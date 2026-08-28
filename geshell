@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# geshell —— 天狐工具箱 AI/CLI 统一入口（Linux / macOS）
+# Windows 请用 geshell.cmd
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec python3 "$SCRIPT_DIR/ai/launch.py" "$@"

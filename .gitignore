@@ -20,3 +20,7 @@ config/settings.json
 config/tools.json
 agent.md
 AGENTS.md
+
+# 二开新增
+.buildtools/
+output/

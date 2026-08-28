@@ -355,10 +355,11 @@ DEFAULT_SETTINGS ={
 "terminal_font_size":10
 }
 
-SETTINGS_FILE ="config/settings.json"
-TOOLS_FILE ="config/tools.json"
-CATEGORIES_FILE ="config/categories.json"
-HOTKEYS_FILE ="config/hotkeys.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SETTINGS_FILE = os.path.join(BASE_DIR, "config", "settings.json")
+TOOLS_FILE = os.path.join(BASE_DIR, "config", "tools.json")
+CATEGORIES_FILE = os.path.join(BASE_DIR, "config", "categories.json")
+HOTKEYS_FILE = os.path.join(BASE_DIR, "config", "hotkeys.json")
 
 def _atomic_write_json (filepath :str ,data ):
     dirpath =os .path .dirname (filepath )
@@ -387,8 +388,8 @@ def _atomic_write_json (filepath :str ,data ):
     os .replace (tmp_path ,filepath )
 
 def load_settings ():
-    if not os .path .exists ("config"):
-        os .makedirs ("config",exist_ok =True )
+    if not os .path .exists (os .path .join (BASE_DIR ,"config")):
+        os .makedirs (os .path .join (BASE_DIR ,"config"),exist_ok =True )
     if not os .path .isfile (SETTINGS_FILE ):
         try :
             _atomic_write_json (SETTINGS_FILE ,DEFAULT_SETTINGS )
@@ -453,8 +454,8 @@ def load_settings ():
 def save_settings (settings_dict :dict ):
     try :
 
-        if not os .path .exists ("config"):
-            os .makedirs ("config",exist_ok =True )
+        if not os .path .exists (os .path .join (BASE_DIR ,"config")):
+            os .makedirs (os .path .join (BASE_DIR ,"config"),exist_ok =True )
 
 
         if "custom_interpreters"in settings_dict :
@@ -1002,7 +1003,11 @@ def save_tools (tools ):
             p =clone .get ('path','')
             if not p :
                 out_list .append (clone )
-                continue 
+                continue
+            # 裸命令名（如 nmap / sqlmap）不是文件路径，保持原样，不做绝对化
+            if not ("/" in p or "\\" in p or os .path .sep in p ):
+                out_list .append (clone )
+                continue
             abs_path =os .path .abspath (p )
             try :
                 if os .path .commonpath ([
@@ -1027,8 +1032,8 @@ def save_tools (tools ):
 
 def load_categories ():
     try :
-        if not os .path .exists ("config"):
-            os .makedirs ("config",exist_ok =True )
+        if not os .path .exists (os .path .join (BASE_DIR ,"config")):
+            os .makedirs (os .path .join (BASE_DIR ,"config"),exist_ok =True )
         if not os .path .exists (CATEGORIES_FILE ):
             _atomic_write_json (CATEGORIES_FILE ,{"categories":DEFAULT_CATEGORIES })
             return DEFAULT_CATEGORIES 
@@ -1042,8 +1047,8 @@ def load_categories ():
 
 def save_categories (categories_list ):
     try :
-        if not os .path .exists ("config"):
-            os .makedirs ("config",exist_ok =True )
+        if not os .path .exists (os .path .join (BASE_DIR ,"config")):
+            os .makedirs (os .path .join (BASE_DIR ,"config"),exist_ok =True )
         _atomic_write_json (CATEGORIES_FILE ,{"categories":categories_list })
         return True
     except Exception as e :

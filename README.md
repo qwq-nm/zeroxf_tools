@@ -1,114 +1,106 @@
-# 天狐工具箱框架 V4.0 · 轻便版
+# 天狐工具箱 · AI 版（二开）
 
-基于 [天狐渗透工具箱-社区版 V4.0](https://www.one-fox.cn/) 二次改造的轻便版框架
+以 **天狐工具箱 V4.0**（`wr0ld/tianhu-toolbox-v4`）为框架底座做的二开：给它加上了 **geshell CLI + MCP 接口**（AI/CLI 统一入口），架构与接口参考枷锁工具箱（GetShell）的 `ai/launch.py` 设计，并做了 **Windows 适配**。
 
-## 一、简介
+- 工具注册表：`config/tools.json`（扩展 schema，GUI 与 CLI 共用单一数据源）
+- GUI（`main.py`/`launcher.py`）：天狐原样保留，供 Windows 人工操作
+- CLI（`geshell` / `geshell.cmd`）：AI 可直接调用
+- MCP（`ai/mcp_server.py`）：AI 以 MCP 工具形式调用
 
-本框架是在原版「天狐渗透工具箱-社区版 V4.0」的基础上，结合个人日常使用习惯与需求二次改造而来的「轻便版」。
-
-原版功能齐全、工具丰富，自己一直在使用；但界面布局、交互细节和部分功能多多少少不太符合个人的习惯和要求，于是做了这版轻量改造，主要围绕**界面布局、交互体验、启动速度、日志、搜索与排序**等方面进行调整。
-
-- 原版官网：https://www.one-fox.cn/
-
-- 原版名称：天狐渗透工具箱-社区版 V4.0
-
-## 二、主要改动与特性
-
-### 界面 / 布局
-
-- 卡片大小调整
-
-- 整体布局修改
-
-- 左侧分类栏支持一键缩放（收起 / 展开）
-
-| ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786977802729-1e99b778-b85e-45eb-ac9a-96f15607b964.png) |
-| ------------------------------------------------------------ |
-| ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786977777272-66aad0e3-2af9-4fdf-95d1-a1df2ce5d998.png) |
-
-### 窗口与按钮
-
-- 编辑、设置等小窗口删除了右上角的「最小化 / 最大化 / 关闭」三个按钮，只保留底部「保存」「取消」两个按钮，并左右平分
-
-- 下拉框样式优化，选项边界更清晰
-
-- 设置窗口精简与调整
-
-| ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786977978348-9d971554-0f39-4195-b9b7-ef6b243e32d8.png) | ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978000240-19094e29-f378-4a84-a194-cedfcb62eb4d.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978955360-e40f2364-fc82-4797-bf83-b428aa0fb4c1.png) | ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978976570-0193c3ee-a0f8-4dda-8697-4d2fe3a716d8.png) |
-| ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978049638-79844696-8e6a-41ea-a353-d6f3b463ec87.png) | ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978052440-55c0ac70-b8f0-4299-9ccb-45ceaa0171ff.png) |
-
-### 卡片交互
-
-- 双击卡片直接启动工具
-
-- 卡片右上角一键收藏 / 取消收藏
-
-- 右键菜单优化（加入收藏、打开程序文件夹等）
-
-- 卡片悬停实时预览小窗口
-
-| ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978224488-e08e11e8-59b6-4b3a-b025-33adf768b307.png) |
-| ------------------------------------------------------------ |
-| ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978226786-0752b1ca-17a3-4604-baf1-ae40e0d7aadc.png) |
-
-### 编辑功能
-
-- 编辑窗口布局重排
-
-- 启动参数拆分为「前置参数」和「后置参数」，适配 Java jar：JVM 参数（如 `-Xmx`、`-Dxxx`）放 `-jar` 之前，程序参数放之后
-
-- 工具描述改为可随意换行的多行输入
-
-- 内置「执行命令实时预览」，编辑时即时看到将要执行的完整命令
-
-![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978411146-53709fb5-3b98-40af-a570-e192439259e9.png)
-
-### 搜索 / 排序
-
-- 搜索增强：支持模糊搜索、拼音搜索、多字段匹配
-
-- 排序算法：收藏优先 → 权重（使用次数）→ 名称拼音
-
-| ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978538622-5611c605-d618-48f1-bc0b-98cff1338de7.png) | ![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978573966-0ae6cee1-66f2-4f23-9dec-757f3b786439.png) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-|                                                              |                                                              |
-
-### 日志
-
-- 顶栏「日志」按钮一键快速打开日志文件
-
-- 日志写入优化：会话之间用空行分隔、命令格式规范化
-
-![img](https://cdn.nlark.com/yuque/0/2026/png/48488607/1786978677205-621d55a2-3507-4590-9b68-66323ff26672.png)
-
-### 性能
-
-- 启动速度优化，压缩到 1 秒左右
-
-## 三、运行环境与启动
-
-本轻便版框架**不含** python3 / Java 运行环境和 tools/ 工具目录，需自备环境。
-
-- Python 3.8+
-
-- PyQt6（安装命令：`pip install PyQt6`）
-
-- 如需运行 Java 工具，请自备 Java 8 / 11
-
-启动方式：
+## 快速开始
 
 ```bash
-python main.py        # 完整主窗口
-python launcher.py    # 经典菜单启动器
+# Linux / macOS
+cd ~/tianhu-tools
+./geshell list            # 列出所有工具
+./geshell info nmap       # 查看工具详情
+./geshell nmap -sV -p- target.com   # 直接调用
+
+# Windows
+geshell list
 ```
 
-## 四、免责声明
+命令名匹配忽略大小写、空格、横线和下划线，支持中文拼音（如 `geshell ruoyi` / `geshell 若依`）。
 
-本框架仅用于学习交流与合法的安全测试，请勿用于任何非法用途。使用本工具产生的一切后果由使用者自行承担。
+## geshell 命令面
 
-## 五、项目地址
+| 命令 | 说明 |
+| --- | --- |
+| `geshell list` | 按分类列出工具，AI 可用打 ✓，GUI/网页打 ✗ |
+| `geshell info <工具>` | 工具详情 + 调用方式 |
+| `geshell doctor` | 环境自检（JDK / 依赖命令 / 调用名冲突 / 路径） |
+| `geshell selftest` | 运行回归测试 |
+| `geshell gendocs` | 重新生成 `ai/tools.md`（AI 参考手册） |
+| `geshell <工具> [参数...]` | 调用工具，输出实时流式并落盘到 `output/runs/<时间戳>_<名>/` |
 
-- GitHub：<https://github.com/wr0ld/tianhu-toolbox-v4>
+## MCP 接口
 
+`ai/mcp_server.py` 是 stdio JSON-RPC MCP server，暴露 `tools/list` 和 `tools/call`，工具名为 `tool_<调用名>`（如 `tool_nmap`、`tool_sqlmap`）。
+
+在 Claude Code 的 `~/.claude/settings.json` 里注册：
+
+```json
+{
+  "mcpServers": {
+    "tianhu-geshell": {
+      "command": "python3",
+      "args": ["/home/lpzn/tianhu-tools/ai/mcp_server.py"],
+      "description": "天狐工具箱 geshell：AI 可调用全部渗透工具"
+    }
+  }
+}
+```
+
+Windows 端把 `python3` 换成 `python`，路径换成 `C:\...\ai\mcp_server.py`。
+
+## 工具清单
+
+工具清单 = 枷锁好工具 + ProjectDiscovery 全家桶 + **从枷锁 1.2GB 包提取的跨平台工具**（约 58 个），分类：信息收集 / 漏洞扫描 / 框架漏洞利用 / 内网渗透 / 爆破 / 隧道代理 / 后渗透 / WebShell / 抓包代理 / 重点系统漏洞 / 数据库利用。
+
+**工具来源分三层**：
+1. **官方二进制**（`provision_tools.py` 自动拉取，20 个）：nuclei/httpx/ffuf/fscan/dalfox/chisel/frps/frpc/sqlmap/subfinder/naabu/katana/dnsx/uncover/sqlcmd/gobuster/urlfinder/yasso/sliver/hashcat
+2. **从枷锁提取的跨平台工具**（24 个）：python 工具集（ssti/spring/ruoyi/redis/tomcat/dirsearch/docem/dedecmscan/avoidkilling/revshell）+ jar 利用工具（shiro/struts2/thinkphp/weblogic/jenkins/xxl-job/jeecg/nacos/数据库综合/OA 综合利用/哥斯拉/冰蝎/HeapDump 提取）
+3. **需系统安装或自备**（doctor 会提示）：hydra/hashcat/metasploit/nmap、mysql/mongodb/oracle/netexec、xray/CS/Burp 等
+
+`scripts/provision_tools.py` 会自动从官方 GitHub release 拉取可免费分发的二进制；同一脚本在 Windows 重跑一次即拉 .exe 版本。Python 工具共用 `tools/_venv`（已装好依赖）。
+
+每条工具的扩展字段（天狐原生字段之外新增）：
+
+| 字段 | 说明 |
+| --- | --- |
+| `risk` | 风险等级：`passive / active / exploit / brute / tunnel / post-exploit` |
+| `ai_callable` | AI 能否直接调用（GUI 工具设 false） |
+| `aliases` | 别名，参与模糊匹配（中文工具名的 aliases[0] 是真实命令） |
+| `example` | 示例命令（写入 tools.md 给 AI 参考） |
+| `dependencies` | 依赖命令（doctor 用 `shutil.which` 检查） |
+
+### 合并你自带的原版天狐 tools.json（踢掉不好用的）
+
+```bash
+python3 scripts/merge_tools.py --import 你的原版tools.json [--drop name1 name2 ...]
+```
+
+合并规则：按 name+category 去重，保留现有条目（含扩展字段），`--drop` 列表里的工具直接剔除。
+
+## 环境依赖
+
+- Python 3.8+（GUI 需要 PyQt6，CLI 不需要）
+- 系统命令类工具需自行安装（`doctor` 会提示缺失）：nmap / sqlmap / nuclei / ffuf / httpx / hydra / fscan / frp 等
+- Java 类工具（JAVA8/JAVA11）：需 JDK，`doctor` 会检测
+
+Windows 可用 `setup.bat` 检查环境并列出 winget 安装命令。
+
+## 二开改了天狐的哪些东西
+
+| 文件 | 改动 |
+| --- | --- |
+| `config.py` | 路径常量锚定 `BASE_DIR`（不再依赖 cwd）；`save_tools` 保留裸命令名（如 `nmap`）不被绝对化 |
+| 新增 `ai/` | `launch.py`（geshell 后端）、`cli_runner.py`（跨平台命令执行）、`fuzzy.py`（从天狐 utils 抽出，无 PyQt6）、`mcp_server.py`、`selftest.py`、`tools.md`（生成） |
+| 新增入口 | `geshell`（bash）、`geshell.cmd`（Windows） |
+| `config/tools.json` | 种子工具清单（扩展 schema） |
+
+## 授权与合规
+
+仅限在明确授权的资产和测试范围内使用。未授权扫描、爆破、利用或访问他人系统违法。
+
+> 二开说明：本项目基于 [wr0ld/tianhu-toolbox-v4](https://github.com/wr0ld/tianhu-toolbox-v4)（GPL-3.0），CLI 架构参考 [One-JiaSuo/Jiasuo-tools](https://github.com/One-JiaSuo/Jiasuo-tools)。
