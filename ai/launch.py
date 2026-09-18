@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""geshell —— 天狐工具箱 AI/CLI 统一入口（二开）。
+"""geshell —— zeroxf 工具箱 AI/CLI 统一入口。
 
 用法：
   geshell list                    # 列出所有工具（按分类分组，AI 可用打 ✓）
@@ -275,9 +275,10 @@ def doctor() -> int:
         from core.env_manager import EnvManager
         em = EnvManager()
         for ver in ("8", "11"):
-            home = em.get_java_home(ver)
-            if home and os.path.exists(os.path.join(home, "bin", "java.exe")):
-                print(f"[ok]   JDK {ver}: {home}")
+            # 用 get_java_exe 而非拼死的 bin/java.exe：类 Unix 下可执行文件没有 .exe 后缀
+            exe = em.get_java_exe(ver)
+            if exe and os.path.exists(exe):
+                print(f"[ok]   JDK {ver}: {os.path.dirname(os.path.dirname(exe))}")
             elif os.name == "nt":
                 print(f"[警告] JDK {ver} 未找到（JAVA8/JAVA11 类工具不可用）")
             else:
@@ -285,7 +286,7 @@ def doctor() -> int:
                 if java:
                     print(f"[ok]   系统 java: {java}（非 Windows 环境）")
                 else:
-                    print(f"[警告] 未找到系统 java")
+                    print(f"[警告] JDK {ver} 未找到（JAVA8/JAVA11 类工具不可用）")
     except Exception as e:
         print(f"[警告] JDK 检测失败: {e}")
 
@@ -354,7 +355,7 @@ def generate_docs() -> int:
     tools = get_all_tools()
     ai_tools = [t for t in tools if is_cli_callable(t)]
 
-    lines = ["# 天狐工具箱 AI 参考手册（geshell）", ""]
+    lines = ["# zeroxf 工具箱 AI 参考手册（geshell）", ""]
     lines.append("> 由 `geshell gendocs` 自动生成。工具名匹配忽略大小写、空格、横线、下划线，支持拼音。")
     lines.append("")
     lines.append("## 调用方式")

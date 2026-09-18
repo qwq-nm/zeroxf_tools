@@ -265,7 +265,7 @@ class LauncherWindow(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle("天狐渗透工具箱 - 启动器")
+        self.setWindowTitle("zeroxf 工具箱 - 启动器")
         self.setWindowIcon(QIcon(os.path.join(CONFIG_DIR, "fox.ico")))
         self.resize(1200, 750)
         self.setMinimumSize(1000, 600)

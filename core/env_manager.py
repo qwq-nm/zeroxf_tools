@@ -10,6 +10,9 @@ from typing import Dict ,Optional ,List
 logging .basicConfig (level =logging .INFO ,format ='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger =logging .getLogger ("EnvManager")
 
+# 可执行文件扩展名（Windows 为 .exe，类 Unix 为空）
+_EXE =".exe"if os .name =="nt"else ""
+
 class EnvManager :
     _instance =None 
 
@@ -104,8 +107,8 @@ class EnvManager :
 
         target =self .java8_builtin if version =="8"else self .java11_builtin 
 
-        if os .path .exists (os .path .join (target ,"bin","java.exe")):
-            return target 
+        if os .path .exists (os .path .join (target ,"bin","java"+_EXE )):
+            return target
 
         return ""
 
@@ -114,7 +117,7 @@ class EnvManager :
         if not home :
             return "javaw"if gui else "java"
 
-        exe_name ="javaw.exe"if gui else "java.exe"
+        exe_name =("javaw"if gui else "java")+_EXE
         exe_path =os .path .join (home ,"bin",exe_name )
         if os .path .exists (exe_path ):
             return exe_path 
@@ -197,7 +200,10 @@ class EnvManager :
 
             if "JAVA_HOME"in env :
                 jh =env ["JAVA_HOME"]
-                env ["CLASSPATH"]=f".;{jh}\\lib;{jh}\\lib\\dt.jar;{jh}\\lib\\tools.jar"
+                if os .name =="nt":
+                    env ["CLASSPATH"]=f".;{jh}\\lib;{jh}\\lib\\dt.jar;{jh}\\lib\\tools.jar"
+                else :
+                    env ["CLASSPATH"]=f".:{jh}/lib:{jh}/lib/dt.jar:{jh}/lib/tools.jar"
 
         if new_paths :
             original_path =env .get ("PATH","")

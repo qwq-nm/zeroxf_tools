@@ -1,4 +1,4 @@
-# 天狐工具箱 AI 参考手册（geshell）
+# zeroxf 工具箱 AI 参考手册（geshell）
 
 > 由 `geshell gendocs` 自动生成。工具名匹配忽略大小写、空格、横线、下划线，支持拼音。
 
@@ -19,13 +19,13 @@ geshell <工具名> [参数...]
 | sqlmap | sqlmap | 命令行 | active | SQL 注入自动化检测与利用 |
 | xray | xray | 命令行 | passive | 被动代理漏洞扫描器 |
 | dalfox | dalfox | 命令行 | active | XSS 专用扫描器 |
-| ssti | ssti | 命令行 | exploit | 模板注入(SSTI)检测与利用 |
-| spring | spring | 命令行 | exploit | Spring Boot 信息泄漏 + RCE |
-| tomcat | tomcat | 命令行 | exploit | Tomcat 弱口令 + 上传漏洞 |
-| dedecmscan | dedecmscan | 命令行 | exploit | DedeCMS 漏洞扫描 |
-| redis | redis | 命令行 | exploit | Redis 未授权访问 + RCE + 写 Shell |
-| heapdump | heapdump | 命令行 | exploit | 从 HeapDump 提取敏感信息 |
-| ruoyi | ruoyi | 命令行 | exploit | 若依框架漏洞扫描与利用 |
+| ssti | ssti | Python | exploit | SSTI 统一入口：Fenjing + SSTImap（WAF 绕过） |
+| spring | spring | Python | exploit | Spring 统一入口：SpringScan + SpringBoot-Scan + CloudSe |
+| tomcat | tomcat | Python | brute | Tomcat 扫描（弱口令/上传漏洞） |
+| dedecmscan | dedecmscan | Python | exploit | DedeCMS 漏洞扫描器 |
+| redis | redis | Python | exploit | Redis 统一入口：爆破/RCE/写Shell/SSH/Cron |
+| heapdump | heapdump | JAVA11 | passive | Heap Dump 敏感信息提取 v1.1 |
+| ruoyi | ruoyi | Python | exploit | 若依统一入口：扫描器 + 综合利用 |
 | fscan | fscan | 命令行 | active | 内网综合扫描（端口/服务/漏洞/MS17010） |
 | yasso | yasso | 命令行 | active | 内网扫描 + 密码爆破 |
 | hydra | hydra | 命令行 | brute | 多协议在线密码爆破 |
@@ -34,8 +34,39 @@ geshell <工具名> [参数...]
 | frpc | frpc | 命令行 | tunnel | frp 客户端（内网机器映射服务） |
 | chisel | chisel | 命令行 | tunnel | HTTP 隧道 / SOCKS5 代理 |
 | metasploit | metasploit | 命令行 | post-exploit | Metasploit 渗透测试框架（CLI） |
-| avoidkilling | avoidkilling | 命令行 | post-exploit | PHP 免杀 Webshell 生成（XOR/Base64/混淆） |
-| docem | docem | 命令行 | post-exploit | Office 文档 XXE / XSS Payload 注入 |
+| avoidkilling | avoidkilling | Python | post-exploit | PHP 免杀 Webshell 生成 |
+| docem | docem | Python | exploit | Office 文档 XXE / XSS Payload 注入 |
+| subfinder | subfinder | 命令行 | passive | 子域名被动收集 |
+| naabu | naabu | 命令行 | passive | 端口扫描器（ProjectDiscovery） |
+| katana | katana | 命令行 | passive | 下一代爬虫（JS 渲染） |
+| dnsx | dnsx | 命令行 | passive | DNS 查询与验证 |
+| uncover | uncover | 命令行 | passive | Shodan/Censys 测绘聚合 |
+| gobuster | gobuster | 命令行 | passive | 目录/虚拟主机爆破 |
+| shiro | shiro | JAVA8 | exploit | Shiro 反序列化利用 v5.1.1 |
+| struts2 | struts2 | JAVA11 | exploit | Struts2 漏洞利用 v19.73 |
+| weblogic | weblogic | JAVA8 | exploit | WebLogic 漏洞利用 v1.3 |
+| fastjson | fastjson | JAVA11 | exploit | Fastjson 反序列化利用 |
+| log4j | log4j | JAVA11 | exploit | Log4j2 RCE 利用 |
+| thinkphp | thinkphp | JAVA8 | exploit | ThinkPHP 漏洞利用 GUI |
+| nacos | nacos | JAVA11 | exploit | Nacos 漏洞利用 v3.0.5 |
+| jenkins | jenkins | JAVA8 | exploit | Jenkins 漏洞利用 GUI |
+| xxljob | xxl-job | JAVA8 | exploit | XXL-JOB 漏洞利用 |
+| mysql | mysql | 命令行 | active | MySQL 客户端/综合利用 |
+| mssql | mssql | 命令行 | active | MSSQL 客户端 |
+| mongodb | mongodb | 命令行 | active | MongoDB 未授权访问 |
+| oracle | oracle | 命令行 | active | Oracle 数据库客户端 |
+| netexec | netexec | 命令行 | active | 内网认证/枚举（原 crackmapexec） |
+| sliver | sliver | 命令行 | post-exploit | Sliver 开源 C2 |
+| dirsearch | dirsearch | Python | passive | Web 目录扫描（枷锁版） |
+| jeecg | jeecg | JAVA8 | exploit | Jeecg-Boot 漏洞利用 |
+| dbcombo | dbcombo | JAVA8 | exploit | 数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG） |
+| iwannagetall | iwannagetall | JAVA8 | exploit | OA 综合利用 |
+| hyacinth | hyacinth | JAVA8 | exploit | Java 综合利用 v2.0.2 |
+| usql | usql | 命令行 | active | 通用 SQL 客户端：MySQL/PG/Oracle/MSSQL（替代 mysql/oracle 客 |
+| jndi | jndi | JAVA8 | exploit | JNDI 注入利用服务：覆盖 fastjson 反序列化 / log4j2 RCE（替代 fastj |
+| zap | zap | 命令行 | passive | OWASP ZAP 被动代理/自动化扫描（替代已停止公开分发的 xray） |
+| impacket | impacket | 命令行 | active | impacket 协议攻击脚本集：secretsdump/psexec/smbclient/GetN |
+| exploitdb | exploitdb | 命令行 | passive | ExploitDB 本地漏洞库检索（searchsploit；配合 sliver/nuclei/im |
 
 ## 信息收集工具
 
@@ -68,7 +99,7 @@ geshell <工具名> [参数...]
 - 说明：目录/文件/参数 Fuzz
 - 风险：passive
 - 参数模式：passthrough
-- 别名：ffuf-fuzz, dirsearch
+- 别名：ffuf-fuzz
 - 示例：`geshell ffuf -u https://target.com/FUZZ -w /opt/wordlists/dir-common.txt`
 
 ### arl（arl）
@@ -76,6 +107,62 @@ geshell <工具名> [参数...]
 - 说明：ARL 灯塔资产管理平台 Web 控制台
 - 风险：passive
 - 参数模式：passthrough
+
+### subfinder（subfinder）
+
+- 说明：子域名被动收集
+- 风险：passive
+- 参数模式：passthrough
+- 别名：sub, 子域名
+- 示例：`geshell subfinder -d target.com -all`
+
+### naabu（naabu）
+
+- 说明：端口扫描器（ProjectDiscovery）
+- 风险：passive
+- 参数模式：passthrough
+- 别名：naabu端口
+- 示例：`geshell naabu -host target.com -p -`
+
+### katana（katana）
+
+- 说明：下一代爬虫（JS 渲染）
+- 风险：passive
+- 参数模式：passthrough
+- 别名：katana爬虫
+- 示例：`geshell katana -u https://target.com -jc`
+
+### dnsx（dnsx）
+
+- 说明：DNS 查询与验证
+- 风险：passive
+- 参数模式：passthrough
+- 别名：dnsx查询
+- 示例：`geshell dnsx -l domains.txt -a -resp`
+
+### uncover（uncover）
+
+- 说明：Shodan/Censys 测绘聚合
+- 风险：passive
+- 参数模式：passthrough
+- 别名：uncover测绘
+- 示例：`geshell uncover -q 'app:shiro'`
+
+### gobuster（gobuster）
+
+- 说明：目录/虚拟主机爆破
+- 风险：passive
+- 参数模式：passthrough
+- 别名：gobuster目录
+- 示例：`geshell gobuster dir -u https://target.com -w dict.txt`
+
+### dirsearch（dirsearch）
+
+- 说明：Web 目录扫描（枷锁版）
+- 风险：passive
+- 参数模式：passthrough
+- 别名：dirsearch扫描
+- 示例：`geshell dirsearch -u http://target:8888 -e php,html,js -t 25`
 
 ## 漏洞扫描与利用工具
 
@@ -113,33 +200,57 @@ geshell <工具名> [参数...]
 
 ### ssti（ssti）
 
-- 说明：模板注入(SSTI)检测与利用
+- 说明：SSTI 统一入口：Fenjing + SSTImap（WAF 绕过）
 - 风险：exploit
 - 参数模式：passthrough
-- 别名：ssti检测
-- 示例：`geshell ssti auto -u 'https://target.com/?name=admin'`
+- 别名：ssti检测, sstikit
+- 示例：`geshell ssti auto -u http://target/?name=test`
+
+### docem（docem）
+
+- 说明：Office 文档 XXE / XSS Payload 注入
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：docx
+- 示例：`geshell docem`
+
+### zap（zap）
+
+- 说明：OWASP ZAP 被动代理/自动化扫描（替代已停止公开分发的 xray）
+- 风险：passive
+- 参数模式：passthrough
+- 别名：zap, owaspzap
+- 示例：`geshell zap.sh -cmd -quickurl http://target.com -quickout /tmp/zap.html`
+
+### exploitdb（exploitdb）
+
+- 说明：ExploitDB 本地漏洞库检索（searchsploit；配合 sliver/nuclei/impacket 覆盖 msf 用途）
+- 风险：passive
+- 参数模式：passthrough
+- 别名：exploitdb, searchsploit
+- 示例：`geshell searchsploit apache 2.4`
 
 ## 框架漏洞利用工具
 
 ### spring（spring）
 
-- 说明：Spring Boot 信息泄漏 + RCE
+- 说明：Spring 统一入口：SpringScan + SpringBoot-Scan + CloudSec
 - 风险：exploit
 - 参数模式：passthrough
 - 别名：springboot, actuator
-- 示例：`geshell spring boot -u https://target.com`
+- 示例：`geshell spring boot -u http://target:8080`
 
 ### tomcat（tomcat）
 
-- 说明：Tomcat 弱口令 + 上传漏洞
-- 风险：exploit
+- 说明：Tomcat 扫描（弱口令/上传漏洞）
+- 风险：brute
 - 参数模式：passthrough
-- 别名：tomcat弱口令
+- 别名：tomcatscanpro
 - 示例：`geshell tomcat`
 
 ### dedecmscan（dedecmscan）
 
-- 说明：DedeCMS 漏洞扫描
+- 说明：DedeCMS 漏洞扫描器
 - 风险：exploit
 - 参数模式：passthrough
 - 别名：dedecms
@@ -147,27 +258,121 @@ geshell <工具名> [参数...]
 
 ### redis（redis）
 
-- 说明：Redis 未授权访问 + RCE + 写 Shell
+- 说明：Redis 统一入口：爆破/RCE/写Shell/SSH/Cron
 - 风险：exploit
 - 参数模式：passthrough
-- 别名：redis未授权, redis-rce
-- 示例：`geshell redis exp -h 10.0.0.5 -p 6379`
+- 别名：redis未授权, redisexp
+- 示例：`geshell redis exp -h`
+
+### shiro（shiro）
+
+- 说明：Shiro 反序列化利用 v5.1.1
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：shiro反序列化
+
+### struts2（struts2）
+
+- 说明：Struts2 漏洞利用 v19.73
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：s2
+
+### weblogic（weblogic）
+
+- 说明：WebLogic 漏洞利用 v1.3
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：weblogic漏洞
+
+### fastjson（fastjson）
+
+- 说明：Fastjson 反序列化利用
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：fastjson漏洞
+
+### log4j（log4j）
+
+- 说明：Log4j2 RCE 利用
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：log4shell, log4j2
+
+### thinkphp（thinkphp）
+
+- 说明：ThinkPHP 漏洞利用 GUI
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：thinkphp漏洞
+
+### jndi（jndi）
+
+- 说明：JNDI 注入利用服务：覆盖 fastjson 反序列化 / log4j2 RCE（替代 fastjson/log4j 工具）
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：jndi, jndi-injection
+- 示例：`geshell jndi -C 'touch /tmp/pwn' -A 10.0.0.5`
+
+## 重点系统漏洞工具
 
 ### heapdump（heapdump）
 
-- 说明：从 HeapDump 提取敏感信息
-- 风险：exploit
+- 说明：Heap Dump 敏感信息提取 v1.1
+- 风险：passive
 - 参数模式：passthrough
-- 别名：heap-dump
+- 别名：jdumpspider
 - 示例：`geshell heapdump -f heapdump文件路径`
 
 ### ruoyi（ruoyi）
 
-- 说明：若依框架漏洞扫描与利用
+- 说明：若依统一入口：扫描器 + 综合利用
 - 风险：exploit
 - 参数模式：passthrough
-- 别名：若依
-- 示例：`geshell ruoyi -u https://target.com`
+- 别名：若依, ruoyi-all
+- 示例：`geshell ruoyi scan`
+
+### nacos（nacos）
+
+- 说明：Nacos 漏洞利用 v3.0.5
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：nacos未授权
+
+### jenkins（jenkins）
+
+- 说明：Jenkins 漏洞利用 GUI
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：jenkins漏洞
+
+### xxl-job（xxljob）
+
+- 说明：XXL-JOB 漏洞利用
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：xxljob
+
+### jeecg（jeecg）
+
+- 说明：Jeecg-Boot 漏洞利用
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：jeecg
+
+### iwannagetall（iwannagetall）
+
+- 说明：OA 综合利用
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：oa综合利用
+
+### hyacinth（hyacinth）
+
+- 说明：Java 综合利用 v2.0.2
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：java综合利用
 
 ## 内网渗透工具
 
@@ -186,6 +391,22 @@ geshell <工具名> [参数...]
 - 参数模式：passthrough
 - 别名：yasso内网
 - 示例：`geshell yasso`
+
+### netexec（netexec）
+
+- 说明：内网认证/枚举（原 crackmapexec）
+- 风险：active
+- 参数模式：passthrough
+- 别名：netexec, crackmapexec
+- 示例：`geshell nxc smb 10.0.0.0/24`
+
+### impacket（impacket）
+
+- 说明：impacket 协议攻击脚本集：secretsdump/psexec/smbclient/GetNPUsers 等（替代 NetExec）
+- 风险：active
+- 参数模式：passthrough
+- 别名：impacket, secretsdump
+- 示例：`geshell secretsdump.py domain/user:pass@10.0.0.5`
 
 ## 爆破工具
 
@@ -250,19 +471,26 @@ geshell <工具名> [参数...]
 
 ### avoidkilling（avoidkilling）
 
-- 说明：PHP 免杀 Webshell 生成（XOR/Base64/混淆）
+- 说明：PHP 免杀 Webshell 生成
 - 风险：post-exploit
 - 参数模式：passthrough
 - 别名：免杀
-- 示例：`geshell avoidkilling -type default -e xor2 -name config.php`
+- 示例：`geshell main.py -type default -e xor2 -name shell.php`
 
-### docem（docem）
+### sliver（sliver）
 
-- 说明：Office 文档 XXE / XSS Payload 注入
+- 说明：Sliver 开源 C2
 - 风险：post-exploit
 - 参数模式：passthrough
-- 别名：docem
-- 示例：`geshell docem`
+- 别名：sliverc2
+- 示例：`geshell sliver`
+
+### revshell（revshell）
+
+- 说明：反弹 Shell 命令生成（GUI，需图形界面）
+- 风险：post-exploit
+- 参数模式：passthrough
+- 别名：反弹shell
 
 ## 抓包与代理工具
 
@@ -282,16 +510,61 @@ geshell <工具名> [参数...]
 - 参数模式：passthrough
 - 别名：antsword
 
-### 哥斯拉（godzilla）
+### godzilla（godzilla）
 
-- 说明：Godzilla WebShell 管理（GUI）
+- 说明：哥斯拉 WebShell 管理（GUI）
 - 风险：post-exploit
 - 参数模式：passthrough
-- 别名：godzilla
+- 别名：哥斯拉
 
-### 冰蝎（behinder）
+### behinder（behinder）
 
-- 说明：Behinder WebShell 管理（GUI）
+- 说明：冰蝎 WebShell 管理 v4.1（GUI）
 - 风险：post-exploit
 - 参数模式：passthrough
-- 别名：behinder
+- 别名：冰蝎
+
+## 数据库利用工具
+
+### mysql（mysql）
+
+- 说明：MySQL 客户端/综合利用
+- 风险：active
+- 参数模式：passthrough
+- 别名：mysql连接
+
+### mssql（mssql）
+
+- 说明：MSSQL 客户端
+- 风险：active
+- 参数模式：passthrough
+- 别名：sqlserver, mssql
+
+### mongodb（mongodb）
+
+- 说明：MongoDB 未授权访问
+- 风险：active
+- 参数模式：passthrough
+- 别名：mongodb未授权
+
+### oracle（oracle）
+
+- 说明：Oracle 数据库客户端
+- 风险：active
+- 参数模式：passthrough
+- 别名：oracle连接
+
+### dbcombo（dbcombo）
+
+- 说明：数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG）
+- 风险：exploit
+- 参数模式：passthrough
+- 别名：数据库综合
+
+### usql（usql）
+
+- 说明：通用 SQL 客户端：MySQL/PG/Oracle/MSSQL（替代 mysql/oracle 客户端）
+- 风险：active
+- 参数模式：passthrough
+- 别名：usql, sql客户端
+- 示例：`geshell usql mysql://user:pass@10.0.0.5:3306/db`

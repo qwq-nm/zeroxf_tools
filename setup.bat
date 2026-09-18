@@ -1,13 +1,13 @@
 @echo off
 rem ============================================================
-rem  天狐工具箱 AI 版 · Windows 环境检查与依赖安装清单
+rem  zeroxf 工具箱 AI 版 · Windows 环境检查与依赖安装清单
 rem  用法: setup.bat [--install]
 rem    （不带参数：只检查；带 --install：执行下方 winget 安装）
 rem ============================================================
 setlocal EnableDelayedExpansion
 
 echo.
-echo == 天狐工具箱 AI 版 · Windows 环境检查 ==
+echo == zeroxf 工具箱 AI 版 · Windows 环境检查 ==
 echo.
 
 rem ---- Python ----

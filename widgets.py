@@ -184,7 +184,7 @@ class TitleBar (QWidget ):
         lay .setContentsMargins (0 ,0 ,0 ,0 )
         lay .setSpacing (5 )
 
-        self .title_label =QLabel ("天狐渗透工具箱-社区版V4.0",self )
+        self .title_label =QLabel ("zeroxf 工具箱 V4.0",self )
         self .title_label .setStyleSheet ("font-size:16px; font-weight:bold; padding-left:10px;")
         lay .addWidget (self .title_label )
 

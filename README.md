@@ -1,4 +1,4 @@
-# 天狐工具箱 · AI 版（二开）
+# zeroxf 工具箱 · AI 版
 
 以 **天狐工具箱 V4.0**（`wr0ld/tianhu-toolbox-v4`）为框架底座做的二开：给它加上了 **geshell CLI + MCP 接口**（AI/CLI 统一入口），架构与接口参考枷锁工具箱（GetShell）的 `ai/launch.py` 设计，并做了 **Windows 适配**。
 
@@ -37,15 +37,15 @@ geshell list
 
 `ai/mcp_server.py` 是 stdio JSON-RPC MCP server，暴露 `tools/list` 和 `tools/call`，工具名为 `tool_<调用名>`（如 `tool_nmap`、`tool_sqlmap`）。
 
-在 Claude Code 的 `~/.claude/settings.json` 里注册：
+在 Claude Code 的 `~/.claude.json` 里注册（`mcpServers` 段）：
 
 ```json
 {
   "mcpServers": {
     "tianhu-geshell": {
       "command": "python3",
-      "args": ["/home/lpzn/tianhu-tools/ai/mcp_server.py"],
-      "description": "天狐工具箱 geshell：AI 可调用全部渗透工具"
+      "args": ["/path/to/tianhu-tools/ai/mcp_server.py"],
+      "description": "zeroxf 工具箱 geshell：AI 可调用全部渗透工具"
     }
   }
 }

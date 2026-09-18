@@ -304,7 +304,7 @@ class MainWindow (QMainWindow ):
             pass
 
     def init_ui (self ):
-        self .setWindowTitle ("天狐渗透工具箱-社区版V4.0")
+        self .setWindowTitle ("zeroxf 工具箱 V4.0")
         self .setWindowIcon (QIcon ("config/fox.ico"))
         self .setWindowFlag (Qt .WindowType .FramelessWindowHint )
         self .resize (1400 ,800 )

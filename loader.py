@@ -270,7 +270,7 @@ class FluidLoader (QWidget ):
         painter .drawEllipse (QPointF (center_x ,center_y ),ring_r ,ring_r )
 
 
-        title_text ="天狐渗透工具箱-社区版V4.0"
+        title_text ="zeroxf 工具箱 V4.0"
         title_rect =QRectF (0 ,center_y +70 ,self .size_w ,32 )
         title_font =QFont ("Microsoft YaHei UI",14 ,QFont .Weight .Bold )
         painter .setFont (title_font )
@@ -306,7 +306,7 @@ class FluidLoader (QWidget ):
             painter .setPen (QColor (255 ,255 ,255 ))
             font =QFont ("Microsoft YaHei UI",int (36 *self .logo_scale ),QFont .Weight .Bold )
             painter .setFont (font )
-            painter .drawText (QRectF (0 ,0 ,self .size_w ,self .size_h ),Qt .AlignmentFlag .AlignCenter ,"天狐")
+            painter .drawText (QRectF (0 ,0 ,self .size_w ,self .size_h ),Qt .AlignmentFlag .AlignCenter ,"zeroxf")
 
 
         painter .setOpacity (self .opacity_val *0.92 )

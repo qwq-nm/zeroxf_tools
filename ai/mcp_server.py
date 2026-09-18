@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""天狐工具箱 stdio MCP Server —— 让 AI 以 MCP 工具形式调用 geshell 工具。
+"""zeroxf 工具箱 stdio MCP Server —— 让 AI 以 MCP 工具形式调用 geshell 工具。
 
 走标准 stdio JSON-RPC（与用户现有 nmap/Playwright MCP 一致）：
 - tools/list  → 列出所有 AI 可调用工具（工具名 tool_<normalized>）

@@ -152,7 +152,11 @@ def build_command(tool: Dict[str, Any], user_args: List[str]) -> Dict[str, Any]:
     if t in ("命令行", "cli"):
         exe = _resolve_path(tool, path) or str(tool.get("name", ""))
         cmd = [exe] + pre + post + args
-        return {"kind": "cmd", "cmd": cmd, "cwd": cwd, "env": _inject_env(t)}
+        # 绝对路径的可执行文件以其所在目录为 cwd：有些工具（如 xray）会把配置文件
+        # 生成在当前 cwd，沿用调用者目录就会四处污染。裸命令（nmap 等）保持 None。
+        return {"kind": "cmd", "cmd": cmd,
+                "cwd": cwd or (os.path.dirname(exe) if os.path.isabs(exe) else None),
+                "env": _inject_env(t)}
 
     # 批处理
     if t in ("批处理", "batch"):
@@ -179,7 +183,9 @@ def build_command(tool: Dict[str, Any], user_args: List[str]) -> Dict[str, Any]:
 
     # 兜底：当作系统命令
     exe = _resolve_path(tool, path) or str(tool.get("name", ""))
-    return {"kind": "cmd", "cmd": [exe] + pre + post + args, "cwd": cwd, "env": _inject_env(t)}
+    return {"kind": "cmd", "cmd": [exe] + pre + post + args,
+            "cwd": cwd or (os.path.dirname(exe) if os.path.isabs(exe) else None),
+            "env": _inject_env(t)}
 
 
 def launch_gui(tool: Dict[str, Any]) -> int:
