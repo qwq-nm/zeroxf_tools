@@ -1,13 +1,13 @@
 @echo off
 rem ============================================================
-rem  zeroxf å·¥å…·ç®± AI ç‰ˆ Â· Windows ç¯å¢ƒæ£€æŸ¥ä¸ä¾èµ–å®‰è£…æ¸…å•
-rem  ç”¨æ³•: setup.bat [--install]
-rem    ï¼ˆä¸å¸¦å‚æ•°ï¼šåªæ£€æŸ¥ï¼›å¸¦ --installï¼šæ‰§è¡Œä¸‹æ–¹ winget å®‰è£…ï¼‰
+rem  zeroxf ¹¤¾ßÏä AI °æ ¡¤ Windows »·¾³¼ì²éÓëÒÀÀµ°²×°Çåµ¥
+rem  ÓÃ·¨: setup.bat [--install]
+rem    £¨²»´ø²ÎÊı£ºÖ»¼ì²é£»´ø --install£ºÖ´ĞĞÏÂ·½ winget °²×°£©
 rem ============================================================
 setlocal EnableDelayedExpansion
 
 echo.
-echo == zeroxf å·¥å…·ç®± AI ç‰ˆ Â· Windows ç¯å¢ƒæ£€æŸ¥ ==
+echo == zeroxf ¹¤¾ßÏä AI °æ ¡¤ Windows »·¾³¼ì²é ==
 echo.
 
 rem ---- Python ----
@@ -15,15 +15,15 @@ python --version >nul 2>&1
 if %errorlevel%==0 (
     echo [ok]   Python: %errorlevel% & python --version
 ) else (
-    echo [ç¼ºå°‘] Python 3.8+ï¼Œè¯·å®‰è£…: https://www.python.org/downloads/
-    echo        æˆ– winget install Python.Python.3.12
+    echo [È±ÉÙ] Python 3.8+£¬Çë°²×°: https://www.python.org/downloads/
+    echo        »ò winget install Python.Python.3.12
 )
 
-rem ---- æœ¬æœº venv ----
+rem ---- ±¾»ú venv ----
 if exist "%~dp0venv\Scripts\python.exe" (
-    echo [ok]   é¡¹ç›® venv å­˜åœ¨
+    echo [ok]   ÏîÄ¿ venv ´æÔÚ
 ) else (
-    echo [æç¤º] æœªæ‰¾åˆ° venvï¼Œå¯é€‰: python -m venv venv ^&^& venv\Scripts\pip install PyQt6
+    echo [ÌáÊ¾] Î´ÕÒµ½ venv£¬¿ÉÑ¡: python -m venv venv ^&^& venv\Scripts\pip install PyQt6
 )
 
 rem ---- Java ----
@@ -31,30 +31,30 @@ where java >nul 2>&1
 if %errorlevel%==0 (
     echo [ok]   Java: & java -version 2^>^&1 | findstr /i "version"
 ) else (
-    echo [ç¼ºå°‘] Java 8/11ï¼ˆJAVA8/JAVA11 ç±»å·¥å…·éœ€è¦ï¼‰ï¼Œ
-    echo        å®‰è£…: winget install EclipseAdoptium.Temurin.11.JDK
+    echo [È±ÉÙ] Java 8/11£¨JAVA8/JAVA11 Àà¹¤¾ßĞèÒª£©£¬
+    echo        °²×°: winget install EclipseAdoptium.Temurin.11.JDK
 )
 
-rem ---- å¸¸ç”¨ç³»ç»Ÿå‘½ä»¤ ----
+rem ---- ³£ÓÃÏµÍ³ÃüÁî ----
 for %%t in (nmap sqlmap nuclei ffuf httpx hydra fscan frps frpc chisel) do (
     where %%t >nul 2>&1
     if !errorlevel!==0 (
         echo [ok]   %%t
     ) else (
-        echo [ç¼ºå°‘] %%t
+        echo [È±ÉÙ] %%t
     )
 )
 
 echo.
 if "%~1"=="--install" (
-    echo == å¼€å§‹å®‰è£…ç¼ºå¤±ç³»ç»Ÿä¾èµ–ï¼ˆwingetï¼‰==
+    echo == ¿ªÊ¼°²×°È±Ê§ÏµÍ³ÒÀÀµ£¨winget£©==
     winget install --id Insecure.Nmap -e
     winget install --id ProjectDiscovery.Nuclei -e
     winget install --id ProjectDiscovery.Httpx -e
     winget install --id ffuf.ffuf -e
     pip install sqlmap
-    echo [æç¤º] hydra/fscan/frp/chisel è¯·ä»å®˜æ–¹ release ä¸‹è½½äºŒè¿›åˆ¶æ”¾å…¥ tools\ æˆ– PATH
+    echo [ÌáÊ¾] hydra/fscan/frp/chisel Çë´Ó¹Ù·½ release ÏÂÔØ¶ş½øÖÆ·ÅÈë tools\ »ò PATH
 ) else (
-    echo [æç¤º] åŠ  --install å‚æ•°è‡ªåŠ¨å®‰è£…å¸¸è§ä¾èµ–ï¼ˆwinget/pipï¼‰
+    echo [ÌáÊ¾] ¼Ó --install ²ÎÊı×Ô¶¯°²×°³£¼ûÒÀÀµ£¨winget/pip£©
 )
 endlocal

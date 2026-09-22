@@ -1,4 +1,4 @@
 @echo off
-rem geshell â€”â€” zeroxf å·¥å…·ç®± AI/CLI ç»Ÿä¸€å…¥å£ï¼ˆWindowsï¼‰
-rem ç”¨æ³•: geshell list / geshell <å·¥å…·å> [å‚æ•°...]
+rem geshell ¡ª¡ª zeroxf ¹¤¾ßÏä AI/CLI Í³Ò»Èë¿Ú£¨Windows£©
+rem ÓÃ·¨: geshell list / geshell <¹¤¾ßÃû> [²ÎÊı...]
 python "%~dp0ai\launch.py" %*

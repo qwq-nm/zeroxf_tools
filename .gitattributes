@@ -1,0 +1,9 @@
+# Windows 批处理/脚本必须用 CRLF 换行，且中文用 GBK（Windows 中文 CMD 的默认代码页）。
+# 不加这些规则的话，git 在 checkout 时可能把换行规范化为 LF，
+# 导致双击 .bat「没有任何反应」（CMD 解析不了 LF 换行的标签跳转）。
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.vbs text eol=crlf
+
+# 其余按内容自动判断
+* text=auto
