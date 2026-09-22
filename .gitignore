@@ -11,6 +11,8 @@ tools/
 *.ico
 !config/fox.png
 !config/fox.ico
+# 文档用的海报与界面截图需要随仓库分发，上面的 *.png 会误伤，这里放行
+!docs/**/*.png
 *.bak
 *.zip
 __pycache__/

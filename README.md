@@ -7,6 +7,10 @@
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-ready-purple)](#mcp-ai-调用)
 
+![zeroxf 工具箱](docs/poster.png)
+
+### 界面预览
+
 ![工具箱主界面](docs/screenshots/wsl-main.png)
 
 ---

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>zeroxf 工具箱 · 海报</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    width:1200px; height:1330px; overflow:hidden;
+    font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;
+    background:#0b1020; color:#e8ecf5;
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(56,132,255,.28), transparent 45%),
+      radial-gradient(circle at 85% 92%, rgba(0,209,178,.20), transparent 45%),
+      linear-gradient(160deg,#0b1020 0%,#111a33 60%,#0d1428 100%);
+    position:relative;
+  }
+  /* 网格底纹 */
+  .grid {
+    position:absolute; inset:0; opacity:.16;
+    background-image:linear-gradient(rgba(120,170,255,.35) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(120,170,255,.35) 1px,transparent 1px);
+    background-size:56px 56px;
+    mask-image:linear-gradient(180deg,#000 0%,transparent 55%);
+  }
+  .wrap { position:relative; padding:74px 76px; height:100%; display:flex; flex-direction:column; }
+
+  /* 顶部标识 */
+  .brand { display:flex; align-items:center; gap:22px; margin-bottom:56px; }
+  .logo {
+    width:92px; height:92px; border-radius:24px; flex:none;
+    background:linear-gradient(135deg,#3b82f6,#22d3ee);
+    display:flex; align-items:center; justify-content:center;
+    font-size:46px; font-weight:800; color:#08101f;
+    box-shadow:0 16px 44px rgba(59,130,246,.45);
+  }
+  .brand h1 { font-size:60px; font-weight:800; letter-spacing:-1px; line-height:1.05; }
+  .brand .sub { font-size:23px; color:#8fa6c9; margin-top:10px; letter-spacing:.5px; }
+
+  /* 核心数字 */
+  .stats { display:flex; gap:20px; margin-bottom:52px; }
+  .stat {
+    flex:1; background:rgba(255,255,255,.05); border:1px solid rgba(120,170,255,.20);
+    border-radius:20px; padding:26px 24px;
+  }
+  .stat .n { font-size:52px; font-weight:800; line-height:1;
+             background:linear-gradient(135deg,#60a5fa,#22d3ee);
+             -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .stat .l { font-size:19px; color:#93a8c8; margin-top:12px; }
+
+  /* 三大入口 */
+  .entry-title { font-size:26px; color:#7dd3fc; font-weight:700; margin-bottom:22px;
+                 display:flex; align-items:center; gap:12px; }
+  .entry-title::before { content:""; width:5px; height:26px; border-radius:3px;
+                         background:linear-gradient(180deg,#3b82f6,#22d3ee); }
+  .entries { display:flex; gap:18px; margin-bottom:50px; }
+  .entry {
+    flex:1; background:linear-gradient(150deg,rgba(59,130,246,.14),rgba(34,211,238,.06));
+    border:1px solid rgba(96,165,250,.28); border-radius:18px; padding:26px 24px;
+  }
+  .entry .ico { font-size:32px; margin-bottom:14px; }
+  .entry .t { font-size:24px; font-weight:700; margin-bottom:10px; color:#dbeafe; }
+  .entry .d { font-size:17px; color:#8fa6c9; line-height:1.65; }
+
+  /* 工具清单 */
+  .cats { display:grid; grid-template-columns:1fr 1fr; gap:14px 26px; margin-bottom:auto; }
+  .cat { display:flex; align-items:center; justify-content:space-between;
+         padding:15px 20px; background:rgba(255,255,255,.038);
+         border-left:3px solid #3b82f6; border-radius:10px; }
+  .cat .cn { font-size:20px; color:#c7d6ee; }
+  .cat .cc { font-size:19px; font-weight:700; color:#60a5fa; }
+
+  /* 底部 */
+  .foot { margin-top:44px; padding-top:30px; border-top:1px solid rgba(120,170,255,.16);
+          display:flex; align-items:center; justify-content:space-between; }
+  .foot .u { font-size:22px; color:#7dd3fc; font-weight:600; font-family:Consolas,monospace; }
+  .foot .n { font-size:17px; color:#6b7f9e; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="wrap">
+
+    <div class="brand">
+      <div class="logo">Z</div>
+      <div>
+        <h1>zeroxf 工具箱</h1>
+        <div class="sub">AI 版 · 图形界面 / 命令行 / MCP 三入口</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="n">63</div><div class="l">集成工具</div></div>
+      <div class="stat"><div class="n">56</div><div class="l">AI 可直接调用</div></div>
+      <div class="stat"><div class="n">9</div><div class="l">能力分类</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">平台一致可用</div></div>
+    </div>
+
+    <div class="entry-title">三套入口 · 一份配置</div>
+    <div class="entries">
+      <div class="entry">
+        <div class="ico">🖥</div>
+        <div class="t">图形界面</div>
+        <div class="d">卡片式工具墙，分类浏览、搜索、收藏，点击即用</div>
+      </div>
+      <div class="entry">
+        <div class="ico">⌨️</div>
+        <div class="t">命令行</div>
+        <div class="d">geshell CLI，支持中文拼音与模糊匹配，脚本友好</div>
+      </div>
+      <div class="entry">
+        <div class="ico">🤖</div>
+        <div class="t">MCP 接口</div>
+        <div class="d">AI Agent 以 tool_* 形式直接调用，无需人工介入</div>
+      </div>
+    </div>
+
+    <div class="cats">
+      <div class="cat"><span class="cn">信息收集</span><span class="cc">12</span></div>
+      <div class="cat"><span class="cn">漏洞扫描与利用</span><span class="cc">8</span></div>
+      <div class="cat"><span class="cn">框架漏洞利用</span><span class="cc">11</span></div>
+      <div class="cat"><span class="cn">重点系统漏洞</span><span class="cc">8</span></div>
+      <div class="cat"><span class="cn">内网渗透</span><span class="cc">4</span></div>
+      <div class="cat"><span class="cn">数据库利用</span><span class="cc">6</span></div>
+      <div class="cat"><span class="cn">后渗透</span><span class="cc">5</span></div>
+      <div class="cat"><span class="cn">隧道代理</span><span class="cc">3</span></div>
+      <div class="cat"><span class="cn">WebShell 管理</span><span class="cc">3</span></div>
+      <div class="cat"><span class="cn">爆破 / 抓包代理</span><span class="cc">3</span></div>
+    </div>
+
+    <div class="foot">
+      <div class="u">github.com/qwq-nm/zeroxf_tools</div>
+      <div class="n">基于天狐工具箱 V4.0 二开 · GPL-3.0</div>
+    </div>
+
+  </div>
+</body>
+</html>
