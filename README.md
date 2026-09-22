@@ -1,134 +1,197 @@
 # zeroxf 工具箱 · AI 版
 
-以 **天狐工具箱 V4.0**（`wr0ld/tianhu-toolbox-v4`）为框架底座做的二开：给它加上了 **geshell CLI + MCP 接口**（AI/CLI 统一入口），架构与接口参考枷锁工具箱（GetShell）的 `ai/launch.py` 设计，并做了 **Windows 适配**。
+**一个既给人用、也给 AI 用的渗透测试工具箱**——63 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
 
-- 工具注册表：`config/tools.json`（扩展 schema，GUI 与 CLI 共用单一数据源）
-- GUI（`main.py`/`launcher.py`）：天狐原样保留，供 Windows 人工操作
-- CLI（`geshell` / `geshell.cmd`）：AI 可直接调用
-- MCP（`ai/mcp_server.py`）：AI 以 MCP 工具形式调用
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20WSL%2FLinux-blue)](#安装)
+[![Tools](https://img.shields.io/badge/tools-63%20(%E5%85%B6%E4%B8%AD56%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
+[![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-ready-purple)](#mcp-ai-调用)
 
-## 快速开始
+![工具箱主界面](docs/screenshots/wsl-main.png)
 
-### 首次初始化（clone 之后必做）
+---
 
-仓库**只含代码**——工具二进制、JDK、GUI 依赖都不入库（`.gitignore` 挡掉了），需要按需拉取：
+## 这是什么
+
+以 **天狐工具箱 V4.0**（[`wr0ld/tianhu-toolbox-v4`](https://github.com/wr0ld/tianhu-toolbox-v4)）为框架底座做的二开，在原版的图形界面之外，补上了 **命令行（geshell）** 与 **MCP** 两套程序化入口，让同一批工具既能人工点击操作，也能被脚本和 AI 直接调用。
+
+架构与接口设计参考了枷锁工具箱（GetShell）的 `ai/launch.py`。
+
+| 入口 | 文件 | 面向 |
+| --- | --- | --- |
+| 🖥 **图形界面** | `main.py` / `launcher.py` | 人工操作，卡片式工具墙 |
+| ⌨️ **命令行** | `geshell` / `geshell.cmd` | 脚本、批处理、终端快手 |
+| 🤖 **MCP** | `ai/mcp_server.py` | AI Agent 以工具形式调用 |
+
+**单一数据源**：三者共用 `config/tools.json`。新增一个工具、改一次路径，三个入口同时生效。
+
+---
+
+## 亮点
+
+- **63 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **56 个可被 AI 直接调用**
+- **三套入口，一份配置** —— GUI 里能点的，CLI 和 MCP 里都能调，不会出现"界面有、命令行没有"的割裂
+- **依赖自动装配** —— `provision_tools.py` 一条命令拉齐全部工具二进制、便携 JDK、GUI 运行时，自动适配 Windows / Linux / macOS
+- **零环境依赖的 JDK 方案** —— 内置便携 JDK 8/11/17（8 与 11 为 Liberica full 版，内含 JavaFX），12 个 jar 类工具无需系统装 Java
+- **跨平台一致** —— 同一套脚本在 WSL 与 Windows 原生均可用，按平台自动选择资产（`.exe` / ELF）
+- **URL 都能救回来** —— 对已停止公开分发的工具（如 xray）也留有可用来源；对无源工具提供功能等价替代
+- **容错安装** —— 单个工具失败不会中断整批，最后统一汇报
+- **AI 友好** —— 工具元数据带 `risk` / `ai_callable` / `example` 字段，AI 能自行判断哪些该调、怎么调
+
+---
+
+## 集成的工具
+
+**共 63 个**（56 个 AI 可直接调用），按 9 大类组织：
+
+| 分类 | 数量 | 代表工具 |
+| --- | ---: | --- |
+| 信息收集 | 12 | `nmap` `httpx` `nuclei` `ffuf` `subfinder` `naabu` `katana` `dnsx` `uncover` `gobuster` `urlfinder` `dirsearch` |
+| 漏洞扫描与利用 | 8 | `nuclei` `sqlmap` `xray` `dalfox` `zap` `exploitdb` `ssti` `docem` |
+| 框架漏洞利用 | 11 | `shiro` `struts2` `weblogic` `fastjson`→`jndi` `log4j`→`jndi` `thinkphp` `spring` `tomcat` `dedecmscan` `redis` `nacos` |
+| 重点系统漏洞 | 8 | `heapdump` `ruoyi` `nacos` `jenkins` `xxl-job` `jeecg` `iwannagetall` `hyacinth` |
+| 内网渗透 | 4 | `fscan` `yasso` `netexec` `impacket` |
+| 爆破 | 2 | `hydra` `hashcat` |
+| 隧道代理 | 3 | `frps` `frpc` `chisel` |
+| 后渗透 | 5 | `metasploit` `sliver` `cobaltstrike` `avoidkilling` `revshell` |
+| 数据库利用 | 6 | `mysql` `mssql` `mongodb` `oracle` `usql` `dbcombo` |
+| WebShell 管理 | 3 | `蚁剑` `godzilla` `behinder` |
+| 抓包与代理 | 1 | `BurpSuite` |
+
+**能力覆盖**：被动信息收集 → 主动漏洞扫描 → 框架专项利用 → 内网横向 → 权限维持 → 数据提取，一条完整链路。
+
+> 完整清单与调用方式见 [`ai/tools.md`](ai/tools.md)（`geshell gendocs` 自动生成）。
+
+### 关于不可得的工具
+
+以下工具因授权、分发或来源原因无法自动获取，工具箱提供了**功能等价的替代**或说明：
+
+| 工具 | 情况 | 处理 |
+| --- | --- | --- |
+| `fastjson` `log4j` | 专用利用 jar 无公开源 | 由 **JNDI-Injection-Exploit**（`jndi`）统一覆盖两者场景 |
+| `CobaltStrike` `BurpSuite` `蚁剑` | 商业软件 / 需自备 | 保留条目，装入后即可用；`Sliver`（`sliver` 命令）与 `ZAP` 分别是 CS / Burp 的开源等价物 |
+
+`geshell doctor` 会明确列出这些项，不会静默失败。
+
+---
+
+## 安装
+
+### 方式一：一键初始化（推荐）
+
+clone 之后，仓库里**只有代码**——工具二进制、JDK、GUI 运行时都不入库，需要按需拉取：
 
 ```bash
+git clone https://github.com/qwq-nm/zeroxf_tools.git
+cd zeroxf_tools
+
 python3 scripts/provision_tools.py --jdk    # 便携 JDK 8/11/17（12 个 jar 类工具需要）
-python3 scripts/provision_tools.py          # 全部开源工具二进制（20+ 个）
-python3 scripts/provision_tools.py --gui    # GUI 依赖 PyQt6（要用图形界面才装）
+python3 scripts/provision_tools.py          # 全部工具二进制
+python3 scripts/provision_tools.py --gui    # GUI 运行时 PyQt6（用图形界面才装）
 ```
 
-### 命令行用法
+Windows 下把 `python3` 换成 `python`。脚本会自动识别平台，拉取对应版本（Windows 拿 `.exe`，Linux 拿 ELF）。
+
+### 方式二：手动安装（逐个控制）
 
 ```bash
-# Linux / macOS
-cd ~/tianhu-tools
-./geshell list            # 列出所有工具
-./geshell info nmap       # 查看工具详情
-./geshell nmap -sV -p- target.com   # 直接调用
-
-# Windows
-geshell list
+python3 scripts/provision_tools.py --tools nuclei httpx ffuf     # 只装指定工具
+python3 scripts/provision_tools.py --tools zap usql oracle xray  # 专用工具
+python3 scripts/provision_tools.py --help                        # 查看全部参数
 ```
 
-命令名匹配忽略大小写、空格、横线和下划线，支持中文拼音（如 `geshell ruoyi` / `geshell 若依`）。
+> 详尽的安装说明、系统依赖、故障排查见 **[docs/INSTALL.md](docs/INSTALL.md)**。
+
+### 方式三：交给 AI Agent
+
+如果你在用 Claude Code / 其他 AI 编码助手，把 **[docs/AGENT.md](docs/AGENT.md)** 的内容发给它，它能自行完成环境探测、依赖安装与验证。
+
+---
+
+## 使用
 
 ### 图形界面
 
-GUI 是 PyQt6 应用（`main.py` + `core/` + `widgets.py`），与 CLI **共用同一份 `config/tools.json`**，工具清单完全同步。
-
 | 平台 | 启动方式 |
 | --- | --- |
-| Windows | 双击 `启动工具箱.bat` 或 `zeroxf工具箱-社区版V4.0.vbs` |
-| WSL / Linux | `tools/_venv/bin/python main.py`（WSLg 会把窗口显示到 Windows 桌面） |
+| Windows | 双击 `启动工具箱.bat`（或 `启动工具箱-无窗口.vbs` 静默启动） |
+| WSL / Linux | `tools/_venv/bin/python main.py` |
 
-**两个常见的坑**：
+界面会按分类展示全部工具卡片，点击即调用，支持搜索、收藏、最近启动。
 
-1. **GUI 依赖 PyQt6**，先执行 `python3 scripts/provision_tools.py --gui`。缺它时启动脚本会打印中文指引，而不是静默失败。
-2. **不要从 `\\wsl.localhost\...` 双击启动**。Windows 的 CMD 不支持把 UNC 路径作为当前目录，会导致相对路径全部失效。启动脚本已用 `pushd` 规避，但把工具箱放在 Windows 磁盘上性能更好。
+### 命令行
 
-> 原版天狐自带便携 Python（`python3/`），但那部分不在本仓库内——启动脚本会依次回退到你系统里的 `pyw` / `pythonw` / `py` / `python`。
+```bash
+./geshell list                        # 按分类列出全部工具
+./geshell info nmap                   # 查看单个工具详情与调用方式
+./geshell nmap -sV -p- target.com     # 直接调用
+./geshell doctor                      # 环境自检
+./geshell selftest                    # 回归测试
+```
 
-## geshell 命令面
+命令名匹配**忽略大小写、空格、横线和下划线**，并支持中文拼音：
 
-| 命令 | 说明 |
-| --- | --- |
-| `geshell list` | 按分类列出工具，AI 可用打 ✓，GUI/网页打 ✗ |
-| `geshell info <工具>` | 工具详情 + 调用方式 |
-| `geshell doctor` | 环境自检（JDK / 依赖命令 / 调用名冲突 / 路径） |
-| `geshell selftest` | 运行回归测试 |
-| `geshell gendocs` | 重新生成 `ai/tools.md`（AI 参考手册） |
-| `geshell <工具> [参数...]` | 调用工具，输出实时流式并落盘到 `output/runs/<时间戳>_<名>/` |
+```bash
+./geshell 若依          # = ./geshell ruoyi
+./geshell URL-FINDER    # = ./geshell urlfinder
+```
 
-## MCP 接口
+### MCP（AI 调用）
 
-`ai/mcp_server.py` 是 stdio JSON-RPC MCP server，暴露 `tools/list` 和 `tools/call`，工具名为 `tool_<调用名>`（如 `tool_nmap`、`tool_sqlmap`）。
+`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 56 个可调用工具暴露为 `tool_<名称>`：
 
-在 Claude Code 的 `~/.claude.json` 里注册（`mcpServers` 段）：
+在 `~/.claude.json` 的 `mcpServers` 段加入：
 
 ```json
 {
   "mcpServers": {
-    "tianhu-geshell": {
+    "zeroxf-geshell": {
       "command": "python3",
-      "args": ["/path/to/tianhu-tools/ai/mcp_server.py"],
-      "description": "zeroxf 工具箱 geshell：AI 可调用全部渗透工具"
+      "args": ["/path/to/zeroxf_tools/ai/mcp_server.py"],
+      "description": "zeroxf 工具箱：AI 可调用全部渗透工具"
     }
   }
 }
 ```
 
-Windows 端把 `python3` 换成 `python`，路径换成 `C:\...\ai\mcp_server.py`。
+之后 AI 就能以 `tool_nmap`、`tool_nuclei`、`tool_sqlmap` 等形式直接调用。
 
-## 工具清单
+---
 
-工具清单 = 枷锁好工具 + ProjectDiscovery 全家桶 + **从枷锁 1.2GB 包提取的跨平台工具**（约 58 个），分类：信息收集 / 漏洞扫描 / 框架漏洞利用 / 内网渗透 / 爆破 / 隧道代理 / 后渗透 / WebShell / 抓包代理 / 重点系统漏洞 / 数据库利用。
+## 文档
 
-**工具来源分三层**：
-1. **官方二进制**（`provision_tools.py` 自动拉取，20 个）：nuclei/httpx/ffuf/fscan/dalfox/chisel/frps/frpc/sqlmap/subfinder/naabu/katana/dnsx/uncover/sqlcmd/gobuster/urlfinder/yasso/sliver/hashcat
-2. **从枷锁提取的跨平台工具**（24 个）：python 工具集（ssti/spring/ruoyi/redis/tomcat/dirsearch/docem/dedecmscan/avoidkilling/revshell）+ jar 利用工具（shiro/struts2/thinkphp/weblogic/jenkins/xxl-job/jeecg/nacos/数据库综合/OA 综合利用/哥斯拉/冰蝎/HeapDump 提取）
-3. **需系统安装或自备**（doctor 会提示）：hydra/hashcat/metasploit/nmap、mysql/mongodb/oracle/netexec、xray/CS/Burp 等
-
-`scripts/provision_tools.py` 会自动从官方 GitHub release 拉取可免费分发的二进制；同一脚本在 Windows 重跑一次即拉 .exe 版本。Python 工具共用 `tools/_venv`（已装好依赖）。
-
-每条工具的扩展字段（天狐原生字段之外新增）：
-
-| 字段 | 说明 |
+| 文档 | 内容 |
 | --- | --- |
-| `risk` | 风险等级：`passive / active / exploit / brute / tunnel / post-exploit` |
-| `ai_callable` | AI 能否直接调用（GUI 工具设 false） |
-| `aliases` | 别名，参与模糊匹配（中文工具名的 aliases[0] 是真实命令） |
-| `example` | 示例命令（写入 tools.md 给 AI 参考） |
-| `dependencies` | 依赖命令（doctor 用 `shutil.which` 检查） |
+| [docs/INSTALL.md](docs/INSTALL.md) | 完整安装指南：环境要求、分步安装、系统依赖、故障排查 |
+| [docs/AGENT.md](docs/AGENT.md) | 给 AI Agent 的安装与验证指令（可直接粘贴给 AI） |
+| [ai/tools.md](ai/tools.md) | 全部工具的参数、示例与调用方式（自动生成） |
+| `geshell doctor` | 运行时环境自检，定位缺失依赖 |
 
-### 合并你自带的原版天狐 tools.json（踢掉不好用的）
+---
 
-```bash
-python3 scripts/merge_tools.py --import 你的原版tools.json [--drop name1 name2 ...]
-```
+## 常见问题
 
-合并规则：按 name+category 去重，保留现有条目（含扩展字段），`--drop` 列表里的工具直接剔除。
+**Q：双击 `.bat` 没任何反应？**
+仓库里的 `.bat` / `.cmd` 已通过 `.gitattributes` 固定为 CRLF 换行 + GBK 编码（Windows 中文环境的原生格式）。如果你手动编辑过这些文件，注意别让编辑器把它存成 LF 或 UTF-8——那会让 CMD 解析错乱、脚本静默不执行。
 
-## 环境依赖
+**Q：从 `\\wsl.localhost\...` 双击启动失败？**
+Windows 的 CMD 不支持 UNC 路径作为工作目录。启动脚本已用 `pushd` 规避，但更推荐把工具箱放在 Windows 本地磁盘。
 
-- Python 3.8+（GUI 需要 PyQt6，CLI 不需要）
-- 系统命令类工具需自行安装（`doctor` 会提示缺失）：nmap / sqlmap / nuclei / ffuf / httpx / hydra / fscan / frp 等
-- Java 类工具（JAVA8/JAVA11）：需 JDK，`doctor` 会检测
+**Q：GUI 里点工具闪一下就没了？**
+先跑 `geshell doctor` 看依赖。若在 WSL 下且是 JavaFX 类工具（哥斯拉、冰蝎、shiro 等），工具箱已自动注入 `GDK_BACKEND=x11`——WSLg 同时提供 Wayland 与 XWayland，不强制 X11 会段错误。
 
-Windows 可用 `setup.bat` 检查环境并列出 winget 安装命令。
+**Q：`git clone` 下来界面里一个工具都没有？**
+`config/tools.json` 是必须分发的内容（已纳入版本控制）。若缺失，说明用了旧版本，`git pull` 即可。
 
-## 二开改了天狐的哪些东西
+**Q：某些工具装不上？**
+看 `provision_tools.py` 的输出。它对单个工具的失败做了隔离，不会中断整批；失败项会明确打印原因。
 
-| 文件 | 改动 |
-| --- | --- |
-| `config.py` | 路径常量锚定 `BASE_DIR`（不再依赖 cwd）；`save_tools` 保留裸命令名（如 `nmap`）不被绝对化 |
-| 新增 `ai/` | `launch.py`（geshell 后端）、`cli_runner.py`（跨平台命令执行）、`fuzzy.py`（从天狐 utils 抽出，无 PyQt6）、`mcp_server.py`、`selftest.py`、`tools.md`（生成） |
-| 新增入口 | `geshell`（bash）、`geshell.cmd`（Windows） |
-| `config/tools.json` | 种子工具清单（扩展 schema） |
+---
 
 ## 授权与合规
 
-仅限在明确授权的资产和测试范围内使用。未授权扫描、爆破、利用或访问他人系统违法。
+本项目基于 [wr0ld/tianhu-toolbox-v4](https://github.com/wr0ld/tianhu-toolbox-v4)（GPL-3.0）二开，遵循 GPL-3.0 发布，原项目版权归原作者所有。
 
-> 二开说明：本项目基于 [wr0ld/tianhu-toolbox-v4](https://github.com/wr0ld/tianhu-toolbox-v4)（GPL-3.0），CLI 架构参考 [One-JiaSuo/Jiasuo-tools](https://github.com/One-JiaSuo/Jiasuo-tools)。
+> ⚠️ **仅限在明确授权的资产和测试范围内使用。** 未授权扫描、爆破、利用或访问他人系统违法。使用者需自行承担合规责任。
+
+CLI 架构参考 [One-JiaSuo/Jiasuo-tools](https://github.com/One-JiaSuo/Jiasuo-tools)。

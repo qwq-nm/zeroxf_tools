@@ -569,7 +569,11 @@ def provision_usql(force=False):
     if not force and os.path.exists(target):
         print("[已有] usql 已打包，跳过（--force 重新下载）")
         return [("usql", "usql")]
-    asset = f"usql-{USQL_VERSION}-{PLAT}-amd64.tar.bz2"
+    # 两平台资产格式不同：Windows 是 .zip（内含 usql.exe），Linux/macOS 是 .tar.bz2 单文件
+    if PLAT == "windows":
+        asset = f"usql-{USQL_VERSION}-windows-amd64.zip"
+    else:
+        asset = f"usql-{USQL_VERSION}-{PLAT}-amd64.tar.bz2"
     url = f"https://github.com/xo/usql/releases/download/v{USQL_VERSION}/{asset}"
     archive = os.path.join(TOOLS_DIR, f".tmp_{asset}")
     tmp_out = os.path.join(TOOLS_DIR, ".tmp_out_usql")
@@ -578,7 +582,7 @@ def provision_usql(force=False):
         _download(url, archive)
         shutil.rmtree(tmp_out, ignore_errors=True)
         os.makedirs(tmp_out, exist_ok=True)
-        subprocess.check_call(["tar", "xjf", archive, "-C", tmp_out])
+        _extract(archive, tmp_out, _detect_extract(archive, "tarbz2"))
         src = os.path.join(tmp_out, "usql" + EXE)
         if not os.path.exists(src):
             print("[失败] usql: 包内未找到 usql 可执行文件")
@@ -727,7 +731,7 @@ def provision_oracle(force=False):
 def _write_zap_wrapper(target_dir):
     """生成 ZAP 包装脚本（注入内置 JDK 17）。返回入口文件名。"""
     if PLAT == "windows":
-        return "zap.sh"
+        return "zap.bat"        # Windows 版的启动脚本是 .bat，不需要注入 JAVA_HOME 的 shell 包装
     wrapper = os.path.join(target_dir, "zap-tianhu.sh")
     with open(wrapper, "w", encoding="utf-8") as f:
         f.write(ZAP_WRAPPER)
@@ -747,7 +751,16 @@ def provision_zap(force=False):
     archive = None
     tmp_out = os.path.join(TOOLS_DIR, ".tmp_out_zap")
     try:
-        pattern = r"ZAP_.*_Windows\.exe$" if PLAT == "windows" else r"ZAP_.*_Linux\.tar\.gz$"
+        # 注意 ZAP 的资产命名两平台不一致：Linux 是 ZAP_2.17.0_Linux.tar.gz（点号），
+        # Windows 是 ZAP_2_17_0_windows.exe（下划线），所以正则要放宽。
+        # 另外 Windows 那个 .exe 其实是**安装程序**而非压缩包，无法直接解压，
+        # 因此 Windows 端改用同样可用的 ZAP_*_Crossplatform.zip（标准 zip）。
+        if PLAT == "windows":
+            pattern = r"ZAP_[0-9._]*Crossplatform\.zip$"
+            fallback = f"ZAP_{ZAP_VERSION}_Crossplatform.zip"
+        else:
+            pattern = r"ZAP_[0-9._]*Linux\.tar\.gz$"
+            fallback = f"ZAP_{ZAP_VERSION}_Linux.tar.gz"
         try:
             asset = _gh_latest_asset("zaproxy/zaproxy", pattern)
         except Exception as e:
@@ -755,18 +768,16 @@ def provision_zap(force=False):
             print(f"[提示] 查询最新版失败（{e}），改用兜底版本 {ZAP_VERSION}")
             asset = None
         if not asset:
-            if PLAT == "windows":
-                print("[失败] zap: 无法确定 Windows 版资产名（受 API 限流）")
-                return None
-            asset = f"ZAP_{ZAP_VERSION}_Linux.tar.gz"
-        ver = re.search(r"ZAP_([\d.]+)_", asset).group(1)
+            asset = fallback
+        # 取版本号：兼容 2.17.0 与 2_17_0 两种写法
+        ver = re.search(r"ZAP_([\d._]+?)_(?:Linux|Crossplatform)", asset).group(1).replace("_", ".")
         url = f"https://github.com/zaproxy/zaproxy/releases/download/v{ver}/{asset}"
         archive = os.path.join(TOOLS_DIR, f".tmp_{asset}")
         print(f"[下载] zap ← {asset}")
         _download(url, archive)
         shutil.rmtree(tmp_out, ignore_errors=True)
         os.makedirs(tmp_out, exist_ok=True)
-        _extract(archive, tmp_out, "targz")
+        _extract(archive, tmp_out, _detect_extract(archive, "targz"))
         tops = [os.path.join(tmp_out, d) for d in os.listdir(tmp_out)
                 if os.path.isdir(os.path.join(tmp_out, d))]
         if not tops:
