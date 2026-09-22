@@ -399,9 +399,90 @@ def provision_sqlmap():
     return _provision_pip("sqlmap", "sqlmap")
 
 
+# NetExec 依赖中 PyPI 上取得到的那部分。
+# 另有 certipy-ad、pynfsclient 两个是 git 依赖，clone 在受限网络下极易失败，
+# 这里跳过——它们只影响 AD CS / NFS 相关的子命令，不影响 SMB/WinRM/LDAP 等主协议。
+NETEXEC_PYPI_DEPS = [
+    "termcolor", "argcomplete", "asyauth", "beautifulsoup4", "bloodhound-ce",
+    "certihound", "cryptography", "dploot", "dsinternals", "jwt", "lsassy",
+    "masky", "minikerberos", "msldap", "netaddr", "netifaces", "paramiko",
+    "pefile", "pycryptodome", "pypykatz", "pypsrp", "pyperclip",
+    "python-libnmap", "python-dateutil", "rich", "sqlalchemy", "tabulate",
+    "terminaltables3", "unicrypto", "winacl", "xmltodict",
+]
+
+# aardwolf（Rust 实现）在 PyPI 只有 sdist，装它需要完整 Rust 工具链；
+# 但官方 release 提供各 Python ABI 的预编译 wheel，用它可完全免掉编译器。
+AARDWOLF_TAG = "0.2.12"
+
+
+def _aardwolf_wheel_url():
+    """返回当前平台/Python 对应的 aardwolf 预编译 wheel 地址，无则 None。"""
+    abi = f"cp{sys.version_info.major}{sys.version_info.minor}"
+    base = f"https://github.com/skelsec/aardwolf/releases/download/{AARDWOLF_TAG}"
+    if PLAT == "windows":
+        return f"{base}/aardwolf-{AARDWOLF_TAG}-{abi}-{abi}-win_amd64.whl"
+    if PLAT == "linux":
+        many = "manylinux_2_17_x86_64.manylinux2014_x86_64"
+        return f"{base}/aardwolf-{AARDWOLF_TAG}-{abi}-{abi}-{many}.whl"
+    return None
+
+
 def provision_netexec():
-    # NetExec 在 PyPI 无发行包（netexec / nxc / netexec-py 均 404），官方推荐从 GitHub 安装
-    return _provision_pip("git+https://github.com/Pennyw0rth/NetExec", "nxc")
+    """安装 NetExec。
+
+    这条路有三个坑，缺一个都装不上：
+
+    1. PyPI 上没有它的发行包（netexec / nxc / netexec-py 全 404），只能从源码装；
+    2. 它用 poetry-dynamic-versioning 从 git 元数据推导版本号，而源码 zip 没有
+       .git，pip 在生成元数据阶段就会失败——必须设
+       POETRY_DYNAMIC_VERSIONING_BYPASS 绕过；
+    3. 它依赖 aardwolf（Rust 实现）。PyPI 只有 sdist、编译要 Rust 工具链 + C 编译器，
+       但官方 release 有各 ABI 的预编译 wheel，优先用它；
+       其余 git 依赖易失败，故先用 --no-deps 装主体，再补 PyPI 上取得到的依赖。
+    """
+    venv = os.path.join(TOOLS_DIR, "_venv")
+    bindir = os.path.join(venv, "Scripts" if PLAT == "windows" else "bin")
+    py = os.path.join(bindir, "python" + EXE)
+    pip = os.path.join(bindir, "pip" + EXE)
+    if not os.path.exists(py):
+        subprocess.check_call([sys.executable, "-m", "venv", venv])
+
+    # 1) aardwolf：优先预编译 wheel，避免要求 Rust 工具链
+    try:
+        if subprocess.run([py, "-c", "import aardwolf"],
+                          capture_output=True).returncode != 0:
+            url = _aardwolf_wheel_url()
+            if url:
+                print(f"[下载] aardwolf ← {AARDWOLF_TAG} 预编译 wheel（免编译）")
+                subprocess.check_call([pip, "install", "-q", "--no-deps", url])
+            else:
+                print("[提示] 当前平台无 aardwolf 预编译 wheel，将回退源码编译（需 Rust）")
+    except Exception as e:
+        print(f"[提示] aardwolf 预编译包安装失败（{e}），将回退源码编译")
+
+    # 2) NetExec 主体 + 3) 补齐依赖
+    archive = os.path.join(TOOLS_DIR, ".tmp_netexec.zip")
+    env = os.environ.copy()
+    env["POETRY_DYNAMIC_VERSIONING_BYPASS"] = "0.0.0"
+    try:
+        print("[下载] NetExec ← 源码 zip")
+        _download("https://codeload.github.com/Pennyw0rth/NetExec/zip/refs/heads/main",
+                  archive)
+        subprocess.check_call([pip, "install", "-q", "--no-deps", archive], env=env)
+        print("[下载] NetExec 依赖（PyPI 部分）")
+        subprocess.check_call([pip, "install", "-q", *NETEXEC_PYPI_DEPS])
+    except Exception as e:
+        print(f"[失败] netexec: {e}")
+        return None
+    finally:
+        _drop(archive)
+
+    exe = os.path.join(bindir, "nxc" + EXE)
+    if not os.path.exists(exe):
+        print("[失败] netexec: 安装后未找到 nxc 入口")
+        return None
+    return [("_venv", os.path.relpath(exe, TOOLS_DIR))]
 
 
 def _liberica_url(ver):
