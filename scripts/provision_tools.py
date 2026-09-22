@@ -691,6 +691,21 @@ exit 1
 '''
 
 
+ORACLE_WRAPPER_BAT = '''@echo off
+rem zeroxf 包装脚本：sqlplus.exe 需要 Instant Client 目录下的 DLL 才能启动
+setlocal
+set "_HERE=%~dp0"
+set "_IC="
+for /d %%D in ("%_HERE%instantclient_*") do set "_IC=%%D"
+if not defined _IC (
+    echo 未找到 Instant Client 目录 1>&2
+    exit /b 1
+)
+set "PATH=%_IC%;%PATH%"
+"%_IC%\\sqlplus.exe" %*
+'''
+
+
 def provision_oracle(force=False):
     """下载 Oracle Instant Client + SQL*Plus 到 tools/oracle/。
 
@@ -698,9 +713,10 @@ def provision_oracle(force=False):
     标成"需自备"是过虑了。sqlplus 依赖同目录的 IC 共享库与系统 libaio.so.1。
     """
     target_dir = os.path.join(TOOLS_DIR, "oracle")
-    if not force and os.path.exists(os.path.join(target_dir, "sqlplus.sh")):
+    entry_name = "sqlplus.bat" if PLAT == "windows" else "sqlplus.sh"
+    if not force and os.path.exists(os.path.join(target_dir, entry_name)):
         print("[已有] oracle 已打包，跳过（--force 重新下载）")
-        return [("oracle", "sqlplus.sh")]
+        return [("oracle", entry_name)]
     try:
         os.makedirs(target_dir, exist_ok=True)
         for name in ("instantclient-basiclite-linuxx64.zip",
@@ -723,11 +739,18 @@ def provision_oracle(force=False):
         entry = os.path.join(ic_dir, "sqlplus")
         if os.path.exists(entry):
             os.chmod(entry, 0o755)
-        wrapper = os.path.join(target_dir, "sqlplus.sh")
-        with open(wrapper, "w", encoding="utf-8") as f:
-            f.write(ORACLE_WRAPPER)
-        os.chmod(wrapper, 0o755)
-        return [("oracle", "sqlplus.sh")]
+        # Windows 无法执行 .sh，且 sqlplus.exe 需要 Instant Client 的 DLL 在 PATH 里，
+        # 所以两端各生成对应形式的包装脚本（内容等价，形式按平台）
+        if PLAT == "windows":
+            wrapper = os.path.join(target_dir, "sqlplus.bat")
+            with open(wrapper, "w", encoding="gbk", newline="\r\n") as f:
+                f.write(ORACLE_WRAPPER_BAT)
+        else:
+            wrapper = os.path.join(target_dir, "sqlplus.sh")
+            with open(wrapper, "w", encoding="utf-8") as f:
+                f.write(ORACLE_WRAPPER)
+            os.chmod(wrapper, 0o755)
+        return [("oracle", entry_name)]
     except Exception as e:
         print(f"[失败] oracle: {e}")
         return None

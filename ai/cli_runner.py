@@ -71,6 +71,34 @@ def _resolve_path(tool: Dict[str, Any], path: str) -> str:
     return p
 
 
+def _win_exec_argv(exe: str) -> List[str]:
+    """Windows 下把「不能直接执行」的入口包装成可执行的 argv 前缀。
+
+    tools.json 是两端共用的一份配置，里面有两类入口在 Windows 上跑不起来：
+
+    - .sh  —— Windows 无法执行 shell 脚本。oracle 的 sqlplus 就是这种：
+             provision 在两端都生成了 sqlplus.sh，但 Windows 上真正能用的是
+             随 Instant Client 附带的 sqlplus.exe（需先设好依赖库路径），
+             故这里改找同目录的 .bat 包装。
+    - .py  —— 类 Unix 靠 shebang 直接执行，Windows 不会，必须显式交给解释器。
+             impacket 的 secretsdump.py 属于这类，用工具箱自带的 venv Python 跑。
+
+    非 Windows 或非绝对路径（裸命令）时原样返回。
+    """
+    if os.name != "nt" or not os.path.isabs(exe):
+        return [exe]
+    low = exe.lower()
+    if low.endswith(".sh"):
+        base = exe[:-3]
+        for cand in (base + ".bat", base + ".cmd"):
+            if os.path.exists(cand):
+                return [cand]
+        return [exe]
+    if low.endswith(".py"):
+        return [_resolve_python("Python"), exe]
+    return [exe]
+
+
 def _resolve_python(tool_type: str) -> str:
     # 优先项目共享 venv（tools/_venv，已装好工具依赖）
     venv_py = os.path.join(BASE_DIR, "tools", "_venv",
@@ -170,7 +198,7 @@ def build_command(tool: Dict[str, Any], user_args: List[str]) -> Dict[str, Any]:
     # 命令行
     if t in ("命令行", "cli"):
         exe = _resolve_path(tool, path) or str(tool.get("name", ""))
-        cmd = [exe] + pre + post + args
+        cmd = _win_exec_argv(exe) + pre + post + args
         # 绝对路径的可执行文件以其所在目录为 cwd：有些工具（如 xray）会把配置文件
         # 生成在当前 cwd，沿用调用者目录就会四处污染。裸命令（nmap 等）保持 None。
         return {"kind": "cmd", "cmd": cmd,
