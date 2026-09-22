@@ -319,10 +319,13 @@ def doctor() -> int:
         if not p:
             continue
         is_bare = not ("/" in p or "\\" in p)
-        if not is_bare and not os.path.exists(p):
+        # 存在性判断要用解析后的路径：Windows 上实际文件带 .exe、venv 是 Scripts/ 而非 bin/，
+        # 直接拿 tools.json 里的原始 path（按 Linux 命名书写）比对会满屏误报。
+        resolved = p if is_bare else cli_runner._resolve_path(t, p)
+        if not is_bare and not os.path.exists(resolved):
             print(f"[警告] {t.get('name')} 路径不存在: {p}")
         if str(t.get("type", "")).strip() in ("批处理", "batch") and not is_bare \
-                and os.path.exists(p) and p.lower().endswith(".bat"):
+                and os.path.exists(resolved) and p.lower().endswith(".bat"):
             try:
                 with open(p, "r", encoding="utf-8", errors="ignore") as f:
                     content = f.read()
