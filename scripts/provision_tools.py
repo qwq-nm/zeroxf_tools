@@ -143,6 +143,18 @@ if [ -x "${_root}/Java_path/Java_17_win/bin/java" ]; then
 fi
 exec "${_here}/zap.sh" "$@"
 '''
+ZAP_WRAPPER_BAT = '''@echo off
+rem zeroxf 包装脚本：ZAP 需要 Java 17+，指向工具箱内置的便携 JDK
+setlocal
+set "_HERE=%~dp0"
+set "_ROOT=%~dp0..\\.."
+if exist "%_ROOT%\\Java_path\\Java_17_win\\bin\\java.exe" (
+    set "JAVA_HOME=%_ROOT%\\Java_path\\Java_17_win"
+    set "PATH=%JAVA_HOME%\\bin;%PATH%"
+)
+call "%_HERE%zap.bat" %*
+'''
+
 EXPLOITDB_RAW = "https://gitlab.com/exploit-database/exploitdb/-/raw/main"
 
 # searchsploit 启动时必须在脚本同目录找到 .searchsploit_rc，否则直接 exit 1（脚本第 704-710 行）。
@@ -864,9 +876,17 @@ def provision_oracle(force=False):
 
 
 def _write_zap_wrapper(target_dir):
-    """生成 ZAP 包装脚本（注入内置 JDK 17）。返回入口文件名。"""
+    """生成 ZAP 包装脚本（注入内置 JDK 17）。
+
+    返回的入口名两端统一为 zap-tianhu.sh，以保证 config/tools.json 保持
+    单一数据源；Windows 上实际落盘的是 zap-tianhu.bat，由 cli_runner 的
+    _win_exec_argv 自动把 .sh 换成 .bat。
+    """
     if PLAT == "windows":
-        return "zap.bat"        # Windows 版的启动脚本是 .bat，不需要注入 JAVA_HOME 的 shell 包装
+        wrapper = os.path.join(target_dir, "zap-tianhu.bat")
+        with open(wrapper, "w", encoding="gbk", newline="\r\n") as f:
+            f.write(ZAP_WRAPPER_BAT)
+        return "zap-tianhu.sh"      # 逻辑名，两端一致
     wrapper = os.path.join(target_dir, "zap-tianhu.sh")
     with open(wrapper, "w", encoding="utf-8") as f:
         f.write(ZAP_WRAPPER)
