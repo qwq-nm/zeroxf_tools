@@ -205,6 +205,13 @@ class EnvManager :
                 else :
                     env ["CLASSPATH"]=f".:{jh}/lib:{jh}/lib/dt.jar:{jh}/lib/tools.jar"
 
+            # WSLg 会同时暴露 Wayland 和 XWayland。存在 WAYLAND_DISPLAY 时 GDK 默认选
+            # Wayland 后端，而 JavaFX 的 GTK 集成在纯 Wayland 下会触发
+            # "GDK_IS_X11_DISPLAY (display) failed" 断言并段错误（窗口都还没出来）。
+            # 强制 X11 后端，GUI 类 jar 工具（哥斯拉/冰蝎/shiro 等）才能正常显示。
+            if os .name !="nt"and env .get ("DISPLAY")and os .environ .get ("WAYLAND_DISPLAY"):
+                env .setdefault ("GDK_BACKEND","x11")
+
         if new_paths :
             original_path =env .get ("PATH","")
 
