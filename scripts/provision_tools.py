@@ -205,6 +205,34 @@ def _download(url, dest, retries=5):
     raise last
 
 
+def _detect_extract(path, declared):
+    """按文件魔数推断真正的打包格式，优先于 spec 里声明的 extract。
+
+    同一仓库在不同平台的资产格式常常不同，而 spec 的 extract 只写了一个值：
+      chisel     Linux .gz 单文件   / Windows .zip
+      ffuf、frp、gobuster、dalfox、urlfinder  Linux .tar.gz / Windows .zip
+      sqlcmd     Linux .tar.bz2     / Windows .zip
+    照搬声明会在 Windows 端解压失败（例如拿 gzip 去解 ZIP 报 "Not a gzipped file (b'PK')"）。
+    这里以魔数为准；gz 与 tar.gz 魔数相同，用 declared/文件名区分。
+    """
+    try:
+        with open(path, "rb") as f:
+            magic = f.read(8)
+    except OSError:
+        return declared
+    if magic[:2] == b"PK":
+        return "zip"
+    if magic[:3] == b"BZh":
+        return "tarbz2"
+    if magic[:6] == b"7z\xbc\xaf\x27\x1c":
+        return "7z"
+    if magic[:2] == b"\x1f\x8b":
+        if declared == "targz" or path.lower().endswith(".tar.gz"):
+            return "targz"
+        return "gz"
+    return declared or "raw"
+
+
 def _extract(archive, dest_dir, extract):
     os.makedirs(dest_dir, exist_ok=True)
     if extract == "zip":
@@ -268,7 +296,10 @@ def provision_github(name, spec):
         subdir = os.path.join(TOOLS_DIR, spec["subdir"])
         tmp_out = os.path.join(TOOLS_DIR, f".tmp_out_{spec['subdir']}")
         shutil.rmtree(tmp_out, ignore_errors=True)
-        _extract(archive, tmp_out, spec["extract"])
+        # 以实际文件魔数为准：同一仓库的 Linux/Windows 资产打包格式可能不同
+        # （chisel 是 .gz vs .zip；ffuf/frp/gobuster 等是 .tar.gz vs .zip）
+        fmt = _detect_extract(archive, spec["extract"])
+        _extract(archive, tmp_out, fmt)
 
         placed = []
         if spec.get("keep_dir"):
@@ -290,7 +321,7 @@ def provision_github(name, spec):
                 return None
             os.chmod(bin_path, 0o755)
             placed.append((spec["subdir"], exe_name))
-        elif spec["extract"] in ("gz", "raw"):
+        elif fmt in ("gz", "raw"):
             # 单文件：解压产物即二进制，直接移动到目标名
             files = [os.path.join(tmp_out, f) for f in os.listdir(tmp_out)
                      if os.path.isfile(os.path.join(tmp_out, f))]
