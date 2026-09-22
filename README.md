@@ -11,7 +11,11 @@
 
 ### 界面预览
 
-![工具箱主界面](docs/screenshots/wsl-main.png)
+两端界面完全一致（同一份代码 + 同一份工具注册表）：
+
+| WSL / Linux | Windows |
+| --- | --- |
+| ![WSL 端界面](docs/screenshots/wsl-main.png) | ![Windows 端界面](docs/screenshots/windows-main.png) |
 
 ---
 
