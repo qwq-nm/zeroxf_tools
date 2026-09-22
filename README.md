@@ -9,6 +9,18 @@
 
 ## 快速开始
 
+### 首次初始化（clone 之后必做）
+
+仓库**只含代码**——工具二进制、JDK、GUI 依赖都不入库（`.gitignore` 挡掉了），需要按需拉取：
+
+```bash
+python3 scripts/provision_tools.py --jdk    # 便携 JDK 8/11/17（12 个 jar 类工具需要）
+python3 scripts/provision_tools.py          # 全部开源工具二进制（20+ 个）
+python3 scripts/provision_tools.py --gui    # GUI 依赖 PyQt6（要用图形界面才装）
+```
+
+### 命令行用法
+
 ```bash
 # Linux / macOS
 cd ~/tianhu-tools
@@ -21,6 +33,22 @@ geshell list
 ```
 
 命令名匹配忽略大小写、空格、横线和下划线，支持中文拼音（如 `geshell ruoyi` / `geshell 若依`）。
+
+### 图形界面
+
+GUI 是 PyQt6 应用（`main.py` + `core/` + `widgets.py`），与 CLI **共用同一份 `config/tools.json`**，工具清单完全同步。
+
+| 平台 | 启动方式 |
+| --- | --- |
+| Windows | 双击 `启动工具箱.bat` 或 `zeroxf工具箱-社区版V4.0.vbs` |
+| WSL / Linux | `tools/_venv/bin/python main.py`（WSLg 会把窗口显示到 Windows 桌面） |
+
+**两个常见的坑**：
+
+1. **GUI 依赖 PyQt6**，先执行 `python3 scripts/provision_tools.py --gui`。缺它时启动脚本会打印中文指引，而不是静默失败。
+2. **不要从 `\\wsl.localhost\...` 双击启动**。Windows 的 CMD 不支持把 UNC 路径作为当前目录，会导致相对路径全部失效。启动脚本已用 `pushd` 规避，但把工具箱放在 Windows 磁盘上性能更好。
+
+> 原版天狐自带便携 Python（`python3/`），但那部分不在本仓库内——启动脚本会依次回退到你系统里的 `pyw` / `pythonw` / `py` / `python`。
 
 ## geshell 命令面
 

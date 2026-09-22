@@ -6,13 +6,14 @@
 解压到 tools/<子目录>/<可执行文件>，并自动更新 config/tools.json 的 path。
 
 用法：
-  python3 scripts/provision_tools.py [--tools 名称1 名称2 ...] [--jdk] [--force]
+  python3 scripts/provision_tools.py [--tools 名称1 名称2 ...] [--jdk] [--gui] [--force]
 
 说明：
 - SOURCES 表内是能从官方 release 拉取的开源工具；其余走下方 SPECIAL 分发表里的专用函数
   （sqlmap/netexec/impacket/mongodb/usql/jndi/zap/exploitdb/oracle/xray）。
 - --jdk 安装便携 Liberica JDK 8/11/17 到 Java_path/，8 与 11 为 full 版（含 JavaFX），
   供 12 个 jar 类工具使用，无需系统 java。
+- --gui 安装 PyQt6 到 tools/_venv，供 main.py/launcher.py 的图形界面使用。
 - CobaltStrike/Burp/蚁剑等商业或 GUI 工具不在表内，保持原样，doctor 会提示。
 - 同一脚本在 Windows 上重跑一次即可拉取 .exe 版本。
 """
@@ -717,6 +718,36 @@ def provision_zap(force=False):
         _drop(archive, tmp_out)
 
 
+def provision_gui(force=False):
+    """安装 GUI 依赖（PyQt6）到 tools/_venv。
+
+    main.py / launcher.py / loader.py 是 PyQt6 应用，但 PyQt6 只提供库、
+    没有命令行入口，走不了 _provision_pip（那个函数要校验入口脚本存在），
+    因此单独处理。
+    """
+    venv = os.path.join(TOOLS_DIR, "_venv")
+    bindir = os.path.join(venv, "Scripts" if PLAT == "windows" else "bin")
+    py = os.path.join(bindir, "python" + EXE)
+    if not os.path.exists(py):
+        print("[提示] 未找到 tools/_venv，正在创建")
+        subprocess.check_call([sys.executable, "-m", "venv", venv])
+    if not force:
+        r = subprocess.run([py, "-c", "import PyQt6.QtWidgets"],
+                           capture_output=True, text=True)
+        if r.returncode == 0:
+            print("[已有] PyQt6 已安装，跳过（--force 重装）")
+            return True
+    # PyQt6 会连带拉 Qt6 运行时（约 90MB），是这里最大的单个依赖
+    print("[下载] PyQt6 → GUI 运行时依赖（约 90MB）")
+    try:
+        subprocess.check_call([os.path.join(bindir, "pip" + EXE),
+                               "install", "--upgrade", "PyQt6"])
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"[失败] PyQt6: {e}")
+        return False
+
+
 def provision_impacket():
     # impacket 是一组协议攻击脚本，NetExec 本身即基于它；入口取常用的 secretsdump
     return _provision_pip("impacket", "impacket-secretsdump")
@@ -776,14 +807,23 @@ def update_tools_json(placed_map):
 def main():
     ap = argparse.ArgumentParser(description="打包开源工具进 tools/")
     ap.add_argument("--tools", nargs="*", help="只打包指定工具，如 --tools nuclei httpx")
-    ap.add_argument("--jdk", action="store_true", help="安装便携 JDK 8 + JDK 11 到 Java_path/")
+    ap.add_argument("--jdk", action="store_true",
+                    help="安装便携 JDK 8/11/17 到 Java_path/")
+    ap.add_argument("--gui", action="store_true",
+                    help="安装 GUI 依赖 PyQt6 到 tools/_venv（main.py/launcher.py 需要）")
     ap.add_argument("--force", action="store_true", help="已存在也重新下载")
     args = ap.parse_args()
 
     os.makedirs(TOOLS_DIR, exist_ok=True)
     if args.jdk:
         provision_jdk(force=args.force)
-    names = args.tools or list(SOURCES.keys())
+    if args.gui:
+        provision_gui(force=args.force)
+    # 只开 --jdk/--gui 时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）
+    names = args.tools
+    if names is None and not (args.jdk or args.gui):
+        names = list(SOURCES.keys())
+    names = names or []
     placed_map = {}
 
     # 非 GitHub-release 模式的工具（pip 安装 / 直链下载 / 多文件组装）
@@ -830,7 +870,9 @@ def _already_present(spec, name):
     if spec.get("binaries"):
         return all(os.path.exists(os.path.join(TOOLS_DIR, spec["subdir"], b + EXE))
                    for b in spec["binaries"])
-    b = spec["binary"] + EXE
+    # keep_dir 模式（如 hashcat）落盘的是 keep_binary（hashcat.bin），不是 binary，
+    # 否则每次都会被判定为"不存在"而重下 100MB+ 的包
+    b = spec.get("keep_binary", spec["binary"]) + EXE
     return os.path.exists(os.path.join(TOOLS_DIR, spec["subdir"], b))
 
 
