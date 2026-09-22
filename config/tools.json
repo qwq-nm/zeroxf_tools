@@ -1,0 +1,1209 @@
+[
+  {
+    "name": "nmap",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "nmap",
+    "description": "网络发现与端口/服务版本扫描",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "nmap-rs"
+    ],
+    "example": "nmap -sV -sC -p- --min-rate=1000 target.com",
+    "weight": 4.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "httpx",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/httpx/httpx",
+    "description": "HTTP 探活与 Web 指纹识别",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "httpx-probe"
+    ],
+    "example": "cat urls.txt | httpx -sc -title -tech-detect",
+    "weight": 5.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "urlfinder",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/urlfinder/URLFinder",
+    "description": "从 JS/HTML 提取隐藏 URL 与敏感接口",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "url-finder"
+    ],
+    "example": "urlfinder -u https://target.com -s 2",
+    "weight": 4.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "ffuf",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/ffuf/ffuf",
+    "description": "目录/文件/参数 Fuzz",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "ffuf-fuzz"
+    ],
+    "example": "ffuf -u https://target.com/FUZZ -w /opt/wordlists/dir-common.txt",
+    "weight": 4.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "arl",
+    "category": "信息收集工具",
+    "type": "网页",
+    "url": "http://localhost:5003",
+    "description": "ARL 灯塔资产管理平台 Web 控制台",
+    "risk": "passive",
+    "ai_callable": false,
+    "weight": 0.0,
+    "path": "",
+    "params": "",
+    "params_pre": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "nuclei",
+    "category": "漏洞扫描与利用工具",
+    "type": "命令行",
+    "path": "/tools/nuclei/nuclei",
+    "description": "基于 YAML 模板的自动化漏洞扫描",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "nuclei-scan"
+    ],
+    "example": "nuclei -u https://target.com -severity critical,high",
+    "weight": 3.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "sqlmap",
+    "category": "漏洞扫描与利用工具",
+    "type": "命令行",
+    "path": "/tools/_venv/bin/sqlmap",
+    "description": "SQL 注入自动化检测与利用",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "sqli",
+      "sql注入"
+    ],
+    "example": "sqlmap -u 'https://target.com/?id=1' --batch --level=3",
+    "weight": 3.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "xray",
+    "category": "漏洞扫描与利用工具",
+    "type": "命令行",
+    "path": "/tools/xray/xray",
+    "description": "被动代理漏洞扫描器",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "xray-proxy"
+    ],
+    "example": "xray webscan --listen 127.0.0.1:7777",
+    "weight": 5.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "dalfox",
+    "category": "漏洞扫描与利用工具",
+    "type": "命令行",
+    "path": "/tools/dalfox/dalfox",
+    "description": "XSS 专用扫描器",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "xss",
+      "xssscan"
+    ],
+    "example": "dalfox url https://target.com/?search=test",
+    "weight": 2.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "ssti",
+    "category": "漏洞扫描与利用工具",
+    "type": "Python",
+    "path": "/tools/sstikit/ssti_cli.py",
+    "description": "SSTI 统一入口：Fenjing + SSTImap（WAF 绕过）",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "ssti检测",
+      "sstikit"
+    ],
+    "example": "ssti auto -u http://target/?name=test",
+    "weight": 4.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "spring",
+    "category": "框架漏洞利用工具",
+    "type": "Python",
+    "path": "/tools/springkit/spring_cli.py",
+    "description": "Spring 统一入口：SpringScan + SpringBoot-Scan + CloudSec",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "springboot",
+      "actuator"
+    ],
+    "example": "spring boot -u http://target:8080",
+    "weight": 5.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "tomcat",
+    "category": "框架漏洞利用工具",
+    "type": "Python",
+    "path": "/tools/tomcatscanpro/TomcatScanPro.py",
+    "description": "Tomcat 扫描（弱口令/上传漏洞）",
+    "risk": "brute",
+    "ai_callable": true,
+    "aliases": [
+      "tomcatscanpro"
+    ],
+    "example": "tomcat",
+    "weight": 5.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "dedecmscan",
+    "category": "框架漏洞利用工具",
+    "type": "Python",
+    "path": "/tools/dedecmscan/dedescan.py",
+    "description": "DedeCMS 漏洞扫描器",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "dedecms"
+    ],
+    "example": "dedecmscan -u https://target.com",
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "redis",
+    "category": "框架漏洞利用工具",
+    "type": "Python",
+    "path": "/tools/rediskit/redis_cli.py",
+    "description": "Redis 统一入口：爆破/RCE/写Shell/SSH/Cron",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "redis未授权",
+      "redisexp"
+    ],
+    "example": "redis exp -h",
+    "weight": 4.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "heapdump",
+    "category": "重点系统漏洞工具",
+    "type": "JAVA11",
+    "path": "/tools/heapdump/JDumpSpider.jar",
+    "description": "Heap Dump 敏感信息提取 v1.1",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "jdumpspider"
+    ],
+    "example": "heapdump -f heapdump文件路径",
+    "weight": 6.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "ruoyi",
+    "category": "重点系统漏洞工具",
+    "type": "Python",
+    "path": "/tools/ruoyikit/ruoyi_cli.py",
+    "description": "若依统一入口：扫描器 + 综合利用",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "若依",
+      "ruoyi-all"
+    ],
+    "example": "ruoyi scan",
+    "weight": 5.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "fscan",
+    "category": "内网渗透工具",
+    "type": "命令行",
+    "path": "/tools/fscan/fscan",
+    "description": "内网综合扫描（端口/服务/漏洞/MS17010）",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "fscan扫描"
+    ],
+    "example": "fscan -h 10.0.0.0/24",
+    "weight": 2.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "yasso",
+    "category": "内网渗透工具",
+    "type": "命令行",
+    "path": "/tools/yasso/Yasso",
+    "description": "内网扫描 + 密码爆破",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "yasso内网"
+    ],
+    "example": "yasso",
+    "weight": 3.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "hydra",
+    "category": "爆破工具",
+    "type": "命令行",
+    "path": "hydra",
+    "description": "多协议在线密码爆破",
+    "risk": "brute",
+    "ai_callable": true,
+    "aliases": [
+      "爆破"
+    ],
+    "example": "hydra -l root -P pass.txt ssh://10.0.0.5",
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "hashcat",
+    "category": "爆破工具",
+    "type": "命令行",
+    "path": "/tools/hashcat/hashcat.bin",
+    "description": "GPU 离线密码哈希爆破",
+    "risk": "brute",
+    "ai_callable": true,
+    "aliases": [
+      "hash爆破"
+    ],
+    "example": "hashcat -m 1000 hashes.txt /opt/wordlists/rockyou.txt",
+    "weight": 3.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "frps",
+    "category": "隧道代理工具",
+    "type": "命令行",
+    "path": "/tools/frp/frps",
+    "description": "frp 服务端（VPS 接收内网连接）",
+    "risk": "tunnel",
+    "ai_callable": true,
+    "aliases": [
+      "frp服务端"
+    ],
+    "example": "frps -c frps.toml",
+    "weight": 2.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "frpc",
+    "category": "隧道代理工具",
+    "type": "命令行",
+    "path": "/tools/frp/frpc",
+    "description": "frp 客户端（内网机器映射服务）",
+    "risk": "tunnel",
+    "ai_callable": true,
+    "aliases": [
+      "frp客户端"
+    ],
+    "example": "frpc -c frpc.toml",
+    "weight": 2.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "chisel",
+    "category": "隧道代理工具",
+    "type": "命令行",
+    "path": "/tools/chisel/chisel",
+    "description": "HTTP 隧道 / SOCKS5 代理",
+    "risk": "tunnel",
+    "ai_callable": true,
+    "aliases": [
+      "chisel隧道"
+    ],
+    "example": "chisel server -p 8080 --reverse",
+    "weight": 3.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "metasploit",
+    "category": "后渗透工具",
+    "type": "命令行",
+    "path": "msfconsole",
+    "description": "Metasploit 渗透测试框架（CLI）",
+    "risk": "post-exploit",
+    "ai_callable": true,
+    "aliases": [
+      "msf",
+      "metasploit框架"
+    ],
+    "example": "msfconsole -q",
+    "weight": 2.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "cobaltstrike4.9",
+    "category": "后渗透工具",
+    "type": "GUI应用",
+    "path": "/tools/CobaltStrike4.9/teamserver.bat",
+    "description": "CobaltStrike 4.9 红队 C2 平台",
+    "risk": "post-exploit",
+    "ai_callable": false,
+    "aliases": [
+      "cs",
+      "cobaltstrike"
+    ],
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "avoidkilling",
+    "category": "后渗透工具",
+    "type": "Python",
+    "path": "/tools/avoidkilling/main.py",
+    "description": "PHP 免杀 Webshell 生成",
+    "risk": "post-exploit",
+    "ai_callable": true,
+    "aliases": [
+      "免杀"
+    ],
+    "example": "main.py -type default -e xor2 -name shell.php",
+    "weight": 3.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "docem",
+    "category": "漏洞扫描与利用工具",
+    "type": "Python",
+    "path": "/tools/docem/docem_cli.py",
+    "description": "Office 文档 XXE / XSS Payload 注入",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "docx"
+    ],
+    "example": "docem",
+    "weight": 2.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "BurpSuite",
+    "category": "抓包与代理工具",
+    "type": "GUI应用",
+    "path": "/tools/BurpSuite/BurpSuite.bat",
+    "description": "Burp Suite 抓包代理（GUI）",
+    "risk": "passive",
+    "ai_callable": false,
+    "aliases": [
+      "burp"
+    ],
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "蚁剑",
+    "category": "WebShell管理工具",
+    "type": "GUI应用",
+    "path": "/tools/AntSword/antSword.exe",
+    "description": "AntSword WebShell 管理（GUI）",
+    "risk": "post-exploit",
+    "ai_callable": false,
+    "aliases": [
+      "antsword"
+    ],
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "subfinder",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/subfinder/subfinder",
+    "description": "子域名被动收集",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "sub",
+      "子域名"
+    ],
+    "example": "subfinder -d target.com -all",
+    "params_pre": "",
+    "params": "",
+    "weight": 3.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "naabu",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/naabu/naabu",
+    "description": "端口扫描器（ProjectDiscovery）",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "naabu端口"
+    ],
+    "example": "naabu -host target.com -p -",
+    "params_pre": "",
+    "params": "",
+    "weight": 3.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "katana",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/katana/katana",
+    "description": "下一代爬虫（JS 渲染）",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "katana爬虫"
+    ],
+    "example": "katana -u https://target.com -jc",
+    "params_pre": "",
+    "params": "",
+    "weight": 3.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "dnsx",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/dnsx/dnsx",
+    "description": "DNS 查询与验证",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "dnsx查询"
+    ],
+    "example": "dnsx -l domains.txt -a -resp",
+    "params_pre": "",
+    "params": "",
+    "weight": 3.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "uncover",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/uncover/uncover",
+    "description": "Shodan/Censys 测绘聚合",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "uncover测绘"
+    ],
+    "example": "uncover -q 'app:shiro'",
+    "params_pre": "",
+    "params": "",
+    "weight": 2.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "gobuster",
+    "category": "信息收集工具",
+    "type": "命令行",
+    "path": "/tools/gobuster/gobuster",
+    "description": "目录/虚拟主机爆破",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "gobuster目录"
+    ],
+    "example": "gobuster dir -u https://target.com -w dict.txt",
+    "params_pre": "",
+    "params": "",
+    "weight": 3.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "shiro",
+    "category": "框架漏洞利用工具",
+    "type": "JAVA8",
+    "path": "/tools/shiro/shiro_attack.jar",
+    "description": "Shiro 反序列化利用 v5.1.1",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "shiro反序列化"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "struts2",
+    "category": "框架漏洞利用工具",
+    "type": "JAVA11",
+    "path": "/tools/struts2/struts2_exp.jar",
+    "description": "Struts2 漏洞利用 v19.73",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "s2"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "weblogic",
+    "category": "框架漏洞利用工具",
+    "type": "JAVA8",
+    "path": "/tools/weblogic/WeblogicTool.jar",
+    "description": "WebLogic 漏洞利用 v1.3",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "weblogic漏洞"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "fastjson",
+    "category": "框架漏洞利用工具",
+    "type": "JAVA11",
+    "path": "/tools/fastjson/fastjson_exp.jar",
+    "description": "Fastjson 反序列化利用",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "fastjson漏洞"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "log4j",
+    "category": "框架漏洞利用工具",
+    "type": "JAVA11",
+    "path": "/tools/log4j/log4j_shell.jar",
+    "description": "Log4j2 RCE 利用",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "log4shell",
+      "log4j2"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "thinkphp",
+    "category": "框架漏洞利用工具",
+    "type": "JAVA8",
+    "path": "/tools/thinkphp/ThinkphpGUI.jar",
+    "description": "ThinkPHP 漏洞利用 GUI",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "thinkphp漏洞"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "nacos",
+    "category": "重点系统漏洞工具",
+    "type": "JAVA11",
+    "path": "/tools/nacos/nacos-exploit.jar",
+    "description": "Nacos 漏洞利用 v3.0.5",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "nacos未授权"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "jenkins",
+    "category": "重点系统漏洞工具",
+    "type": "JAVA8",
+    "path": "/tools/jenkins/JenkinsExploit.jar",
+    "description": "Jenkins 漏洞利用 GUI",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "jenkins漏洞"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "xxl-job",
+    "category": "重点系统漏洞工具",
+    "type": "JAVA8",
+    "path": "/tools/xxljob/xxl-job-attack.jar",
+    "description": "XXL-JOB 漏洞利用",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "xxljob"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 0.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "mysql",
+    "category": "数据库利用工具",
+    "type": "命令行",
+    "path": "mysql",
+    "description": "MySQL 客户端/综合利用",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "mysql连接"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 3.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "mssql",
+    "category": "数据库利用工具",
+    "type": "命令行",
+    "path": "/tools/sqlcmd/sqlcmd",
+    "description": "MSSQL 客户端",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "sqlserver",
+      "mssql"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 3.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "mongodb",
+    "category": "数据库利用工具",
+    "type": "命令行",
+    "path": "/tools/mongodb/mongosh",
+    "description": "MongoDB 未授权访问",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "mongodb未授权"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 4.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "oracle",
+    "category": "数据库利用工具",
+    "type": "命令行",
+    "path": "/tools/oracle/sqlplus.sh",
+    "description": "Oracle 数据库客户端",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "oracle连接"
+    ],
+    "example": "",
+    "params_pre": "",
+    "params": "",
+    "weight": 4.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "netexec",
+    "category": "内网渗透工具",
+    "type": "命令行",
+    "path": "/tools/_venv/bin/nxc",
+    "description": "内网认证/枚举（原 crackmapexec）",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "netexec",
+      "crackmapexec"
+    ],
+    "example": "nxc smb 10.0.0.0/24",
+    "params_pre": "",
+    "params": "",
+    "weight": 1.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "sliver",
+    "category": "后渗透工具",
+    "type": "命令行",
+    "path": "/tools/sliver/sliver-client",
+    "description": "Sliver 开源 C2",
+    "risk": "post-exploit",
+    "ai_callable": true,
+    "aliases": [
+      "sliverc2"
+    ],
+    "example": "sliver",
+    "params_pre": "",
+    "params": "",
+    "weight": 3.0,
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "dirsearch",
+    "category": "信息收集工具",
+    "type": "Python",
+    "path": "/tools/dirsearch/dirsearch.py",
+    "description": "Web 目录扫描（枷锁版）",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "dirsearch扫描"
+    ],
+    "example": "dirsearch -u http://target:8888 -e php,html,js -t 25",
+    "weight": 3.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "revshell",
+    "category": "后渗透工具",
+    "type": "Python",
+    "path": "/tools/revshell/revshell_generator.py",
+    "description": "反弹 Shell 命令生成（GUI，需图形界面）",
+    "risk": "post-exploit",
+    "ai_callable": false,
+    "aliases": [
+      "反弹shell"
+    ],
+    "example": "",
+    "weight": 2.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "jeecg",
+    "category": "重点系统漏洞工具",
+    "type": "JAVA8",
+    "path": "/tools/jeecg/jeecgExploitss.jar",
+    "description": "Jeecg-Boot 漏洞利用",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "jeecg"
+    ],
+    "example": "",
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "dbcombo",
+    "category": "数据库利用工具",
+    "type": "JAVA8",
+    "path": "/tools/dbcombo/DBUtil.jar",
+    "description": "数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG）",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "数据库综合"
+    ],
+    "example": "",
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "iwannagetall",
+    "category": "重点系统漏洞工具",
+    "type": "JAVA8",
+    "path": "/tools/iwannagetall/IWannaGetAll.jar",
+    "description": "OA 综合利用",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "oa综合利用"
+    ],
+    "example": "",
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "hyacinth",
+    "category": "重点系统漏洞工具",
+    "type": "JAVA8",
+    "path": "/tools/hyacinth/hyacinth.jar",
+    "description": "Java 综合利用 v2.0.2",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "java综合利用"
+    ],
+    "example": "",
+    "weight": 0.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "godzilla",
+    "category": "WebShell管理工具",
+    "type": "JAVA8",
+    "path": "/tools/godzilla/godzilla.jar",
+    "description": "哥斯拉 WebShell 管理（GUI）",
+    "risk": "post-exploit",
+    "ai_callable": false,
+    "aliases": [
+      "哥斯拉"
+    ],
+    "example": "",
+    "weight": 1.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "behinder",
+    "category": "WebShell管理工具",
+    "type": "JAVA8",
+    "path": "/tools/behinder/Behinder.jar",
+    "description": "冰蝎 WebShell 管理 v4.1（GUI）",
+    "risk": "post-exploit",
+    "ai_callable": false,
+    "aliases": [
+      "冰蝎"
+    ],
+    "example": "",
+    "weight": 1.0,
+    "params": "",
+    "params_pre": "",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "usql",
+    "category": "数据库利用工具",
+    "type": "命令行",
+    "path": "/tools/usql/usql",
+    "description": "通用 SQL 客户端：MySQL/PG/Oracle/MSSQL（替代 mysql/oracle 客户端）",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "usql",
+      "sql客户端"
+    ],
+    "weight": 4.0,
+    "params": "",
+    "params_pre": "",
+    "example": "usql mysql://user:pass@10.0.0.5:3306/db",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "jndi",
+    "category": "框架漏洞利用工具",
+    "type": "JAVA8",
+    "path": "/tools/jndi/JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar",
+    "description": "JNDI 注入利用服务：覆盖 fastjson 反序列化 / log4j2 RCE（替代 fastjson/log4j 工具）",
+    "risk": "exploit",
+    "ai_callable": true,
+    "aliases": [
+      "jndi",
+      "jndi-injection"
+    ],
+    "weight": 1.0,
+    "params": "",
+    "params_pre": "",
+    "example": "jndi -C 'touch /tmp/pwn' -A 10.0.0.5",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "zap",
+    "category": "漏洞扫描与利用工具",
+    "type": "命令行",
+    "path": "/tools/zap/zap-tianhu.sh",
+    "description": "OWASP ZAP 被动代理/自动化扫描（替代已停止公开分发的 xray）",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "zap",
+      "owaspzap"
+    ],
+    "weight": 1.0,
+    "params": "",
+    "params_pre": "",
+    "example": "zap.sh -cmd -quickurl http://target.com -quickout /tmp/zap.html",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "impacket",
+    "category": "内网渗透工具",
+    "type": "命令行",
+    "path": "/tools/_venv/bin/secretsdump.py",
+    "description": "impacket 协议攻击脚本集：secretsdump/psexec/smbclient/GetNPUsers 等（替代 NetExec）",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "impacket",
+      "secretsdump"
+    ],
+    "weight": 3.0,
+    "params": "",
+    "params_pre": "",
+    "example": "secretsdump.py domain/user:pass@10.0.0.5",
+    "url": "",
+    "tags": [],
+    "group": ""
+  },
+  {
+    "name": "exploitdb",
+    "category": "漏洞扫描与利用工具",
+    "type": "命令行",
+    "path": "/tools/exploitdb/searchsploit",
+    "description": "ExploitDB 本地漏洞库检索（searchsploit；配合 sliver/nuclei/impacket 覆盖 msf 用途）",
+    "risk": "passive",
+    "ai_callable": true,
+    "aliases": [
+      "exploitdb",
+      "searchsploit"
+    ],
+    "weight": 1.0,
+    "params": "",
+    "params_pre": "",
+    "example": "searchsploit apache 2.4",
+    "url": "",
+    "tags": [],
+    "group": ""
+  }
+]

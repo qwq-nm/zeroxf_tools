@@ -18,7 +18,11 @@ app.log
 config/.instance.lock
 config/shortcuts.ini
 config/settings.json
-config/tools.json
+
+# config/tools.json 故意不忽略：它是工具箱的核心工具清单（63 条），
+# 内容全是相对路径（nmap、/tools/xxx），不含任何本机信息。
+# 若把它排除，clone 下来的仓库就是个空壳——有代码有二进制，但界面里没有任何工具。
+
 agent.md
 AGENTS.md
 
