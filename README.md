@@ -81,6 +81,24 @@
 
 `geshell doctor` 会明确列出这些项，不会静默失败。
 
+### 两端的能力差异
+
+工具箱**本体**（provision 能自动装的部分）在 WSL 与 Windows 上完全一致——
+同一份代码、同一份 `config/tools.json`、同一套工具。差异只来自**系统级软件**
+和第三方分发策略：
+
+| 项目 | WSL / Linux | Windows |
+| --- | --- | --- |
+| 开源工具二进制 | ✅ 自动 | ✅ 自动 |
+| 便携 JDK | ✅ 8 / 11 / 17 | ✅ 8 / 11 |
+| GUI 运行时（PyQt6） | ✅ 自动 | ✅ 自动 |
+| `nmap` `hydra` `mysql` | `apt install` 即可 | ⚠️ **需手动安装** |
+| `metasploit` | 官方 installer | ⚠️ **需手动安装** |
+| `oracle`（sqlplus） | ✅ 自动（Linux 版有免登录直链） | ⚠️ **需 Oracle 账号**（官方只对登录用户提供 Windows 包） |
+
+实测就绪数：**WSL 54/56**、**Windows 51/56**（差异即上表后三行）。
+`geshell doctor` 会把缺的逐条列出并说明原因。
+
 ---
 
 ## 安装
