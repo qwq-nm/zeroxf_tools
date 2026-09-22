@@ -1003,11 +1003,20 @@ def provision_win_deps(force=False):
     if shutil.which("msfconsole") and not force:
         print("[已有] metasploit 已安装，跳过")
     else:
-        print("[下载] Metasploit 官方 MSI（约 700MB，静默安装）")
+        print("[下载] Metasploit 官方 MSI（约 380MB，静默安装）")
         msi = os.path.join(TOOLS_DIR, ".tmp_msf.msi")
         try:
             _download(METASPLOIT_MSI, msi)
+            # 必须从原始文件安装，且安装期间不能删除它——否则 MSI 会因
+            # 找不到安装源而报 1603（SOURCEMGMT: Failed to resolve source）。
             subprocess.check_call(["msiexec", "/i", msi, "/qn", "/norestart"])
+            if not shutil.which("msfconsole"):
+                # 实测部分环境下 msiexec 返回 0 但文件并未落地（MSI 日志里
+                # 是 1603 + Failed to resolve source），因此这里以结果为准判断
+                print("[提示] msiexec 已执行，但未检测到 msfconsole——")
+                print("       该 MSI 的静默安装在此环境不生效，请手动双击安装：")
+                print(f"       {METASPLOIT_MSI}")
+                ok = False
         except Exception as e:
             print(f"[失败] metasploit: {e}")
             ok = False
@@ -1126,7 +1135,7 @@ def main():
         provision_win_deps(force=args.force)
     # 只开 --jdk/--gui 时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）
     names = args.tools
-    if names is None and not (args.jdk or args.gui):
+    if names is None and not (args.jdk or args.gui or args.win_deps):
         names = list(SOURCES.keys())
     names = names or []
     placed_map = {}
