@@ -481,7 +481,12 @@ def provision_mongosh(force=False):
     if not force and os.path.exists(target):
         print("[已有] mongodb 已打包，跳过（--force 重新下载）")
         return [("mongodb", "mongosh")]
-    asset = f"mongosh-{MONGOSH_VERSION}-{PLAT}-x64.tgz"
+    # MongoDB 的命名规则与其他工具都不同：Windows 是 win32-x64.zip
+    # （不是 windows，也不是 .tgz），Linux/macOS 是 <plat>-x64.tgz
+    if PLAT == "windows":
+        asset = f"mongosh-{MONGOSH_VERSION}-win32-x64.zip"
+    else:
+        asset = f"mongosh-{MONGOSH_VERSION}-{PLAT}-x64.tgz"
     archive = os.path.join(TOOLS_DIR, f".tmp_{asset}")
     tmp_out = os.path.join(TOOLS_DIR, ".tmp_out_mongosh")
     try:
@@ -489,7 +494,7 @@ def provision_mongosh(force=False):
         _download(f"https://downloads.mongodb.com/compass/{asset}", archive)
         shutil.rmtree(tmp_out, ignore_errors=True)
         os.makedirs(tmp_out, exist_ok=True)
-        subprocess.check_call(["tar", "xzf", archive, "-C", tmp_out])
+        _extract(archive, tmp_out, _detect_extract(archive, "targz"))
         src = None
         for root, _, files in os.walk(tmp_out):
             if os.path.basename(root) == "bin" and "mongosh" + EXE in files:
