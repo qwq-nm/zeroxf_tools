@@ -114,9 +114,15 @@ cd zeroxf_tools
 python3 scripts/provision_tools.py --jdk    # 便携 JDK 8/11/17（12 个 jar 类工具需要）
 python3 scripts/provision_tools.py          # 全部工具二进制
 python3 scripts/provision_tools.py --gui    # GUI 运行时 PyQt6（用图形界面才装）
+
+# 仅 Windows：补装系统级工具（nmap / MySQL 客户端 / Metasploit）
+python scripts/provision_tools.py --win-deps
 ```
 
 Windows 下把 `python3` 换成 `python`。脚本会自动识别平台，拉取对应版本（Windows 拿 `.exe`，Linux 拿 ELF）。
+
+`--win-deps` 用 **winget**（Windows 10 1809+ 自带，无需另装包管理器）安装 nmap 与 MySQL 客户端，
+并用 Rapid7 官方 MSI 静默安装 Metasploit。
 
 ### 方式二：手动安装（逐个控制）
 
