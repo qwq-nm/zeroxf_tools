@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-mode con cols=94 lines=30&color 0a&title 创建天狐渗透工具箱-社区版V4.0一键启动脚本快捷方式
+mode con cols=94 lines=30&color 0a&title 创建zeroxf工具箱-社区版V4.0一键启动脚本快捷方式
 echo.
 echo One-Fox安全团队
 echo  官网：https://www.one-fox.cn/  
@@ -12,19 +12,19 @@ echo [+] 获得当前路径:%~dp0
 echo.
 
 :: 设置vbs文件和快捷方式名称
-set "path=%~dp0天狐渗透工具箱-社区版V4.0.vbs"
-set "LinkName=天狐渗透工具箱-社区版V4.0"
+set "path=%~dp0zeroxf工具箱-社区版V4.0.vbs"
+set "LinkName=zeroxf工具箱-社区版V4.0"
 
 :: 检查选择的vbs文件是否存在
 if exist "!path!" (
-    echo [+] 发现天狐渗透工具箱-社区版V4.0一键启动脚本!
+    echo [+] 发现zeroxf工具箱-社区版V4.0一键启动脚本!
     echo.
     echo [+] 启动脚本路径：
     echo [+] !path!
     echo.
     goto :creat
 ) else (
-    echo [-] 注意,未发现启动脚本天狐渗透工具箱-社区版V4.0.vbs，请注意是否改名,程序退出... 
+    echo [-] 注意,未发现启动脚本zeroxf工具箱-社区版V4.0.vbs，请注意是否改名,程序退出... 
     echo.
     pause
     exit /b
@@ -38,7 +38,7 @@ set Program=!path!
 rem 程序工作路径
 set WorkDir=%~dp0
 rem 设置快捷方式说明
-set Desc=天狐渗透工具箱-社区版V4.0一键启动_by.狐狸
+set Desc=zeroxf工具箱-社区版V4.0一键启动_by.狐狸
 rem 设置快捷方式图标
 set icon=%~dp0config\fox.ico
 
