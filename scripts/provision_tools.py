@@ -951,6 +951,74 @@ def provision_zap(force=False):
         _drop(archive, tmp_out)
 
 
+# Windows 端需要系统级安装的工具：(命令名, winget 包 ID)
+# winget 随 Windows 10 1809+ 自带，无需额外装包管理器。
+WINGET_PACKAGES = [
+    ("nmap", "Insecure.Nmap"),
+    ("mysql", "Oracle.MySQL"),
+]
+# Metasploit 官方 MSI（Rapid7），支持 /qn 静默安装；winget 源里没有它
+METASPLOIT_MSI = "https://windows.metasploit.com/metasploitframework-latest.msi"
+
+
+def provision_win_deps(force=False):
+    """Windows 端补装系统级命令行工具（nmap / MySQL 客户端 / Metasploit）。
+
+    这些不是「解压即用」的单文件，必须走系统安装：
+
+    - nmap、MySQL 客户端 → winget（Windows 10 1809+ 自带）
+    - Metasploit          → Rapid7 官方 MSI，用 msiexec /qn 静默安装
+
+    hydra 无法安装：它的原版只支持类 Unix，winget 源里同名的是游戏启动器，
+    第三方编译版来源不可靠。爆破需求可由 nmap 的 NSE brute 脚本覆盖
+    （装好 nmap 后即可用）：
+        nmap -p22 --script ssh-brute --script-args userdb=u.txt,passdb=p.txt TARGET
+    """
+    if PLAT != "windows":
+        print("[跳过] 系统依赖安装仅适用于 Windows")
+        return False
+    ok = True
+
+    # 1) winget 包
+    if shutil.which("winget"):
+        for cmd, pkg in WINGET_PACKAGES:
+            if shutil.which(cmd) and not force:
+                print(f"[已有] {cmd} 已在 PATH，跳过")
+                continue
+            print(f"[安装] {pkg}（winget，可能需要几分钟）")
+            try:
+                subprocess.check_call([
+                    "winget", "install", "--id", pkg, "-e",
+                    "--accept-package-agreements", "--accept-source-agreements",
+                    "--disable-interactivity",
+                ])
+            except Exception as e:
+                print(f"[失败] {pkg}: {e}")
+                ok = False
+    else:
+        print("[失败] 未找到 winget（需要 Windows 10 1809 及以上）")
+        ok = False
+
+    # 2) Metasploit（官方 MSI 静默安装，约 700 MB）
+    if shutil.which("msfconsole") and not force:
+        print("[已有] metasploit 已安装，跳过")
+    else:
+        print("[下载] Metasploit 官方 MSI（约 700MB，静默安装）")
+        msi = os.path.join(TOOLS_DIR, ".tmp_msf.msi")
+        try:
+            _download(METASPLOIT_MSI, msi)
+            subprocess.check_call(["msiexec", "/i", msi, "/qn", "/norestart"])
+        except Exception as e:
+            print(f"[失败] metasploit: {e}")
+            ok = False
+        finally:
+            _drop(msi)
+
+    print("[说明] hydra 无 Windows 官方版本，未安装；"
+          "爆破需求可用 nmap 的 NSE brute 脚本覆盖")
+    return ok
+
+
 def provision_gui(force=False):
     """安装 GUI 依赖（PyQt6）到 tools/_venv。
 
@@ -1044,6 +1112,8 @@ def main():
                     help="安装便携 JDK 8/11/17 到 Java_path/")
     ap.add_argument("--gui", action="store_true",
                     help="安装 GUI 依赖 PyQt6 到 tools/_venv（main.py/launcher.py 需要）")
+    ap.add_argument("--win-deps", action="store_true",
+                    help="Windows 端补装系统级工具：nmap / MySQL 客户端 / Metasploit")
     ap.add_argument("--force", action="store_true", help="已存在也重新下载")
     args = ap.parse_args()
 
@@ -1052,6 +1122,8 @@ def main():
         provision_jdk(force=args.force)
     if args.gui:
         provision_gui(force=args.force)
+    if args.win_deps:
+        provision_win_deps(force=args.force)
     # 只开 --jdk/--gui 时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）
     names = args.tools
     if names is None and not (args.jdk or args.gui):
