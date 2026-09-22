@@ -48,7 +48,16 @@ def _resolve_path(tool: Dict[str, Any], path: str) -> str:
     has_sep = ("/" in p) or ("\\" in p)
     is_abs = os.path.isabs(p) or (len(p) > 1 and p[1] == ":")
     if has_sep or is_abs:
-        return os.path.abspath(p)
+        ap = os.path.abspath(p)
+        # config/tools.json 是两端共用的一份配置，其中 path 按 Linux 命名书写
+        # （如 /tools/yasso/Yasso），而 Windows 上的实际文件带 .exe 后缀。
+        # 这里在 Windows 下做一次后缀补全，让同一份配置在两端都能用，
+        # 否则 Windows 端会满屏“入口不存在”。
+        if os.name == "nt" and not os.path.exists(ap):
+            for ext in (".exe", ".bat", ".cmd"):
+                if os.path.exists(ap + ext):
+                    return ap + ext
+        return ap
     return p
 
 
