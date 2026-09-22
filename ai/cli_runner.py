@@ -54,9 +54,19 @@ def _resolve_path(tool: Dict[str, Any], path: str) -> str:
         # 这里在 Windows 下做一次后缀补全，让同一份配置在两端都能用，
         # 否则 Windows 端会满屏“入口不存在”。
         if os.name == "nt" and not os.path.exists(ap):
+            # (a) 工具自身带 .exe 后缀（tools.json 里按 Linux 习惯没写后缀）
             for ext in (".exe", ".bat", ".cmd"):
                 if os.path.exists(ap + ext):
                     return ap + ext
+            # (b) Python venv 的目录布局两平台不同：Linux 是 bin/，Windows 是 Scripts/
+            #     （netexec 的 nxc、impacket 的 secretsdump.py 都属于这种）
+            alt = ap.replace("\\bin\\", "\\Scripts\\").replace("/bin/", "/Scripts/")
+            if alt != ap:
+                if os.path.exists(alt):
+                    return alt
+                for ext in (".exe", ".py", ".bat", ".cmd"):
+                    if os.path.exists(alt + ext):
+                        return alt + ext
         return ap
     return p
 
