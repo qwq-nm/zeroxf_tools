@@ -205,6 +205,30 @@ def _download(url, dest, retries=5):
     raise last
 
 
+def _ensure_7z(dest_path):
+    """确保 7-Zip 命令行工具就位。
+
+    hashcat 的发行包用 BCJ2 过滤器压缩，py7zr 明确不支持
+    （报 UnsupportedCompressionMethodError）。Linux 侧通常已随仓库带
+    .buildtools/7zz；Windows 侧首次使用时自动拉取独立的 7zr.exe。
+    下载失败则返回 False，调用方回退 py7zr（hashcat 会安装失败，但不影响其他工具）。
+    """
+    if os.path.exists(dest_path):
+        return True
+    if os.name != "nt":
+        return False        # Linux/macOS 走 .buildtools/7zz
+    try:
+        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+        print("[提示] 需要 7-Zip 命令行工具，正在拉取 7zr.exe")
+        _download("https://www.7-zip.org/a/7zr.exe", dest_path)
+        if os.path.exists(dest_path):
+            print("[完成] 7zr.exe 就位")
+            return True
+    except Exception as e:
+        print(f"[提示] 7zr.exe 获取失败（{e}），将回退 py7zr")
+    return False
+
+
 def _detect_extract(path, declared):
     """按文件魔数推断真正的打包格式，优先于 spec 里声明的 extract。
 
@@ -243,9 +267,12 @@ def _extract(archive, dest_dir, extract):
     elif extract == "tarbz2":
         subprocess.check_call(["tar", "xjf", archive, "-C", dest_dir])
     elif extract == "7z":
-        # 7z 解压：优先用自带 7-Zip 二进制（支持 BCJ2），否则 py7zr
+        # 7z 解压：优先用 7-Zip 二进制（支持 BCJ2），否则回退 py7zr。
+        # hashcat 的包用了 BCJ2 过滤器，而 py7zr 明确不支持，Windows 端必须靠 7zr.exe。
         seven_zip = os.path.join(BASE_DIR, ".buildtools",
-                                 "7zz" if os.name != "nt" else "7z.exe")
+                                 "7zz" if os.name != "nt" else "7zr.exe")
+        if not os.path.exists(seven_zip):
+            _ensure_7z(seven_zip)
         if os.path.exists(seven_zip):
             subprocess.check_call([seven_zip, "x", archive, f"-o{dest_dir}", "-y"])
             return
@@ -873,7 +900,11 @@ def main():
     }
     for name in names:
         if name in special:
-            r = special[name]()
+            try:
+                r = special[name]()
+            except Exception as e:
+                print(f"[失败] {name}: {type(e).__name__}: {e}")
+                continue
             if r:
                 placed_map[name] = r[0]
             continue
@@ -884,7 +915,13 @@ def main():
         if not args.force and _already_present(spec, name):
             print(f"[已有] {name} 已打包，跳过（--force 重新下载）")
             continue
-        r = provision_github(name, spec)
+        try:
+            r = provision_github(name, spec)
+        except Exception as e:
+            # 单个工具失败不应中断整批安装：网络中断、解压格式不支持
+            # （如 hashcat 的 7z 用了 py7zr 不认的 BCJ2 过滤器）都可能发生
+            print(f"[失败] {name}: {type(e).__name__}: {e}")
+            continue
         if not r:
             continue
         if spec.get("binaries"):
