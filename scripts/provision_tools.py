@@ -200,6 +200,13 @@ def _download(url, dest, retries=5):
                 raise IOError(f"下载不完整 {done} 字节")
             return
         except Exception as e:
+            # 416 = Range 越界：本地残留文件已完整（或比远端大），删掉让下次全量重下
+            if isinstance(e, urllib.error.HTTPError) and e.code == 416 and os.path.exists(dest):
+                try:
+                    os.remove(dest)
+                    print("[重试] 416 Range 越界，已清除本地残留改为全量下载", flush=True)
+                except OSError:
+                    pass
             last = e
             print(f"[重试] {attempt}/{retries} 失败: {e}", flush=True)
     raise last
@@ -317,11 +324,13 @@ def provision_github(name, spec):
         return None
     url = f"https://github.com/{repo}/releases/latest/download/{asset}"
     archive = os.path.join(TOOLS_DIR, f".tmp_{asset}")
+    # tmp_out 必须定义在 try 之外：下载失败时 finally 仍会遍历它清理，
+    # 若留在 try 内会抛 UnboundLocalError，把真实的下载错误盖掉。
+    tmp_out = os.path.join(TOOLS_DIR, f".tmp_out_{spec['subdir']}")
     try:
         print(f"[下载] {name} ← {asset}")
         _download(url, archive)
         subdir = os.path.join(TOOLS_DIR, spec["subdir"])
-        tmp_out = os.path.join(TOOLS_DIR, f".tmp_out_{spec['subdir']}")
         shutil.rmtree(tmp_out, ignore_errors=True)
         # 以实际文件魔数为准：同一仓库的 Linux/Windows 资产打包格式可能不同
         # （chisel 是 .gz vs .zip；ffuf/frp/gobuster 等是 .tar.gz vs .zip）
