@@ -143,9 +143,18 @@ python3 scripts/setup_burp.py
 | 开源工具二进制 | ✅ 自动 | ✅ 自动 |
 | 便携 JDK | ✅ 8 / 11 / 17 | ✅ 8 / 11 |
 | GUI 运行时（PyQt6） | ✅ 自动 | ✅ 自动 |
-| `nmap` `hydra` `mysql` | `apt install` 即可 | ⚠️ **需手动安装** |
-| `metasploit` | 官方 installer | ⚠️ **需手动安装** |
+| `nmap` `mysql` | `apt install` 即可 | `python scripts/provision_tools.py --win-deps`（winget 自动装）|
+| **`hydra`** | ✅ `apt install hydra` | ❌ **装不了 —— Windows 无官方版本** |
+| `metasploit` | 官方 installer | ⚠️ 官方 MSI 的静默安装实测不生效，建议手动双击 |
 | `oracle`（sqlplus） | ✅ 自动（Linux 版有免登录直链） | ⚠️ **需 Oracle 账号**（官方只对登录用户提供 Windows 包） |
+
+> **`hydra` 的特别说明**：它**只有类 Unix 版本**，官方从未发布 Windows 构建。
+> winget 源里搜到的 `HydraLauncher.Hydra` 是**游戏启动器**，与渗透工具无关。
+> 因此本工具箱**只在 Linux/WSL 侧配置 hydra**，Windows 端不提供，`doctor` 会如实报缺失。
+> Windows 上需要爆破能力时，可用 **nmap 的 NSE brute 脚本**覆盖：
+> ```bash
+> nmap -p22 --script ssh-brute --script-args userdb=u.txt,passdb=p.txt TARGET
+> ```
 
 实测就绪数：**WSL 54/56**、**Windows 51/56**（差异即上表后三行）。
 `geshell doctor` 会把缺的逐条列出并说明原因。

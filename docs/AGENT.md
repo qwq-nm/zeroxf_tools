@@ -187,6 +187,7 @@ tools/_venv/bin/python main.py
 | Burp 双击**毫无反应**（非崩溃） | PATH 里是旧 JDK（如 8），而 Burp 2026.x 需要 **21+** | `python3 scripts/setup_burp.py`（自动注入正确 JDK）|
 | Burp MCP 连接返回 **403** | Host 校验：只接受 `Host: 127.0.0.1:9876` | 用 Windows 侧 java 跑 proxy，见 §3.6 |
 | Burp MCP 的 `Enabled` 打开后仍显示 **Disabled** | 社区版不支持 AI 功能（授权限制）| 需 Professional 版，见 §3.6——不要再尝试调配置 |
+| `hydra` 报缺失（**仅 Windows 端**）| **Windows 无官方版本**，装不了 | 正常现象，**不要尝试安装**（winget 里的同名包是游戏启动器）。爆破需求用 nmap 的 NSE brute 脚本：`nmap -p22 --script ssh-brute ...` |
 
 > `netexec` 的补充：它是 PyPI 上无发行包的包，需从 GitHub 装，且其构建依赖 `poetry-dynamic-versioning` 会读取 git 元数据——用源码 tarball 安装时需绕过：`POETRY_DYNAMIC_VERSIONING_BYPASS=0.0.0 pip install <tarball>`。
 
@@ -198,7 +199,12 @@ tools/_venv/bin/python main.py
 
 1. **平台信息** —— 在哪装的（WSL / Windows / 双端）、Python 版本
 2. **工具就绪数** —— 例如 `56 个 AI 可调用工具中 54 个依赖就绪`
-3. **仍缺失的项及原因** —— 明确区分「不可得」（商业软件/无公开源）与「安装失败」
+3. **仍缺失的项及原因** —— 明确区分「不可得」（商业软件 / 无公开源）与「安装失败」。
+   几个**预期内、不要试图修复**的缺失：
+   - `hydra`（Windows 端）：无官方 Windows 版本
+   - `oracle`（Windows 端）：Oracle 只对登录用户提供 Windows 包
+   - `fastjson` / `log4j`（两端）：jar 为第三方专属命名，无公开源；功能由 `jndi` 覆盖
+   - `CobaltStrike` / `BurpSuite` / `蚁剑`：商业或需自备（Burp 见 §3.6）
 4. **验证结果** —— `doctor` / `selftest` / MCP / GUI 各自的结论
 5. **使用入口** —— 告诉用户怎么启动（GUI 双击什么、CLI 敲什么、MCP 怎么注册）
 
