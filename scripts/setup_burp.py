@@ -44,7 +44,7 @@ def _c(text, code):
 
 
 # 刻意只用 ASCII 标记：Windows 的 CMD 默认 GBK 编码，
-# 直接用 ✓/✗ 这类字符会抛 UnicodeEncodeError 让脚本崩掉。
+# 直接用 Unicode 的对勾/叉号会抛 UnicodeEncodeError，让脚本第一步就崩。
 def ok(msg):    print(_c("  [OK] ", "32") + msg)
 def warn(msg):  print(_c("  [!]  ", "33") + msg)
 def bad(msg):   print(_c("  [X]  ", "31") + msg)
