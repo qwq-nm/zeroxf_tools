@@ -23,10 +23,13 @@
 git clone https://github.com/qwq-nm/zeroxf_tools.git
 cd zeroxf_tools
 
-python3 scripts/provision_tools.py --jdk    # 便携 JDK（12 个 jar 类工具需要）
-python3 scripts/provision_tools.py          # 全部工具二进制
+python3 scripts/provision_tools.py --jdk    # 便携 JDK（14 个 jar 类工具需要）
+python3 scripts/provision_tools.py          # 全部工具二进制（含 jar 包，约 4.1 GB）
 python3 scripts/provision_tools.py --gui    # GUI 运行时（用界面才需要）
 ```
+
+> 不想一次拉 632 MB 的 jar 包时，用 `--tools` 挑具体工具即可（不带 `--tools`
+> 的全量安装才会顺带还原 jar 包）。
 
 Windows 下把 `python3` 换成 `python`。
 
@@ -42,6 +45,12 @@ cd zeroxf_tools
 ```
 
 仓库里**只有代码和工具注册表**（`config/tools.json`）。工具二进制、JDK、GUI 运行时都不入库——它们体积大、且分平台，由安装脚本按需拉取。
+
+> ⚠️ 注意 `tools/*` 在 `.gitignore` 里是**默认忽略**的，只有几个「仓库自带源码」目录例外
+> （`oracle-py` / `revshell` / `sstikit` / `springkit` / `tomcatscanpro` / `dedecmscan` /
+> `rediskit` / `ruoyikit` / `avoidkilling` / `docem` / `dirsearch`）。这些是天狐原创脚本，
+> 没有任何下载源，**必须靠 git 分发**。若你自定义了 `.gitignore`，别把它们一起挡掉——
+> 否则界面里有卡片、一点就报路径不存在。
 
 ### 2. 安装工具二进制
 
@@ -67,7 +76,33 @@ python3 scripts/provision_tools.py --force            # 已存在也重新下载
 python3 scripts/provision_tools.py --tools <失败的工具名>
 ```
 
-### 3. 安装便携 JDK
+### 3. 安装 jar 类工具
+
+```bash
+python3 scripts/provision_tools.py --jars     # 单独安装 / 补齐
+python3 scripts/provision_tools.py --jars --force   # 重新下载并覆盖
+```
+
+这 14 个工具（`shiro` `struts2` `weblogic` `thinkphp` `nacos` `jenkins` `xxl-job`
+`jeecg` `dbcombo` `iwannagetall` `hyacinth` `godzilla` `behinder` `heapdump`）
+的 jar 都是**第三方作者作品，没有公开下载源**，provision 没法逐个从上游拉。
+
+它们合计 **632 MB**，其中 `weblogic`(130 MB)、`iwannagetall`(180 MB)、
+`behinder`(126 MB) 单个就**超过 GitHub 单文件 100 MB 的硬限制**，因此不能入 git。
+工具箱把它们打包成一个 Release 资产分发：
+
+| 项目 | 值 |
+| --- | --- |
+| 资产 | `zeroxf-jar-tools-v1.tar.gz`（约 584 MB） |
+| 位置 | 本仓库 Releases → tag `jar-tools-v1` |
+| 缓存 | 下载后留在 `.buildtools/`（已 gitignore），重跑直接复用 |
+
+脚本只解**缺失**的 jar，已存在的不覆盖（除非 `--force`）。包内路径会做目录穿越校验。
+
+**手动安装**（脚本走不通时）：直接下载该资产解包，把 `tools/` 目录覆盖到仓库根目录即可，
+结构与仓库一致（`tools/<工具名>/<jar>`）。包内 `MANIFEST.txt` 列了各 jar 的 sha256。
+
+### 4. 安装便携 JDK
 
 ```bash
 python3 scripts/provision_tools.py --jdk
@@ -85,7 +120,7 @@ python3 scripts/provision_tools.py --jdk
 
 装在工具箱内部，**不需要系统装 Java**，也不污染系统 PATH。
 
-### 4. 安装 GUI 运行时
+### 5. 安装 GUI 运行时
 
 ```bash
 python3 scripts/provision_tools.py --gui

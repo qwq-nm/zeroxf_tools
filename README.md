@@ -1,9 +1,9 @@
 # zeroxf 工具箱 · AI 版
 
-**一个既给人用、也给 AI 用的渗透测试工具箱**——63 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
+**一个既给人用、也给 AI 用的渗透测试工具箱**——64 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
 
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20WSL%2FLinux-blue)](#安装)
-[![Tools](https://img.shields.io/badge/tools-63%20(%E5%85%B6%E4%B8%AD56%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
+[![Tools](https://img.shields.io/badge/tools-64%20(%E5%85%B6%E4%B8%AD58%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-ready-purple)](#mcp-ai-调用)
 
@@ -37,7 +37,7 @@
 
 ## 亮点
 
-- **63 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **56 个可被 AI 直接调用**
+- **64 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **58 个可被 AI 直接调用**
 - **三套入口，一份配置** —— GUI 里能点的，CLI 和 MCP 里都能调，不会出现"界面有、命令行没有"的割裂
 - **依赖自动装配** —— `provision_tools.py` 一条命令拉齐全部工具二进制、便携 JDK、GUI 运行时，自动适配 Windows / Linux / macOS
 - **零环境依赖的 JDK 方案** —— 内置便携 JDK 8/11/17（8 与 11 为 Liberica full 版，内含 JavaFX），12 个 jar 类工具无需系统装 Java
@@ -50,7 +50,7 @@
 
 ## 集成的工具
 
-**共 63 个**（56 个 AI 可直接调用），按 9 大类组织：
+**共 64 个**（58 个 AI 可直接调用），按 9 大类组织：
 
 | 分类 | 数量 | 代表工具 |
 | --- | ---: | --- |
@@ -80,6 +80,24 @@
 | `CobaltStrike` `BurpSuite` `蚁剑` | 商业软件 / 需自备 | 保留条目，装入后即可用；`Sliver`（`sliver` 命令）与 `ZAP` 分别是 CS / Burp 的开源等价物 |
 
 `geshell doctor` 会明确列出这些项，不会静默失败。
+
+### jar 类工具为什么走 Release 而不是 git
+
+14 个 Java 利用/管理工具（`shiro` `struts2` `weblogic` `thinkphp` `nacos` `jenkins`
+`xxl-job` `jeecg` `dbcombo` `iwannagetall` `hyacinth` `godzilla` `behinder` `heapdump`）
+的 jar 是第三方作者作品，**没有公开下载源**，脚本无法逐个从上游拉取。
+
+它们合计 **632 MB**，其中 `weblogic`(130 MB)、`iwannagetall`(180 MB)、`behinder`(126 MB)
+单个就超过 **GitHub 单文件 100 MB 的硬限制**——直接 `git add` 会被服务器拒收。因此统一
+打包成 Release 资产：
+
+```bash
+python3 scripts/provision_tools.py --jars     # 下载 584 MB 并还原
+```
+
+脚本只解缺失的 jar（已存在的跳过），包内路径做目录穿越校验；下载走断点续传，
+缓存留在 `.buildtools/`。手动安装就直接下该 Release 资产、把里面的 `tools/`
+覆盖到仓库根目录（`MANIFEST.txt` 列了各 jar 的 sha256）。
 
 ### Burp Suite：一键接入 MCP
 
@@ -145,7 +163,7 @@ python3 scripts/setup_burp.py
 | GUI 运行时（PyQt6） | ✅ 自动 | ✅ 自动 |
 | `nmap` `mysql` | `apt install` 即可 | `python scripts/provision_tools.py --win-deps`（winget 自动装）|
 | **`hydra`** | ✅ `apt install hydra` | ❌ **装不了 —— Windows 无官方版本** |
-| `metasploit` | 官方 installer | ⚠️ 官方 MSI 的静默安装实测不生效，建议手动双击 |
+| `metasploit` | 官方 installer | ✅ 手动装（官方 MSI 的静默安装实测不生效，见下方说明）|
 | `oracle`（sqlplus） | ✅ 自动（Linux 版有免登录直链） | ⚠️ 需 Oracle 账号（官方只对登录用户提供 Windows 包）|
 | **`oracle-py`** | ✅ 自动 | ✅ 自动 —— **Windows 端的 Oracle 替代** |
 
@@ -165,8 +183,25 @@ python3 scripts/setup_burp.py
 > nmap -p22 --script ssh-brute --script-args userdb=u.txt,passdb=p.txt TARGET
 > ```
 
-实测就绪数：**WSL 54/56**、**Windows 51/56**（差异即上表后三行）。
-`geshell doctor` 会把缺的逐条列出并说明原因。
+> **`metasploit` 与 `mysql` 的 Windows 安装**：两者都要**刷新 PATH 才生效**。
+> winget 装的 MySQL 不会自己建 shim，Metasploit 的 MSI 静默安装实测多次失败
+> （`1603`），手动双击装到 `D:\metasploit-framework` 即可用。
+> 装完记得把各自的 `bin` 目录加进 PATH——**已经打开的终端不会自动看到新 PATH**，
+> 必须重开一个窗口，否则 `geshell doctor` 仍会报缺失。
+
+实测就绪数（用各自平台真实的 PATH 量，不从 WSL 侧跨环境做数）：
+
+| 平台 | 就绪 | 缺失 |
+| --- | --- | --- |
+| **WSL / Linux** | **56/58** | `fastjson` `log4j` |
+| **Windows** | **54/58** | `fastjson` `log4j` `hydra` `oracle` |
+
+差异只有两条：`hydra`（Windows 无官方版本）、`oracle`（需 Oracle 账号，
+Windows 端用 `oracle-py` 替代）。`geshell doctor` 会把缺的逐条列出并说明原因。
+
+> ⚠️ 从 WSL 里调用 Windows 的 python 做检查会得到偏低的数字——那个进程继承的是
+> WSL 侧的 PATH 快照，看不到 Windows 后来加的 PATH。要在 Windows 上量，
+> 就在 Windows 的终端里跑，或显式用注册表里的 PATH。
 
 ---
 
@@ -180,13 +215,17 @@ clone 之后，仓库里**只有代码**——工具二进制、JDK、GUI 运行
 git clone https://github.com/qwq-nm/zeroxf_tools.git
 cd zeroxf_tools
 
-python3 scripts/provision_tools.py --jdk    # 便携 JDK 8/11/17（12 个 jar 类工具需要）
-python3 scripts/provision_tools.py          # 全部工具二进制
+python3 scripts/provision_tools.py --jdk    # 便携 JDK 8/11/17（14 个 jar 类工具需要）
+python3 scripts/provision_tools.py          # 全部工具二进制 + jar 包
 python3 scripts/provision_tools.py --gui    # GUI 运行时 PyQt6（用图形界面才装）
 
 # 仅 Windows：补装系统级工具（nmap / MySQL 客户端 / Metasploit）
 python scripts/provision_tools.py --win-deps
 ```
+
+> **jar 包单独装**：不带 `--tools` 的全量安装会顺带还原 14 个 jar 类工具
+> （从本仓库 Release 下载 584 MB）。想跳过就用 `--tools` 指定具体工具，
+> 或事后单独跑 `python3 scripts/provision_tools.py --jars`。
 
 Windows 下把 `python3` 换成 `python`。脚本会自动识别平台，拉取对应版本（Windows 拿 `.exe`，Linux 拿 ELF）。
 
@@ -239,7 +278,7 @@ python3 scripts/provision_tools.py --help                        # 查看全部�
 
 ### MCP（AI 调用）
 
-`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 56 个可调用工具暴露为 `tool_<名称>`：
+`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 58 个可调用工具暴露为 `tool_<名称>`：
 
 在 `~/.claude.json` 的 `mcpServers` 段加入：
 
