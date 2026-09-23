@@ -106,7 +106,7 @@ geshell <工具名> [参数...]
 
 ### arl（arl）
 
-- 说明：ARL 灯塔资产管理平台 Web 控制台
+- 说明：ARL 灯塔资产管理平台 Web 控制台入口（指向本机 localhost:5003，需另行部署）
 - 风险：passive
 - 参数模式：passthrough
 
@@ -466,7 +466,7 @@ geshell <工具名> [参数...]
 
 ### cobaltstrike4.9（cobaltstrike4.9）
 
-- 说明：CobaltStrike 4.9 红队 C2 平台
+- 说明：C2 平台（商业软件，GUI，需自备）。AI 可用的开源 C2 是 sliver
 - 风险：post-exploit
 - 参数模式：passthrough
 - 别名：cs, cobaltstrike
@@ -499,7 +499,7 @@ geshell <工具名> [参数...]
 
 ### BurpSuite（burpsuite）
 
-- 说明：Burp Suite 抓包代理（GUI）
+- 说明：抓包代理（GUI）。AI 接口走 PortSwigger 官方 MCP 扩展而非 CLI（装法见 scripts/setup_burp.py，需 Professional 版）
 - 风险：passive
 - 参数模式：passthrough
 - 别名：burp
@@ -508,21 +508,21 @@ geshell <工具名> [参数...]
 
 ### 蚁剑（antsword）
 
-- 说明：AntSword WebShell 管理（GUI）
+- 说明：蚁剑 WebShell 管理（GUI，无 CLI 接口）
 - 风险：post-exploit
 - 参数模式：passthrough
 - 别名：antsword
 
 ### godzilla（godzilla）
 
-- 说明：哥斯拉 WebShell 管理（GUI）
+- 说明：哥斯拉 WebShell 管理（GUI，无 CLI 接口）。生成免杀 WebShell 用 avoidkilling（AI 可调用）
 - 风险：post-exploit
 - 参数模式：passthrough
 - 别名：哥斯拉
 
 ### behinder（behinder）
 
-- 说明：冰蝎 WebShell 管理 v4.1（GUI）
+- 说明：冰蝎 WebShell 管理 v4.1（GUI，无 CLI 接口）。生成免杀 WebShell 用 avoidkilling（AI 可调用）
 - 风险：post-exploit
 - 参数模式：passthrough
 - 别名：冰蝎

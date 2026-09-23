@@ -80,7 +80,7 @@
     "category": "信息收集工具",
     "type": "网页",
     "url": "http://localhost:5003",
-    "description": "ARL 灯塔资产管理平台 Web 控制台",
+    "description": "ARL 灯塔资产管理平台 Web 控制台入口（指向本机 localhost:5003，需另行部署）",
     "risk": "passive",
     "ai_callable": false,
     "weight": 0.0,
@@ -463,7 +463,7 @@
     "category": "后渗透工具",
     "type": "GUI应用",
     "path": "/tools/CobaltStrike4.9/teamserver.bat",
-    "description": "CobaltStrike 4.9 红队 C2 平台",
+    "description": "C2 平台（商业软件，GUI，需自备）。AI 可用的开源 C2 是 sliver",
     "risk": "post-exploit",
     "ai_callable": false,
     "aliases": [
@@ -520,7 +520,7 @@
     "category": "抓包与代理工具",
     "type": "GUI应用",
     "path": "/tools/BurpSuite/BurpSuite.bat",
-    "description": "Burp Suite 抓包代理（GUI）",
+    "description": "抓包代理（GUI）。AI 接口走 PortSwigger 官方 MCP 扩展而非 CLI（装法见 scripts/setup_burp.py，需 Professional 版）",
     "risk": "passive",
     "ai_callable": false,
     "aliases": [
@@ -538,7 +538,7 @@
     "category": "WebShell管理工具",
     "type": "GUI应用",
     "path": "/tools/AntSword/antSword.exe",
-    "description": "AntSword WebShell 管理（GUI）",
+    "description": "蚁剑 WebShell 管理（GUI，无 CLI 接口）",
     "risk": "post-exploit",
     "ai_callable": false,
     "aliases": [
@@ -987,7 +987,7 @@
       "反弹shell生成"
     ],
     "example": "revshell 10.0.0.5 -p 4444 -l Netcat -v reverse_e",
-    "weight": 4.0,
+    "weight": 5.0,
     "params": "",
     "params_pre": "",
     "url": "",
@@ -1075,7 +1075,7 @@
     "category": "WebShell管理工具",
     "type": "JAVA8",
     "path": "/tools/godzilla/godzilla.jar",
-    "description": "哥斯拉 WebShell 管理（GUI）",
+    "description": "哥斯拉 WebShell 管理（GUI，无 CLI 接口）。生成免杀 WebShell 用 avoidkilling（AI 可调用）",
     "risk": "post-exploit",
     "ai_callable": false,
     "aliases": [
@@ -1094,7 +1094,7 @@
     "category": "WebShell管理工具",
     "type": "JAVA8",
     "path": "/tools/behinder/Behinder.jar",
-    "description": "冰蝎 WebShell 管理 v4.1（GUI）",
+    "description": "冰蝎 WebShell 管理 v4.1（GUI，无 CLI 接口）。生成免杀 WebShell 用 avoidkilling（AI 可调用）",
     "risk": "post-exploit",
     "ai_callable": false,
     "aliases": [
