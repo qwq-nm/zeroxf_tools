@@ -207,6 +207,35 @@ Windows 端用 `oracle-py` 替代）。`geshell doctor` 会把缺的逐条列出
 
 ## 安装
 
+### 先搞清楚：64 个工具分别从哪来
+
+工具箱的获取方式**不是一种而是四种**，因为它们性质不同：
+
+| # | 来源 | 数量 | 装法 |
+| --- | ---: | ---: | --- |
+| a | **随 git 分发** | 11 | clone 即有，无需操作 |
+| b | **provision 自动下载** | 32 | `python3 scripts/provision_tools.py` |
+| c | **Release 资产** | 14 | `python3 scripts/provision_tools.py --jars` |
+| d | **需自备 / 无公开源** | 7 | 见下方说明，`doctor` 会如实报缺失 |
+
+<details>
+<summary>展开看每一类具体是哪些</summary>
+
+- **a. 随 git 分发（11）** —— 天狐原创的 Python 脚本与手写 CLI，没有任何下载源，
+  只能入库：`ssti` `spring` `tomcat` `dedecmscan` `redis` `ruoyi` `avoidkilling`
+  `docem` `dirsearch` `revshell` `oracle-py`
+  > ⚠️ 这几个目录在 `.gitignore` 里是 `tools/*` 的**例外**。改 gitignore 时别把它们
+  > 一起挡掉——否则 clone 下来界面有卡片、一点就报路径不存在。
+- **b. provision 自动下载（32）** —— 有官方 release 的开源工具（`nuclei` `httpx`
+  `ffuf` `fscan` … `zap` `impacket` `sqlmap`）。按平台自动选资产：Windows 拿 `.exe`，
+  Linux 拿 ELF。
+- **c. Release 资产（14）** —— 第三方 Java 利用/管理工具的 jar，无公开源且体积大
+  （3 个超 GitHub 100 MB 限制），打成 `zeroxf-jar-tools-v1.tar.gz` 随 Release 分发。
+- **d. 需自备（7）** —— `CobaltStrike` `BurpSuite` `蚁剑`（商业/需自备）、
+  `fastjson` `log4j`（专用 jar 无公开源，功能由 `jndi` 覆盖）、`hydra`（仅 Linux）。
+
+</details>
+
 ### 方式一：一键初始化（推荐）
 
 clone 之后，仓库里**只有代码**——工具二进制、JDK、GUI 运行时都不入库，需要按需拉取：
