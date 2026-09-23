@@ -43,10 +43,12 @@ def _c(text, code):
     return f"\033[{code}m{text}\033[0m" if sys.stdout.isatty() else text
 
 
-def ok(msg):    print(_c("  ✓ ", "32") + msg)
-def warn(msg):  print(_c("  ! ", "33") + msg)
-def bad(msg):   print(_c("  ✗ ", "31") + msg)
-def info(msg):  print("    " + msg)
+# 刻意只用 ASCII 标记：Windows 的 CMD 默认 GBK 编码，
+# 直接用 ✓/✗ 这类字符会抛 UnicodeEncodeError 让脚本崩掉。
+def ok(msg):    print(_c("  [OK] ", "32") + msg)
+def warn(msg):  print(_c("  [!]  ", "33") + msg)
+def bad(msg):   print(_c("  [X]  ", "31") + msg)
+def info(msg):  print("       " + msg)
 
 
 # ---------- 路径工具 ----------
