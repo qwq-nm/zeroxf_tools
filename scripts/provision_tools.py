@@ -14,6 +14,7 @@
 - --jdk 安装便携 Liberica JDK 8/11/17 到 Java_path/，8 与 11 为 full 版（含 JavaFX），
   供 12 个 jar 类工具使用，无需系统 java。
 - --gui 安装 PyQt6 到 tools/_venv，供 main.py/launcher.py 的图形界面使用。
+- --jars 还原 14 个 jar 类工具（632 MB，随本仓库的 GitHub Release 分发，见 provision_jars）。
 - CobaltStrike/Burp/蚁剑等商业或 GUI 工具不在表内，保持原样，doctor 会提示。
 - 同一脚本在 Windows 上重跑一次即可拉取 .exe 版本。
 """
@@ -24,6 +25,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tarfile
 import urllib.request
 import zipfile
 
@@ -1128,6 +1130,95 @@ def provision_searchsploit(force=False):
         return None
 
 
+# jar 类工具：14 个 Java 利用/管理工具的 jar，全部来自天狐工具箱 V4.0 原始发行包。
+# 它们是第三方作者的作品，没有任何公开下载源，provision 无法逐个拉取；
+# 合计 632 MB，其中 weblogic(130MB) / iwannagetall(180MB) / behinder(126MB)
+# 单个就超过 GitHub 单文件 100 MB 的硬限制，因此不能入 git ——
+# 统一打包成 Release 资产分发，由本函数下载还原。
+JAR_BUNDLE_TAG = "jar-tools-v1"
+JAR_BUNDLE_FILE = "zeroxf-jar-tools-v1.tar.gz"
+JAR_BUNDLE_URL = ("https://github.com/qwq-nm/zeroxf_tools/releases/download/"
+                  f"{JAR_BUNDLE_TAG}/{JAR_BUNDLE_FILE}")
+
+JAR_TOOLS = {
+    "shiro":        "shiro/shiro_attack.jar",
+    "struts2":      "struts2/struts2_exp.jar",
+    "weblogic":     "weblogic/WeblogicTool.jar",
+    "thinkphp":     "thinkphp/ThinkphpGUI.jar",
+    "nacos":        "nacos/nacos-exploit.jar",
+    "jenkins":      "jenkins/JenkinsExploit.jar",
+    "xxl-job":      "xxljob/xxl-job-attack.jar",
+    "jeecg":        "jeecg/jeecgExploitss.jar",
+    "dbcombo":      "dbcombo/DBUtil.jar",
+    "iwannagetall": "iwannagetall/IWannaGetAll.jar",
+    "hyacinth":     "hyacinth/hyacinth.jar",
+    "godzilla":     "godzilla/godzilla.jar",
+    "behinder":     "behinder/Behinder.jar",
+    "heapdump":     "heapdump/JDumpSpider.jar",
+}
+
+
+def provision_jars(force=False):
+    """下载并还原 14 个 jar 类工具。
+
+    返回已就位的工具名列表。整体是一个 584 MB 的 tar.gz，下载走 _download
+    （支持断点续传），解包用 tarfile 而非系统 tar —— Windows 上不必依赖
+    tar.exe 是否存在，也方便逐条做路径校验。
+    """
+    def dest_of(rel):
+        return os.path.join(TOOLS_DIR, rel.replace("/", os.sep))
+
+    missing = [n for n, rel in JAR_TOOLS.items()
+               if force or not os.path.exists(dest_of(rel))]
+    if not missing:
+        print(f"[已有] jar 类工具 {len(JAR_TOOLS)} 个已就位，跳过"
+              f"（--force 重新下载解包）")
+        return sorted(JAR_TOOLS)
+
+    print(f"[提示] 需补齐 {len(missing)}/{len(JAR_TOOLS)} 个 jar 类工具: "
+          f"{'、'.join(missing)}")
+
+    cache = os.path.join(BASE_DIR, ".buildtools", JAR_BUNDLE_FILE)
+    os.makedirs(os.path.dirname(cache), exist_ok=True)
+    if not os.path.exists(cache):
+        print(f"[下载] {JAR_BUNDLE_FILE}（约 584 MB，大文件，支持断点续传）")
+        _download(JAR_BUNDLE_URL, cache)
+    else:
+        print(f"[缓存] 复用 {cache}")
+
+    print(f"[解压] → {TOOLS_DIR}")
+    root = os.path.realpath(BASE_DIR)
+    done, n = [], 0
+    with tarfile.open(cache, "r:gz") as tf:
+        for m in tf.getmembers():
+            if not m.isfile():
+                continue
+            rel = m.name.lstrip("./")
+            if not rel.startswith("tools/"):
+                continue
+            target = os.path.realpath(os.path.join(BASE_DIR, rel))
+            # 防目录穿越：包内路径必须落在仓库目录内
+            if not target.startswith(root + os.sep):
+                print(f"[警告] 跳过可疑路径: {m.name}")
+                continue
+            if os.path.exists(target) and not force:
+                continue
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            src = tf.extractfile(m)
+            if src is None:
+                continue
+            with src, open(target, "wb") as out:
+                shutil.copyfileobj(src, out)
+            n += 1
+
+    done = [nm for nm, rel in JAR_TOOLS.items() if os.path.exists(dest_of(rel))]
+    print(f"[完成] jar 类工具就位 {len(done)}/{len(JAR_TOOLS)}（本次写入 {n} 个文件）")
+    still = [nm for nm in JAR_TOOLS if nm not in done]
+    if still:
+        print(f"[警告] 仍缺失: {'、'.join(still)}")
+    return sorted(done)
+
+
 def update_tools_json(placed_map):
     if not placed_map:
         return
@@ -1155,6 +1246,8 @@ def main():
                     help="Windows 端补装系统级工具：nmap / MySQL 客户端 / Metasploit")
     ap.add_argument("--oracledb", action="store_true",
                     help="装 python-oracledb 到 tools/_venv（Oracle thin 模式，免客户端）")
+    ap.add_argument("--jars", action="store_true",
+                    help="还原 14 个 jar 类工具（632 MB，从本仓库 Release 下载）")
     ap.add_argument("--force", action="store_true", help="已存在也重新下载")
     args = ap.parse_args()
 
@@ -1167,9 +1260,12 @@ def main():
         provision_win_deps(force=args.force)
     if args.oracledb:
         provision_oracledb(force=args.force)
-    # 只开 --jdk/--gui 时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）
+    if args.jars:
+        provision_jars(force=args.force)
+    # 只开 --jdk/--gui 等开关时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）
+    only_flags = (args.jdk or args.gui or args.win_deps or args.oracledb or args.jars)
     names = args.tools
-    if names is None and not (args.jdk or args.gui or args.win_deps or args.oracledb):
+    if names is None and not only_flags:
         names = list(SOURCES.keys())
     names = names or []
     placed_map = {}
@@ -1221,6 +1317,16 @@ def main():
             placed_map[name] = r[0] if isinstance(r, list) else (spec["subdir"], name)
 
     update_tools_json(placed_map)
+
+    # 全量安装（无参数直接跑）时一并还原 jar 包；用 --tools/--jars 挑了具体目标
+    # 就不顺带拉这 584 MB，避免「只想装个 nuclei」却等半小时。
+    if not only_flags and args.tools is None:
+        try:
+            provision_jars(force=args.force)
+        except Exception as e:
+            print(f"[失败] jars: {type(e).__name__}: {e}")
+            print("        jar 类工具可从 Release 手动下载后解包覆盖到仓库根目录")
+
     print(f"[完成] 打包完成，当前平台: {PLAT}")
 
 
