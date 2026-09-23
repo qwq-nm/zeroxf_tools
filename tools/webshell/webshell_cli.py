@@ -305,6 +305,16 @@ class BehinderShell(BaseShell):
             raise ShellError(
                 f"缺少冰蝎协议实现（behinder_php.py）或其依赖: {e}\n"
                 f"      它依赖 pycryptodome，装：tools/_venv/bin/pip install pycryptodome")
+        except OSError as e:
+            # Windows 上杀软按访问扫描会隔离这个文件：症状是读取时报
+            # EBADF / WinError 2，随后文件从磁盘消失。这里不要甩 traceback，
+            # 直接告诉用户往哪儿看。
+            raise ShellError(
+                f"读取 behinder_php.py 失败（{type(e).__name__}: {e}）。\n"
+                f"      在 Windows 上这几乎总是杀软（如火绒）按访问扫描后隔离了该文件——\n"
+                f"      它含有冰蝎的 AES 与载荷特征串，容易被判为 hacktool。\n"
+                f"      处置：把工具箱目录加进杀软的信任区/白名单，或只在 WSL 侧用冰蝎协议。\n"
+                f"      另两条线（哥斯拉、蚁剑）不受影响。")
         self.B = B
         self.impl = B.BehinderPhpShell(url, password, timeout=timeout)
         self.php8_fallback = False

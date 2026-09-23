@@ -111,6 +111,14 @@ geshell webshell -u ... -p pass -t antsword --download /etc/passwd:./passwd.txt
 > `webshell` 因此走客户端降级：标准外壳连不上就换 `define("assert",0);` 前缀重试，
 > **目标一个字节都不用动**。
 
+> ⚠️ **Windows 端可能被杀软拦（实测）**：`behinder_php.py` 里有冰蝎的 AES 与载荷
+> 特征串，**火绒等按访问扫描的杀软会把它隔离**。复现出来的行为很典型：
+> `git checkout` 恢复后文件在，`stat` 也在，**一旦被 Python 读取就报
+> `OSError` / `EBADF`，随后文件从磁盘消失**。
+> 处置：把工具箱目录加进杀软的信任区；或只在 WSL 侧用冰蝎协议。
+> 另两条线（哥斯拉、蚁剑）不受影响。CLI 检测到这种情况会直接给出这段说明，
+> 不会甩 traceback。
+
 ### jar 类工具为什么走 Release 而不是 git
 
 14 个 Java 利用/管理工具（`shiro` `struts2` `weblogic` `thinkphp` `nacos` `jenkins`
@@ -223,11 +231,14 @@ python3 scripts/setup_burp.py
 
 | 平台 | 就绪 | 缺失 |
 | --- | --- | --- |
-| **WSL / Linux** | **56/58** | `fastjson` `log4j` |
-| **Windows** | **54/58** | `fastjson` `log4j` `hydra` `oracle` |
+| **WSL / Linux** | **57/59** | `fastjson` `log4j` |
+| **Windows** | **55/59** | `fastjson` `log4j` `hydra` `oracle` |
 
 差异只有两条：`hydra`（Windows 无官方版本）、`oracle`（需 Oracle 账号，
 Windows 端用 `oracle-py` 替代）。`geshell doctor` 会把缺的逐条列出并说明原因。
+
+> 上表的就绪判据是**入口文件是否存在**。Windows 侧另有一个它测不出来的坑：
+> `webshell` 的冰蝎模块会被杀软隔离（见上方说明），届时只有哥斯拉、蚁剑两条线可用。
 
 > ⚠️ 从 WSL 里调用 Windows 的 python 做检查会得到偏低的数字——那个进程继承的是
 > WSL 侧的 PATH 快照，看不到 Windows 后来加的 PATH。要在 Windows 上量，
