@@ -1205,5 +1205,25 @@
     "url": "",
     "tags": [],
     "group": ""
+  },
+  {
+    "name": "oracle-py",
+    "category": "数据库利用工具",
+    "type": "Python",
+    "path": "/tools/oracle-py/oracle_cli.py",
+    "description": "Oracle 客户端（thin 模式免 Instant Client，Windows 端可用）",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "oracle-py",
+      "oracledb"
+    ],
+    "weight": 2.0,
+    "params": "",
+    "params_pre": "",
+    "example": "oracle-py scott/tiger@10.0.0.5:1521/orcl -e \"select * from users\"",
+    "url": "",
+    "tags": [],
+    "group": ""
   }
 ]

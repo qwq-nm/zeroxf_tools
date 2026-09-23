@@ -67,6 +67,7 @@ geshell <工具名> [参数...]
 | zap | zap | 命令行 | passive | OWASP ZAP 被动代理/自动化扫描（替代已停止公开分发的 xray） |
 | impacket | impacket | 命令行 | active | impacket 协议攻击脚本集：secretsdump/psexec/smbclient/GetN |
 | exploitdb | exploitdb | 命令行 | passive | ExploitDB 本地漏洞库检索（searchsploit；配合 sliver/nuclei/im |
+| oraclepy | oracle-py | Python | active | Oracle 客户端（thin 模式免 Instant Client，Windows 端可用） |
 
 ## 信息收集工具
 
@@ -568,3 +569,11 @@ geshell <工具名> [参数...]
 - 参数模式：passthrough
 - 别名：usql, sql客户端
 - 示例：`geshell usql mysql://user:pass@10.0.0.5:3306/db`
+
+### oracle-py（oraclepy）
+
+- 说明：Oracle 客户端（thin 模式免 Instant Client，Windows 端可用）
+- 风险：active
+- 参数模式：passthrough
+- 别名：oracle-py, oracledb
+- 示例：`geshell oracle-py scott/tiger@10.0.0.5:1521/orcl -e "select * from users"`

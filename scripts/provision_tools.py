@@ -1063,6 +1063,36 @@ def provision_impacket():
     return _provision_pip("impacket", "impacket-secretsdump")
 
 
+def provision_oracledb(force=False):
+    """安装 python-oracledb 到 tools/_venv。
+
+    Oracle 官方不提供 Windows 版 Instant Client 的免登录下载，但
+    python-oracledb 的 **thin 模式是纯 Python 实现**，不需要任何 Oracle
+    客户端库就能连库——因此 Windows 端也能用上 Oracle 客户端能力。
+
+    这里只负责装库；CLI 包装是仓库自带的 tools/oracle-py/oracle_cli.py，
+    无需额外下载。
+    """
+    venv = os.path.join(TOOLS_DIR, "_venv")
+    bindir = os.path.join(venv, "Scripts" if PLAT == "windows" else "bin")
+    py = os.path.join(bindir, "python" + EXE)
+    if not os.path.exists(py):
+        subprocess.check_call([sys.executable, "-m", "venv", venv])
+    if not force:
+        r = subprocess.run([py, "-c", "import oracledb"], capture_output=True)
+        if r.returncode == 0:
+            print("[已有] python-oracledb 已安装，跳过（--force 重装）")
+            return True
+    print("[下载] python-oracledb → tools/_venv（Oracle thin 模式，免客户端）")
+    try:
+        subprocess.check_call([os.path.join(bindir, "pip" + EXE),
+                               "install", "-q", "--upgrade", "oracledb"])
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"[失败] oracledb: {e}")
+        return False
+
+
 def provision_patator():
     # 多协议在线爆破，替代 hydra（免编译、免系统依赖）
     return _provision_pip("patator", "patator")
@@ -1123,6 +1153,8 @@ def main():
                     help="安装 GUI 依赖 PyQt6 到 tools/_venv（main.py/launcher.py 需要）")
     ap.add_argument("--win-deps", action="store_true",
                     help="Windows 端补装系统级工具：nmap / MySQL 客户端 / Metasploit")
+    ap.add_argument("--oracledb", action="store_true",
+                    help="装 python-oracledb 到 tools/_venv（Oracle thin 模式，免客户端）")
     ap.add_argument("--force", action="store_true", help="已存在也重新下载")
     args = ap.parse_args()
 
@@ -1133,9 +1165,11 @@ def main():
         provision_gui(force=args.force)
     if args.win_deps:
         provision_win_deps(force=args.force)
+    if args.oracledb:
+        provision_oracledb(force=args.force)
     # 只开 --jdk/--gui 时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）
     names = args.tools
-    if names is None and not (args.jdk or args.gui or args.win_deps):
+    if names is None and not (args.jdk or args.gui or args.win_deps or args.oracledb):
         names = list(SOURCES.keys())
     names = names or []
     placed_map = {}

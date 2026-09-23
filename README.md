@@ -146,7 +146,16 @@ python3 scripts/setup_burp.py
 | `nmap` `mysql` | `apt install` 即可 | `python scripts/provision_tools.py --win-deps`（winget 自动装）|
 | **`hydra`** | ✅ `apt install hydra` | ❌ **装不了 —— Windows 无官方版本** |
 | `metasploit` | 官方 installer | ⚠️ 官方 MSI 的静默安装实测不生效，建议手动双击 |
-| `oracle`（sqlplus） | ✅ 自动（Linux 版有免登录直链） | ⚠️ **需 Oracle 账号**（官方只对登录用户提供 Windows 包） |
+| `oracle`（sqlplus） | ✅ 自动（Linux 版有免登录直链） | ⚠️ 需 Oracle 账号（官方只对登录用户提供 Windows 包）|
+| **`oracle-py`** | ✅ 自动 | ✅ 自动 —— **Windows 端的 Oracle 替代** |
+
+> **`oracle-py`**：Oracle 官方不提供 Windows 版 Instant Client 的免登录下载，但他们的
+> Python 驱动 **`python-oracledb` 的 thin 模式是纯 Python 实现**，不需要任何 Oracle
+> 客户端库就能连库。因此 Windows 端也有完整的 Oracle 连接能力。
+> 装它：`python scripts/provision_tools.py --oracledb`；用法：
+> ```bash
+> geshell oracle-py scott/tiger@10.0.0.5:1521/orcl -e "select * from users"
+> ```
 
 > **`hydra` 的特别说明**：它**只有类 Unix 版本**，官方从未发布 Windows 构建。
 > winget 源里搜到的 `HydraLauncher.Hydra` 是**游戏启动器**，与渗透工具无关。
