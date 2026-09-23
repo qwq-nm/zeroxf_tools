@@ -4,7 +4,9 @@ java_path/
 Java_path/
 notepad/
 python3/
-tools/
+tools/*
+# 例外：Oracle CLI 是仓库自带的脚本，必须随仓库分发
+!tools/oracle-py/
 *.pyc
 *.jpg
 *.png
