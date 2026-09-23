@@ -5,8 +5,20 @@ Java_path/
 notepad/
 python3/
 tools/*
-# 例外：Oracle CLI 是仓库自带的脚本，必须随仓库分发
+# 例外：以下目录是「仓库自带源码」——天狐原创脚本、以及随手写的一次性 CLI。
+# 它们没有任何公开下载源，provision_tools.py 也装不回来；若被 tools/* 连带忽略，
+# clone 下来的工具箱里这些工具会直接消失（界面有卡片、一点就报路径不存在）。
 !tools/oracle-py/
+!tools/revshell/
+!tools/sstikit/
+!tools/springkit/
+!tools/tomcatscanpro/
+!tools/dedecmscan/
+!tools/rediskit/
+!tools/ruoyikit/
+!tools/avoidkilling/
+!tools/docem/
+!tools/dirsearch/
 *.pyc
 *.jpg
 *.png

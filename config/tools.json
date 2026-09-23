@@ -977,15 +977,17 @@
     "name": "revshell",
     "category": "后渗透工具",
     "type": "Python",
-    "path": "/tools/revshell/revshell_generator.py",
-    "description": "反弹 Shell 命令生成（GUI，需图形界面）",
+    "path": "/tools/revshell/revshell_cli.py",
+    "description": "反弹 Shell 命令生成（11 种语言/环境，含监听命令）",
     "risk": "post-exploit",
-    "ai_callable": false,
+    "ai_callable": true,
     "aliases": [
-      "反弹shell"
+      "反弹shell",
+      "revshell",
+      "反弹shell生成"
     ],
-    "example": "",
-    "weight": 2.0,
+    "example": "revshell 10.0.0.5 -p 4444 -l Netcat -v reverse_e",
+    "weight": 4.0,
     "params": "",
     "params_pre": "",
     "url": "",

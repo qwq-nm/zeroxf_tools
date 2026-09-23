@@ -1,0 +1,57 @@
+# -*- coding: utf-8 -*-
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#  MA 02110-1301, USA.
+#
+#  Author: Mauro Soria
+
+[build-system]
+requires = ["setuptools>=66.1", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dirsearch"
+description = "Advanced web path scanner"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "GPL-2.0-only"
+authors = [
+    {name = "Mauro Soria", email = "maurosoria@protonmail.com"},
+]
+keywords = ["infosec", "bug bounty", "pentesting", "security"]
+classifiers = [
+    "Programming Language :: Python",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+    "Programming Language :: Python :: 3.9",
+]
+dynamic = ["version", "dependencies"]
+
+[project.scripts]
+dirsearch = "dirsearch.dirsearch:main"
+
+[project.urls]
+Homepage = "https://github.com/maurosoria/dirsearch"
+
+[tool.codespell]
+skip = ".git,./db/dicc.txt,./static"
+
+[tool.flake8]
+count = true
+ignore = "E501,E701,F403,F405,F524,W503"
+show-source = true
+statistics = true

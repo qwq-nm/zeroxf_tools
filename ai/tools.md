@@ -58,6 +58,7 @@ geshell <工具名> [参数...]
 | netexec | netexec | 命令行 | active | 内网认证/枚举（原 crackmapexec） |
 | sliver | sliver | 命令行 | post-exploit | Sliver 开源 C2 |
 | dirsearch | dirsearch | Python | passive | Web 目录扫描（枷锁版） |
+| revshell | revshell | Python | post-exploit | 反弹 Shell 命令生成（11 种语言/环境，含监听命令） |
 | jeecg | jeecg | JAVA8 | exploit | Jeecg-Boot 漏洞利用 |
 | dbcombo | dbcombo | JAVA8 | exploit | 数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG） |
 | iwannagetall | iwannagetall | JAVA8 | exploit | OA 综合利用 |
@@ -488,10 +489,11 @@ geshell <工具名> [参数...]
 
 ### revshell（revshell）
 
-- 说明：反弹 Shell 命令生成（GUI，需图形界面）
+- 说明：反弹 Shell 命令生成（11 种语言/环境，含监听命令）
 - 风险：post-exploit
 - 参数模式：passthrough
-- 别名：反弹shell
+- 别名：反弹shell, revshell, 反弹shell生成
+- 示例：`geshell revshell 10.0.0.5 -p 4444 -l Netcat -v reverse_e`
 
 ## 抓包与代理工具
 
