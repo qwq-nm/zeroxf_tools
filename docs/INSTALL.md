@@ -28,6 +28,9 @@ python3 scripts/provision_tools.py          # 全部工具二进制（含 jar �
 python3 scripts/provision_tools.py --gui    # GUI 运行时（用界面才需要）
 ```
 
+> 全量安装（不带 `--tools`）还会顺带装 **webshell 工具的依赖**
+> （`requests` / `pycryptodome`）。单独补装：`--webshell-deps`。
+
 > 不想一次拉 632 MB 的 jar 包时，用 `--tools` 挑具体工具即可（不带 `--tools`
 > 的全量安装才会顺带还原 jar 包）。
 

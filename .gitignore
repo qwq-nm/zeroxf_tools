@@ -10,6 +10,7 @@ tools/*
 # clone 下来的工具箱里这些工具会直接消失（界面有卡片、一点就报路径不存在）。
 !tools/oracle-py/
 !tools/revshell/
+!tools/webshell/
 !tools/sstikit/
 !tools/springkit/
 !tools/tomcatscanpro/

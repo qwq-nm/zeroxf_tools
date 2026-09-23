@@ -538,7 +538,7 @@
     "category": "WebShell管理工具",
     "type": "GUI应用",
     "path": "/tools/AntSword/antSword.exe",
-    "description": "蚁剑 WebShell 管理（GUI，无 CLI 接口）",
+    "description": "蚁剑 WebShell 管理（GUI）⚠️ 未随工具箱分发（上游只发源码、无二进制），其协议的 AI 调用由 webshell 工具覆盖",
     "risk": "post-exploit",
     "ai_callable": false,
     "aliases": [
@@ -1075,7 +1075,7 @@
     "category": "WebShell管理工具",
     "type": "JAVA8",
     "path": "/tools/godzilla/godzilla.jar",
-    "description": "哥斯拉 WebShell 管理（GUI，无 CLI 接口）。生成免杀 WebShell 用 avoidkilling（AI 可调用）",
+    "description": "哥斯拉 WebShell 管理（GUI，自身无 CLI 接口）——AI 操作请用 webshell 工具",
     "risk": "post-exploit",
     "ai_callable": false,
     "aliases": [
@@ -1094,7 +1094,7 @@
     "category": "WebShell管理工具",
     "type": "JAVA8",
     "path": "/tools/behinder/Behinder.jar",
-    "description": "冰蝎 WebShell 管理 v4.1（GUI，无 CLI 接口）。生成免杀 WebShell 用 avoidkilling（AI 可调用）",
+    "description": "冰蝎 WebShell 管理 v4.1（GUI，自身无 CLI 接口）——AI 操作请用 webshell 工具",
     "risk": "post-exploit",
     "ai_callable": false,
     "aliases": [
@@ -1107,6 +1107,27 @@
     "url": "",
     "tags": [],
     "group": ""
+  },
+  {
+    "name": "webshell",
+    "category": "WebShell管理工具",
+    "type": "Python",
+    "path": "/tools/webshell/webshell_cli.py",
+    "description": "WebShell 管理 CLI：直连蚁剑/冰蝎/哥斯拉三种协议的 PHP 马，可执行命令、探服务器信息、上传下载（--type auto 自动识别协议）",
+    "risk": "post-exploit",
+    "ai_callable": true,
+    "aliases": [
+      "webshell",
+      "webshell管理",
+      "马子管理"
+    ],
+    "example": "webshell -u http://target/shell.php -p pass -t auto -c \"id\"",
+    "weight": 4.0,
+    "url": "",
+    "tags": [],
+    "group": "",
+    "params_pre": "",
+    "params": ""
   },
   {
     "name": "usql",

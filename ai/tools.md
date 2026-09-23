@@ -63,6 +63,7 @@ geshell <工具名> [参数...]
 | dbcombo | dbcombo | JAVA8 | exploit | 数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG） |
 | iwannagetall | iwannagetall | JAVA8 | exploit | OA 综合利用 |
 | hyacinth | hyacinth | JAVA8 | exploit | Java 综合利用 v2.0.2 |
+| webshell | webshell | Python | post-exploit | WebShell 管理 CLI：直连蚁剑/冰蝎/哥斯拉三种协议的 PHP 马，可执行命令、探服务器信 |
 | usql | usql | 命令行 | active | 通用 SQL 客户端：MySQL/PG/Oracle/MSSQL（替代 mysql/oracle 客 |
 | jndi | jndi | JAVA8 | exploit | JNDI 注入利用服务：覆盖 fastjson 反序列化 / log4j2 RCE（替代 fastj |
 | zap | zap | 命令行 | passive | OWASP ZAP 被动代理/自动化扫描（替代已停止公开分发的 xray） |
@@ -508,24 +509,32 @@ geshell <工具名> [参数...]
 
 ### 蚁剑（antsword）
 
-- 说明：蚁剑 WebShell 管理（GUI，无 CLI 接口）
+- 说明：蚁剑 WebShell 管理（GUI）⚠️ 未随工具箱分发（上游只发源码、无二进制），其协议的 AI 调用由 webshell 工具覆盖
 - 风险：post-exploit
 - 参数模式：passthrough
 - 别名：antsword
 
 ### godzilla（godzilla）
 
-- 说明：哥斯拉 WebShell 管理（GUI，无 CLI 接口）。生成免杀 WebShell 用 avoidkilling（AI 可调用）
+- 说明：哥斯拉 WebShell 管理（GUI，自身无 CLI 接口）——AI 操作请用 webshell 工具
 - 风险：post-exploit
 - 参数模式：passthrough
 - 别名：哥斯拉
 
 ### behinder（behinder）
 
-- 说明：冰蝎 WebShell 管理 v4.1（GUI，无 CLI 接口）。生成免杀 WebShell 用 avoidkilling（AI 可调用）
+- 说明：冰蝎 WebShell 管理 v4.1（GUI，自身无 CLI 接口）——AI 操作请用 webshell 工具
 - 风险：post-exploit
 - 参数模式：passthrough
 - 别名：冰蝎
+
+### webshell（webshell）
+
+- 说明：WebShell 管理 CLI：直连蚁剑/冰蝎/哥斯拉三种协议的 PHP 马，可执行命令、探服务器信息、上传下载（--type auto 自动识别协议）
+- 风险：post-exploit
+- 参数模式：passthrough
+- 别名：webshell, webshell管理, 马子管理
+- 示例：`geshell webshell -u http://target/shell.php -p pass -t auto -c "id"`
 
 ## 数据库利用工具
 

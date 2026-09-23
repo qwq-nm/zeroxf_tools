@@ -35,7 +35,7 @@ git clone https://github.com/qwq-nm/zeroxf_tools.git
 cd zeroxf_tools
 ```
 
-**成功判据**：`config/tools.json` 存在，且 `python3 -c "import json;print(len(json.load(open('config/tools.json'))))"` 输出 **64**。
+**成功判据**：`config/tools.json` 存在，且 `python3 -c "import json;print(len(json.load(open('config/tools.json'))))"` 输出 **65**。
 
 > ⚠️ 若 `tools.json` 不存在或数量不对，说明 clone 到的是旧版本，执行 `git pull`。
 
@@ -49,6 +49,7 @@ cd zeroxf_tools
 python3 scripts/provision_tools.py --jdk      # 便携 JDK 8/11/17，约 1.3 G
 python3 scripts/provision_tools.py            # 工具二进制 3.5 G + jar 包 584 M
 python3 scripts/provision_tools.py --gui      # GUI 运行时 PyQt6，约 90 M（仅需 GUI 时）
+python3 scripts/provision_tools.py --webshell-deps   # webshell 工具依赖（已含在全量安装里）
 ```
 
 > 第二步会从本仓库的 **Release 资产**（tag `jar-tools-v1`）下载 584 MB 的
@@ -96,7 +97,7 @@ Windows 下将 `python3` 替换为 `python`。
 ./geshell list
 ```
 
-**期望**：列出 64 个工具，其中 58 个标 `✓`（AI 可调用）。
+**期望**：列出 65 个工具，其中 59 个标 `✓`（AI 可调用）。
 
 ### 3.4 抽样实调
 
@@ -120,7 +121,7 @@ printf '%s\n' \
  | python3 ai/mcp_server.py
 ```
 
-**期望**：`initialize` 返回 `serverInfo.name == "tianhu-geshell"`；`tools/list` 返回 **58** 个工具。
+**期望**：`initialize` 返回 `serverInfo.name == "tianhu-geshell"`；`tools/list` 返回 **59** 个工具。
 
 ### 3.6 Burp Suite MCP（可选，若用户要用 Burp）
 
@@ -206,7 +207,7 @@ tools/_venv/bin/python main.py
 用**结构化**的方式汇报，至少包含：
 
 1. **平台信息** —— 在哪装的（WSL / Windows / 双端）、Python 版本
-2. **工具就绪数** —— 例如 `58 个 AI 可调用工具中 56 个依赖就绪`
+2. **工具就绪数** —— 例如 `59 个 AI 可调用工具中 57 个依赖就绪`
 3. **仍缺失的项及原因** —— 明确区分「不可得」（商业软件 / 无公开源）与「安装失败」。
    几个**预期内、不要试图修复**的缺失：
    - `hydra`（Windows 端）：无官方 Windows 版本

