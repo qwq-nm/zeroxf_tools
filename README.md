@@ -81,6 +81,57 @@
 
 `geshell doctor` 会明确列出这些项，不会静默失败。
 
+### Burp Suite：一键接入 MCP
+
+Burp 是 **PortSwigger 的商业软件**，二进制不适合随仓库分发（体积 + 授权），**需要你自行准备**。工具箱提供 `scripts/setup_burp.py` 自动完成「发现 + 接线」。
+
+**为什么值得单独说**：PortSwigger 官方发布了 **MCP 扩展**（[`PortSwigger/mcp-server`](https://github.com/PortSwigger/mcp-server)），装好后 AI 可以直接发 HTTP 请求、读 proxy history、把请求塞进 Repeater/Intruder、调用 Scanner 与 Collaborator。
+
+**三个前提**：
+
+| # | 前提 | 说明 |
+| --- | --- | --- |
+| 1 | 自备 Burp | **需要 Professional** —— 社区版会提示 `AI features are Burp Suite Professional only`，MCP 服务无法启用 |
+| 2 | 启用 MCP 扩展 | Burp → 扩展 → BApp商店 → 搜 `MCP Server` → 安装 → **MCP 标签打开 Enabled** |
+| 3 | Java 21+ | Burp 2026.x 要求。⚠️ 系统里只装了 JDK 8 会导致**双击启动脚本毫无反应** |
+
+**一条命令配置**：
+
+```bash
+python3 scripts/setup_burp.py
+```
+
+脚本流程：探测 Burp 位置 → 定位 proxy jar → 检查 Java 版本 → 修正绿色版启动脚本 → 写入 `~/.claude.json` 的 MCP 配置 → 实连验证（报告拿到多少工具）。
+
+**两端通用**，脚本自动识别环境：
+
+| 环境 | 做法 |
+| --- | --- |
+| Windows | 直接连 `127.0.0.1:9876` |
+| WSL | 用 **Windows 的 `java.exe`** 跑 proxy（进程落在 Windows 侧），从而绕过 Burp 的 Host 校验 |
+
+**三个已踩过的坑**（脚本已自动处理，手动配置时注意）：
+
+1. **JDK 版本** —— 绿色版的 `.bat` 调用裸命令 `javaw.exe`，若系统 PATH 里是 JDK 8，Burp 起不来或闪退。脚本会注入正确的 `JAVA_HOME`/`PATH`。
+2. **Host 校验** —— Burp 的 MCP 只接受 `Host: 127.0.0.1:9876`；从 WSL 直连、或用 `netsh portproxy` 转发（Host 会变成网关 IP）都会被 **403** 挡掉。用 Windows 侧的 java 跑 proxy 是唯一干净解法。
+3. **社区版限制** —— 见上表第 1 条。`Enabled` 开关能打开，但服务实际不启动、右下角仍显示 `Disabled`。
+
+**手动配置**（不想用脚本时）：
+
+```json
+{
+  "mcpServers": {
+    "burp": {
+      "command": "/mnt/c/Program Files/Java/jdk-21/bin/java.exe",
+      "args": ["-jar", "C:\\Users\\<你的用户名>\\AppData\\Roaming\\BurpSuite\\mcp-proxy\\mcp-proxy-all.jar",
+               "--sse-url", "http://127.0.0.1:9876"]
+    }
+  }
+}
+```
+
+> 配置是**启动时加载**的，改完需重启 Claude Code。使用前记得**先启动 Burp**（proxy 只是转发，后端必须是运行中的 Burp）。
+
 ### 两端的能力差异
 
 工具箱**本体**（provision 能自动装的部分）在 WSL 与 Windows 上完全一致——

@@ -116,7 +116,49 @@ printf '%s\n' \
 
 **期望**：`initialize` 返回 `serverInfo.name == "tianhu-geshell"`；`tools/list` 返回 **56** 个工具。
 
-### 3.6 图形界面（若用户需要 GUI）
+### 3.6 Burp Suite MCP（可选，若用户要用 Burp）
+
+Burp 是**商业软件，不在本仓库内**，需要用户自备。当用户提到 Burp、或要「用 Burp 抓包/扫描」时，按本节处理。
+
+**先确认三件事**（缺一不可）：
+
+| 检查 | 怎么查 | 不满足时 |
+| --- | --- | --- |
+| Burp **Professional** | 窗口标题是否有 `专业版` / `licensed to` | 社区版**不支持** AI 功能，直接告知用户，别浪费时间调配置 |
+| MCP 扩展已启用 | Burp → **MCP** 标签 → `Enabled` 开关 | 让用户在 **扩展 → BApp商店** 搜 `MCP Server` 安装 |
+| Java **21+** | `java -version` | 见下面「坑 1」 |
+
+**一键配置**：
+
+```bash
+python3 scripts/setup_burp.py
+```
+
+脚本自动完成：探测 Burp → 定位 proxy jar → 检查 Java → 修正启动脚本 → 写 MCP 配置 → 实连验证。
+
+**若脚本报「未找到 mcp-proxy-all.jar」**：它由 MCP 扩展在首次启动时释放。让用户**先启动一次 Burp**、在 MCP 标签点「解压服务器代理 jar」，再重跑脚本。
+
+**三个坑**（脚本已自动处理，但排查时必须知道）：
+
+1. **JDK 版本** —— 绿色版 Burp 的 `.bat` 调用**裸命令** `javaw.exe`。若系统 PATH 里是 JDK 8（很常见），现象是**双击毫无反应**——不是崩溃，是版本太低。脚本会往脚本头部注入 `JAVA_HOME`/`PATH` 指向 JDK 21。
+2. **Host 校验** —— Burp 的 MCP **只接受 `Host: 127.0.0.1:9876`**。从 WSL 直连、或用 `netsh interface portproxy` 转发（Host 会变成网关 IP）**都会被 403 挡掉**。
+   **唯一干净解法**：用 **Windows 侧的 `java.exe`** 跑 proxy —— 进程落在 Windows，Host 天然是 `127.0.0.1`，stdio 经 WSL interop 传回。脚本就是这么做的。
+3. **社区版限制** —— `Enabled` 开关**能打开**，但右下角**仍显示 `Disabled`**，并弹提示 `AI features are Burp Suite Professional only`。这是授权限制，**不是配置问题，不要反复尝试**。
+
+**验证**：
+
+```bash
+python3 scripts/setup_burp.py --verify-only
+```
+
+期望输出：`连通成功，Burp 暴露 N 个工具`（Pro 版约 27 个）。
+
+**两个注意事项**：
+
+- MCP 配置是 Claude Code **启动时加载**的，写入后**必须重启**才生效
+- 使用期间 **Burp 必须保持运行**（proxy 只是转发，后端是 Burp）
+
+### 3.7 图形界面（若用户需要 GUI）
 
 ```bash
 # Linux / WSL
@@ -142,6 +184,9 @@ tools/_venv/bin/python main.py
 | `netexec` 安装失败 | 其 `aardwolf` 依赖需 Rust 编译，或源码拉取超时 | 装 Rust 后重试，见下方补充说明 |
 | `oracle` 报缺 `libaio.so.1` | 系统库缺失 | `apt install libaio1t64` + 建软链 `ln -sf /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1` |
 | 双击 `.bat` 无反应 | 文件被存成 LF 换行或 UTF-8 | 恢复为 CRLF + GBK：`git checkout -- 启动工具箱.bat` |
+| Burp 双击**毫无反应**（非崩溃） | PATH 里是旧 JDK（如 8），而 Burp 2026.x 需要 **21+** | `python3 scripts/setup_burp.py`（自动注入正确 JDK）|
+| Burp MCP 连接返回 **403** | Host 校验：只接受 `Host: 127.0.0.1:9876` | 用 Windows 侧 java 跑 proxy，见 §3.6 |
+| Burp MCP 的 `Enabled` 打开后仍显示 **Disabled** | 社区版不支持 AI 功能（授权限制）| 需 Professional 版，见 §3.6——不要再尝试调配置 |
 
 > `netexec` 的补充：它是 PyPI 上无发行包的包，需从 GitHub 装，且其构建依赖 `poetry-dynamic-versioning` 会读取 git 元数据——用源码 tarball 安装时需绕过：`POETRY_DYNAMIC_VERSIONING_BYPASS=0.0.0 pip install <tarball>`。
 
