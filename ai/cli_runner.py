@@ -67,6 +67,15 @@ def _resolve_path(tool: Dict[str, Any], path: str) -> str:
                 for ext in (".exe", ".py", ".bat", ".cmd"):
                     if os.path.exists(alt + ext):
                         return alt + ext
+            # (c) 同一个工具的启动方式两端命名不同：Linux 是 .sh（如 ZAP 的
+            #     zap-tianhu.sh），Windows 侧是配套的 .bat/.cmd。
+            #     _win_exec_argv 执行时已经会做这个映射，但那条路径不影响
+            #     存在性判断——少了这一步，doctor 会把能用的工具报成“路径不存在”。
+            if ap.lower().endswith(".sh"):
+                base = ap[:-3]
+                for cand in (base + ".bat", base + ".cmd", base + ".exe"):
+                    if os.path.exists(cand):
+                        return cand
         return ap
     return p
 
