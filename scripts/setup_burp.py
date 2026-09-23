@@ -28,6 +28,8 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
+import time
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLAUDE_JSON = os.path.expanduser("~/.claude.json")
@@ -264,14 +266,42 @@ def verify(java_exe, proxy_jar, sse_url):
     ]
     inp = "\n".join(json.dumps(r) for r in reqs) + "\n"
     jar = proxy_jar if os.name == "nt" else to_win_path(proxy_jar)
+
+    # 注意：MCP 是异步协议，写完后必须**保持 stdin 打开**一小会儿再关闭，
+    # 否则 proxy 收到 EOF 会立刻断开（日志表现为 "Successfully connected"
+    # 紧跟 "Server connection closing"），拿不到任何响应。
+    stdout_lines = []
     try:
-        p = subprocess.run([java_exe, "-jar", jar, "--sse-url", sse_url],
-                           input=inp, capture_output=True, text=True, timeout=90)
+        proc = subprocess.Popen(
+            [java_exe, "-jar", jar, "--sse-url", sse_url],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True, bufsize=1)
+
+        def _reader():
+            for ln in proc.stdout:
+                stdout_lines.append(ln)
+
+        t = threading.Thread(target=_reader, daemon=True)
+        t.start()
+
+        proc.stdin.write(inp)
+        proc.stdin.flush()
+        time.sleep(5)              # 给 proxy 时间完成 SSE 往返
+        try:
+            proc.stdin.close()
+        except OSError:
+            pass
+        t.join(timeout=15)
+        proc.terminate()
+        try:
+            stderr_text = (proc.stderr.read() or "") if proc.stderr else ""
+        except Exception:
+            stderr_text = ""
     except Exception as e:
         bad(f"验证失败（无法启动 proxy）: {e}")
         return False
 
-    for line in (p.stdout or "").splitlines():
+    for line in stdout_lines:
         line = line.strip()
         if not line.startswith("{"):
             continue
@@ -288,7 +318,7 @@ def verify(java_exe, proxy_jar, sse_url):
                 info(f"... 其余 {len(tools) - 6} 个")
             return True
 
-    err = ((p.stderr or "") + (p.stdout or "")).strip().splitlines()
+    err = (stderr_text + "".join(stdout_lines)).strip().splitlines()
     bad("未能完成握手。最后几行输出：")
     for l in err[-4:]:
         info(l[:110])
