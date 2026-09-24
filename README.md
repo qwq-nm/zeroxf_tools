@@ -522,5 +522,5 @@ Windows 的 CMD 不支持 UNC 路径作为工作目录。启动脚本已用 `pus
 
 CLI 架构参考 [One-JiaSuo/Jiasuo-tools](https://github.com/One-JiaSuo/Jiasuo-tools)。
 
-如果这个项目对你有帮助，欢迎点个 [⭐ Star]([https://github.com](https://github.com/qwq-nm/zeroxf_tools)) 支持一下！
+如果这个项目对你有帮助，欢迎点个 [⭐ Star](https://github.com/qwq-nm/zeroxf_tools) 支持一下！
 
