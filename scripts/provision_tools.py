@@ -820,10 +820,16 @@ def provision_oracle(force=False):
     sqlplus 依赖同目录的 IC 共享库；Linux 还需系统 libaio.so.1。
     """
     target_dir = os.path.join(TOOLS_DIR, "oracle")
-    entry_name = "sqlplus.bat" if PLAT == "windows" else "sqlplus.sh"
-    if not force and os.path.exists(os.path.join(target_dir, entry_name)):
+    # 注册表里一律写**逻辑名 sqlplus.sh**，两端一致——tools.json 是共享的
+    # 单一数据源，写成按平台变化的值会让 Windows 每次 provision 都产生一处
+    # 本地改动（提交了又会破坏 Linux）。实际落盘在 Windows 是 sqlplus.bat，
+    # 由 cli_runner._resolve_path 的 .sh→.bat 回落命中。这与 _write_zap_wrapper
+    # 是同一个范式。
+    logical_name = "sqlplus.sh"
+    on_disk = "sqlplus.bat" if PLAT == "windows" else "sqlplus.sh"
+    if not force and os.path.exists(os.path.join(target_dir, on_disk)):
         print("[已有] oracle 已打包，跳过（--force 重新下载）")
-        return [("oracle", entry_name)]
+        return [("oracle", logical_name)]
     if PLAT == "windows":
         base = f"{ORACLE_IC_BASE_WIN}/{ORACLE_IC_WIN_VER}"
         names = ORACLE_IC_WIN_PKGS
@@ -866,7 +872,7 @@ def provision_oracle(force=False):
             with open(wrapper, "w", encoding="utf-8") as f:
                 f.write(ORACLE_WRAPPER)
             os.chmod(wrapper, 0o755)
-        return [("oracle", entry_name)]
+        return [("oracle", logical_name)]
     except Exception as e:
         print(f"[失败] oracle: {e}")
         return None
