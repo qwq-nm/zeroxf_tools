@@ -48,14 +48,15 @@ cd zeroxf_tools
 依次执行（**每步都可能耗时数分钟**，属正常）：
 
 ```bash
-python3 scripts/provision_tools.py --jdk      # 便携 JDK 8/11/17，约 1.3 G
-python3 scripts/provision_tools.py            # 工具二进制 3.5 G + jar 包 584 M
-python3 scripts/provision_tools.py --gui      # GUI 运行时 PyQt6，约 90 M（仅需 GUI 时）
-python3 scripts/provision_tools.py --webshell-deps   # webshell 工具依赖（已含在全量安装里）
+python3 scripts/provision_tools.py --all      # 一条命令装完，约 4.9 G
 ```
 
-> 第二步会从本仓库的 **Release 资产**（tag `jar-tools-v1`）下载 584 MB 的
-> `zeroxf-jar-tools-v1.tar.gz`，还原 14 个 jar 类工具。这些 jar 是第三方作品、
+`--all` = 便携 JDK + 全部工具（28 个二进制 + 14 个 jar）+ 运行时依赖 + GUI 运行时，
+Windows 上另含系统级工具（nmap / MySQL / Metasploit）。
+需要分开装时用 `--jdk` / `--gui` / `--jars` / `--webshell-deps` 单个开关。
+
+> `--all` 里含从本仓库 **Release 资产**（tag `jar-tools-v1`）下载 584 MB 的
+> `zeroxf-jar-tools-v1.tar.gz` 以还原 14 个 jar 类工具。这些 jar 是第三方作品、
 > 无公开下载源，其中 3 个单个超 GitHub 100 MB 限制，所以只能走 Release。
 > 想跳过就改用 `--tools <名称>` 逐个装，或事后单独跑 `--jars`。
 > 下载失败不影响其余工具——脚本会报 `[失败] jars:` 后继续。
@@ -113,7 +114,10 @@ python3 scripts/verify_all.py
 ./geshell list
 ```
 
-**期望**：列出 63 个工具，其中 57 个标 `✓`（AI 可调用）。
+**期望**：列出 63 个工具，表尾汇总为 `✓ 就绪 57   ⚠ 已注册但文件缺失 0   ✗ 未注册 6`。
+
+> 状态列是三态：`✓` 就绪可直接调用 / `⚠` 已注册但文件没装（要跑 provision）/
+> `✗` 未注册为 AI 可调用。**只要 `⚠` 不是 0，就说明安装没跑完。**
 
 ### 3.4 抽样实调
 

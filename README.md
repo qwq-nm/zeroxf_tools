@@ -300,19 +300,21 @@ clone 之后，仓库里**只有代码**——工具二进制、JDK、GUI 运行
 ```bash
 git clone https://github.com/qwq-nm/zeroxf_tools.git
 cd zeroxf_tools
-
-python3 scripts/provision_tools.py --jdk    # 便携 JDK 8/11/17（14 个 jar 类工具需要）
-python3 scripts/provision_tools.py          # 全部工具二进制 + jar 包
-python3 scripts/provision_tools.py --gui    # GUI 运行时 PyQt6（用图形界面才装）
-python3 scripts/provision_tools.py --webshell-deps  # webshell 工具依赖（全量安装已含）
-
-# 仅 Windows：补装系统级工具（nmap / MySQL 客户端 / Metasploit）
-python scripts/provision_tools.py --win-deps
+python3 scripts/provision_tools.py --all
 ```
 
-> **jar 包单独装**：不带 `--tools` 的全量安装会顺带还原 14 个 jar 类工具
-> （从本仓库 Release 下载 584 MB）。想跳过就用 `--tools` 指定具体工具，
-> 或事后单独跑 `python3 scripts/provision_tools.py --jars`。
+**一条命令装完全部**：便携 JDK + 28 个工具二进制 + 14 个 jar 包 + 运行时依赖
++ GUI 运行时，约 4.9 GB。Windows 上会自动额外补装系统级工具
+（nmap / MySQL 客户端 / Metasploit）。
+
+装完跑一次自检：
+
+```bash
+python3 scripts/verify_all.py
+```
+
+> 想分开装就单独跑对应的开关：`--jdk` / `--gui` / `--jars` / `--webshell-deps`，
+> 或 `--tools <名称...>` 只装指定工具（这时不会顺带拉 584 MB 的 jar 包）。
 
 Windows 下把 `python3` 换成 `python`。脚本会自动识别平台，拉取对应版本（Windows 拿 `.exe`，Linux 拿 ELF）。
 

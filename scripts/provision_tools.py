@@ -6,7 +6,8 @@
 解压到 tools/<子目录>/<可执行文件>，并自动更新 config/tools.json 的 path。
 
 用法：
-  python3 scripts/provision_tools.py [--tools 名称1 名称2 ...] [--jdk] [--gui] [--force]
+  python3 scripts/provision_tools.py --all          # 全量（推荐）：JDK + 全部工具 + jar + 依赖 + GUI
+  python3 scripts/provision_tools.py [--tools 名称...] [--jdk] [--gui] [--force]
 
 说明：
 - SOURCES 表内是能从官方 release 拉取的开源工具；其余走下方 SPECIAL 分发表里的专用函数
@@ -442,7 +443,7 @@ def _aardwolf_wheel_url():
     return None
 
 
-def provision_netexec():
+def provision_netexec(force=False):
     """安装 NetExec。
 
     这条路有三个坑，缺一个都装不上：
@@ -459,6 +460,12 @@ def provision_netexec():
     bindir = os.path.join(venv, "Scripts" if PLAT == "windows" else "bin")
     py = os.path.join(bindir, "python" + EXE)
     pip = os.path.join(bindir, "pip" + EXE)
+    # 已装就跳过。少了这一步，每次全量安装都会重下源码 zip 并重跑一遍依赖安装
+    # ——它是整套里最慢的单步之一。
+    nxc_entry = os.path.join(bindir, "nxc" + EXE)
+    if not force and os.path.exists(nxc_entry):
+        print("[已有] netexec 已安装，跳过（--force 重新安装）")
+        return [("_venv", os.path.relpath(nxc_entry, TOOLS_DIR))]
     if not os.path.exists(py):
         subprocess.check_call([sys.executable, "-m", "venv", venv])
 
@@ -1101,8 +1108,11 @@ def provision_webshell_deps(force=False):
 
 
 def provision_impacket():
-    # impacket 是一组协议攻击脚本，NetExec 本身即基于它；入口取常用的 secretsdump
-    return _provision_pip("impacket", "impacket-secretsdump")
+    # impacket 是一组协议攻击脚本，NetExec 本身即基于它；入口取常用的 secretsdump。
+    # 注意入口名是 `secretsdump.py` 而**不是** `impacket-secretsdump`——Linux 上
+    # pip 装完落盘的就是前者。写错会得到一个永远失败的检查：pip 明明装成功了，
+    # 却报「未找到入口」，而且 tools.json 的路径也更新不了。
+    return _provision_pip("impacket", "secretsdump.py")
 
 
 def provision_oracledb(force=False):
@@ -1290,35 +1300,70 @@ def main():
                     help="还原 14 个 jar 类工具（632 MB，从本仓库 Release 下载）")
     ap.add_argument("--webshell-deps", action="store_true",
                     help="装 webshell 工具的依赖（requests / pycryptodome）到 tools/_venv")
+    ap.add_argument("--all", action="store_true",
+                    help="全量安装：JDK + 全部工具 + jar 包 + 依赖 + GUI 运行时"
+                         "（Windows 另含 --win-deps）。clone 后一条命令装完，约 4.9 GB")
     ap.add_argument("--force", action="store_true", help="已存在也重新下载")
     args = ap.parse_args()
 
-    os.makedirs(TOOLS_DIR, exist_ok=True)
-    if args.jdk:
-        provision_jdk(force=args.force)
-    if args.gui:
-        provision_gui(force=args.force)
-    if args.win_deps:
-        provision_win_deps(force=args.force)
-    if args.oracledb:
-        provision_oracledb(force=args.force)
-    if args.jars:
-        provision_jars(force=args.force)
-    if args.webshell_deps:
-        provision_webshell_deps(force=args.force)
-    # 只开 --jdk/--gui 等开关时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）
-    only_flags = (args.jdk or args.gui or args.win_deps or args.oracledb or args.jars
-                  or args.webshell_deps)
-    names = args.tools
-    if names is None and not only_flags:
-        names = list(SOURCES.keys())
-    names = names or []
-    placed_map = {}
+    # --all 就是把各阶段的开关一起打开。注意它**不能**把自己算进 only_flags，
+    # 否则 SOURCES 全量那一轮会被跳过——那样就只装了外围、没装工具本体。
+    if args.all:
+        if args.tools:
+            ap.error("--all 与 --tools 不能同时用（--all 就是装全部）")
+        args.jdk = True
+        args.gui = True
+        args.webshell_deps = True
+        if PLAT == "windows":
+            args.win_deps = True
+        print("=" * 66)
+        print(" 全量安装：便携 JDK → 全部工具 → jar 包 → 运行时依赖"
+              + (" → 系统级工具" if PLAT == "windows" else " → GUI 运行时"))
+        print(" 约 4.9 GB，耗时视网速；单个工具失败不会中断整批")
+        print("=" * 66)
 
+    os.makedirs(TOOLS_DIR, exist_ok=True)
+
+    _n = [0]
+
+    def _phase(title):
+        """阶段横幅。只在 --all 时打印——单独跑某个开关时加了反而是噪音。"""
+        if not args.all:
+            return
+        _n[0] += 1
+        print(f"\n---- [{_n[0]}] {title} ----")
+
+    def _try(title, fn):
+        """跑一个阶段。一个阶段失败不该让整批停下。"""
+        _phase(title)
+        try:
+            return fn()
+        except Exception as e:
+            print(f"[失败] {title}: {type(e).__name__}: {e}")
+            print("       该阶段跳过，继续后续步骤。可稍后单独重跑。")
+            return None
+
+    if args.jdk:
+        _try("便携 JDK 8/11/17", lambda: provision_jdk(force=args.force))
+    if args.gui:
+        _try("GUI 运行时（PyQt6）", lambda: provision_gui(force=args.force))
+    if args.win_deps:
+        _try("Windows 系统级工具（nmap / MySQL / Metasploit）",
+             lambda: provision_win_deps(force=args.force))
+    if args.oracledb:
+        _try("python-oracledb", lambda: provision_oracledb(force=args.force))
+    if args.jars:
+        _try("jar 类工具（14 个，584 MB）", lambda: provision_jars(force=args.force))
+    if args.webshell_deps:
+        _try("webshell 运行时依赖", lambda: provision_webshell_deps(force=args.force))
+    # 只开 --jdk/--gui 等开关时不顺带重跑整个 SOURCES 表（否则会重下几十个工具）。
+    # --all 例外：它就是要跑全量。
+    only_flags = (args.jdk or args.gui or args.win_deps or args.oracledb or args.jars
+                  or args.webshell_deps) and not args.all
     # 非 GitHub-release 模式的工具（pip 安装 / 直链下载 / 多文件组装）
     special = {
         "sqlmap": provision_sqlmap,
-        "netexec": provision_netexec,
+        "netexec": lambda: provision_netexec(force=args.force),
         "impacket": provision_impacket,
         "patator": provision_patator,
         "mongodb": lambda: provision_mongosh(force=args.force),
@@ -1329,6 +1374,25 @@ def main():
         "oracle": lambda: provision_oracle(force=args.force),
         "xray": lambda: provision_xray(force=args.force),
     }
+
+    names = args.tools
+    if names is None and not only_flags:
+        # 全量必须把 special 也带上。它们**不在 SOURCES 表里**，而下面只遍历
+        # names——只取 SOURCES.keys() 的话，这些工具（sqlmap / netexec / zap /
+        # oracle / jndi / mongodb / usql / impacket / exploitdb / xray）永远不会
+        # 被默认安装，而 README 又写着「全量安装」。只保留注册表里确实存在的，
+        # 免得装出列表里没有的东西。
+        try:
+            with open(TOOLS_FILE, encoding="utf-8") as f:
+                registered = {str(t.get("name", "")) for t in json.load(f)}
+        except Exception:
+            registered = set(special)
+        names = list(SOURCES.keys()) + [n for n in special if n in registered]
+    names = names or []
+    if args.all:
+        _phase(f"工具二进制（{len(names)} 个）")
+    placed_map = {}
+
     for name in names:
         if name in special:
             try:
@@ -1363,9 +1427,10 @@ def main():
 
     update_tools_json(placed_map)
 
-    # 全量安装（无参数直接跑）时一并还原 jar 包；用 --tools/--jars 挑了具体目标
-    # 就不顺带拉这 584 MB，避免「只想装个 nuclei」却等半小时。
-    if not only_flags and args.tools is None:
+    # 默认全量安装（不带任何开关直接跑）时一并还原 jar 包；用 --tools/--jars 挑了
+    # 具体目标就不顺带拉这 584 MB，避免「只想装个 nuclei」却等半小时。
+    # --all 例外：它上面已经显式跑过这两步，这里再跑一次会在 --force 下重复下载。
+    if not only_flags and args.tools is None and not args.all:
         try:
             provision_jars(force=args.force)
         except Exception as e:
