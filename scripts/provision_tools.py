@@ -1315,6 +1315,7 @@ def update_tools_json(placed_map):
         return
     with open(TOOLS_FILE, "r", encoding="utf-8") as f:
         tools = json.load(f)
+    changed = False
     for t in tools:
         name = str(t.get("name", ""))
         if name not in placed_map:
@@ -1333,7 +1334,14 @@ def update_tools_json(placed_map):
         t["path"] = f"/tools/{subdir}/{binary}" if not binary.startswith("_venv") \
             else f"/tools/{binary}"
         print(f"[更新] {name} → path={t['path']}")
-    with open(TOOLS_FILE, "w", encoding="utf-8") as f:
+        changed = True
+
+    if not changed:
+        return
+    # 没变化就不写回——每次重写会让工作区凭空变脏。写的时候强制 LF：
+    # Windows 上 open(..., "w") 默认把 \n 翻成 \r\n，会让 git 认为整个文件
+    # 都改了（diff 却是空的，最难查的那种「脏」）。
+    with open(TOOLS_FILE, "w", encoding="utf-8", newline="\n") as f:
         json.dump(tools, f, ensure_ascii=False, indent=2)
 
 
