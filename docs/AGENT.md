@@ -210,7 +210,7 @@ tools/_venv/bin/python main.py
 | Burp 双击**毫无反应**（非崩溃） | PATH 里是旧 JDK（如 8），而 Burp 2026.x 需要 **21+** | `python3 scripts/setup_burp.py`（自动注入正确 JDK）|
 | Burp MCP 连接返回 **403** | Host 校验：只接受 `Host: 127.0.0.1:9876` | 用 Windows 侧 java 跑 proxy，见 §3.6 |
 | Burp MCP 的 `Enabled` 打开后仍显示 **Disabled** | 社区版不支持 AI 功能（授权限制）| 需 Professional 版，见 §3.6——不要再尝试调配置 |
-| `hydra` 报缺失（**仅 Windows 端**）| **Windows 无官方版本**，装不了 | 正常现象，**不要尝试安装**（winget 里的同名包是游戏启动器）。爆破需求用 nmap 的 NSE brute 脚本：`nmap -p22 --script ssh-brute ...` |
+| `hydra` 字段在 Windows 上显示为 nxc | hydra 本体无 Windows 版，`hydra` 条目指向的 `tools/brute/` 调度器**自动落到 netexec**——这是设计行为，不是故障 | 无需处置。用 `--backend` 可强制指定，`--show` 看实际命令 |
 | `tools/webshell/behinder_php.py` **反复消失**，`git status` 显示 `D`；用到冰蝎协议时报 `OSError` / `EBADF` | **杀软按访问扫描把该文件隔离了**（火绒等）。它含冰蝎的 AES 与载荷特征串，易被判为 hacktool。特征是：`git checkout` 恢复后文件在、`stat` 也在，**一旦被 Python 读取就报错，随后文件从磁盘消失** | 提示用户把工具箱目录加进杀软**信任区**，然后 `git checkout -- tools/webshell/behinder_php.py` 恢复。⚠️ **不要试图绕过杀软**（编码混淆、改名、还原隔离区都不行）——那是用户机器上的安全控制，加不加白名单由用户决定。用户不加就如实说明：Windows 端只有哥斯拉、蚁剑两条线，冰蝎用 WSL 侧 |
 
 > `netexec` 的补充：它是 PyPI 上无发行包的包，需从 GitHub 装，且其构建依赖 `poetry-dynamic-versioning` 会读取 git 元数据——用源码 tarball 安装时需绕过：`POETRY_DYNAMIC_VERSIONING_BYPASS=0.0.0 pip install <tarball>`。
@@ -222,7 +222,7 @@ tools/_venv/bin/python main.py
 用**结构化**的方式汇报，至少包含：
 
 1. **平台信息** —— 在哪装的（WSL / Windows / 双端）、Python 版本
-2. **工具就绪数** —— 例如 `59 个 AI 可调用工具中 57 个依赖就绪`
+2. **工具就绪数** —— 两端现在都是 `59/59`。若你的数量更少，逐条看 `doctor` 报的原因，别照抄旧文档里的「预期缺失」
 3. **仍缺失的项及原因** —— 明确区分「不可得」（商业软件 / 无公开源）与「安装失败」。
    几个**预期内、不要试图修复**的缺失：
    - `CobaltStrike` / `BurpSuite` / `蚁剑`：商业或需自备（Burp 见 §3.6）
