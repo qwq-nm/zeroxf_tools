@@ -35,7 +35,7 @@ git clone https://github.com/qwq-nm/zeroxf_tools.git
 cd zeroxf_tools
 ```
 
-**成功判据**：`config/tools.json` 存在，且 `python3 -c "import json;print(len(json.load(open('config/tools.json'))))"` 输出 **65**。
+**成功判据**：`config/tools.json` 存在，且 `python3 -c "import json;print(len(json.load(open('config/tools.json'))))"` 输出 **63**。
 
 > ⚠️ 若 `tools.json` 不存在或数量不对，说明 clone 到的是旧版本，执行 `git pull`。
 
@@ -111,7 +111,7 @@ python3 scripts/verify_all.py
 ./geshell list
 ```
 
-**期望**：列出 65 个工具，其中 59 个标 `✓`（AI 可调用）。
+**期望**：列出 63 个工具，其中 57 个标 `✓`（AI 可调用）。
 
 ### 3.4 抽样实调
 
@@ -135,7 +135,7 @@ printf '%s\n' \
  | python3 ai/mcp_server.py
 ```
 
-**期望**：`initialize` 返回 `serverInfo.name == "tianhu-geshell"`；`tools/list` 返回 **59** 个工具。
+**期望**：`initialize` 返回 `serverInfo.name == "tianhu-geshell"`；`tools/list` 返回 **57** 个工具。
 
 ### 3.6 Burp Suite MCP（可选，若用户要用 Burp）
 
@@ -222,13 +222,12 @@ tools/_venv/bin/python main.py
 用**结构化**的方式汇报，至少包含：
 
 1. **平台信息** —— 在哪装的（WSL / Windows / 双端）、Python 版本
-2. **工具就绪数** —— 两端现在都是 `59/59`。若你的数量更少，逐条看 `doctor` 报的原因，别照抄旧文档里的「预期缺失」
+2. **工具就绪数** —— 两端现在都是 `57/57`。若你的数量更少，逐条看 `doctor` 报的原因，别照抄旧文档里的「预期缺失」
 3. **仍缺失的项及原因** —— 明确区分「不可得」（商业软件 / 无公开源）与「安装失败」。
    几个**预期内、不要试图修复**的缺失：
    - `CobaltStrike` / `BurpSuite` / `蚁剑`：商业或需自备（Burp 见 §3.6）
 
    以下几项**已经不再是缺失项**，别再当预期缺失报给用户：
-   - `fastjson` / `log4j`：已由自研的 `javadeser` 覆盖（协议自己实现）
    - `hydra`（Windows）：该条目指向 `tools/brute/` 调度器，Windows 自动落到 netexec
    - `oracle`（Windows）：Oracle CDN 的版本化直链是公开的，`--tools oracle` 可自动装
 4. **验证结果** —— `doctor` / `selftest` / MCP / GUI 各自的结论

