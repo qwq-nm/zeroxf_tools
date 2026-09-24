@@ -56,8 +56,15 @@ def section(title):
 
 
 def run(cmd, cwd=None, timeout=120):
-    return subprocess.run(cmd, cwd=cwd or BASE, capture_output=True, text=True,
-                          timeout=timeout)
+    """跑一条命令并捕获输出。
+
+    **必须显式指定 utf-8**：Windows 上 `text=True` 会按 ANSI 代码页（中文
+    环境是 GBK）解码，而工具箱的输出是 UTF-8（带 ✓/✗ 和中文）。不指定的话
+    解码抛 UnicodeDecodeError，stdout 直接变成 None，后续全部报
+    `'NoneType' has no attribute 'splitlines'`——症状离根因很远，很难查。
+    """
+    return subprocess.run(cmd, cwd=cwd or BASE, capture_output=True,
+                          encoding="utf-8", errors="replace", timeout=timeout)
 
 
 def py():
@@ -160,7 +167,8 @@ def check_registry(quick):
     try:
         p = subprocess.run([py(), os.path.join(BASE, "ai", "mcp_server.py")],
                            input="\n".join(json.dumps(r) for r in reqs) + "\n",
-                           capture_output=True, text=True, timeout=60, cwd=BASE)
+                           capture_output=True, encoding="utf-8", errors="replace",
+                           timeout=60, cwd=BASE)
         got = None
         for line in p.stdout.splitlines():
             try:
