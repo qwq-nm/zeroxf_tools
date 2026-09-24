@@ -331,7 +331,15 @@ python3 scripts/provision_tools.py --help                        # 查看全部�
 
 ### 方式三：交给 AI Agent
 
-如果你在用 Claude Code / 其他 AI 编码助手，把 **[docs/AGENT.md](docs/AGENT.md)** 的内容发给它，它能自行完成环境探测、依赖安装与验证。
+如果你在用 Claude Code / 其他 AI 编码助手，**把下面这个地址发给它**（可以直接复制粘贴，
+也可以说「照这个装」），它能自行完成环境探测、依赖安装与验证：
+
+```
+https://raw.githubusercontent.com/qwq-nm/zeroxf_tools/main/docs/AGENT.md
+```
+
+> 想先自己看一眼渲染版：<https://github.com/qwq-nm/zeroxf_tools/blob/main/docs/AGENT.md>
+> 上面给的是 raw 地址——AI 抓取时拿到的是纯文本 markdown，比 HTML 页面更干净可靠。
 
 ---
 
