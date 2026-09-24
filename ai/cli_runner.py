@@ -76,6 +76,15 @@ def _resolve_path(tool: Dict[str, Any], path: str) -> str:
                 for cand in (base + ".bat", base + ".cmd", base + ".exe"):
                     if os.path.exists(cand):
                         return cand
+            # (d) 同一个工具的**扩展名**两端不同：hashcat 在 Linux 是
+            #     hashcat.bin、Windows 是 hashcat.exe。注册表里写的是平台中立的
+            #     Linux 名，这里换掉扩展名再试一遍，免得 provision 每次都要把
+            #     tools.json 改成 Windows 写法（那是共享文件，改了就会脏）。
+            stem, ext = os.path.splitext(ap)
+            if ext:
+                for cand_ext in ("", ".exe", ".bat", ".cmd"):
+                    if cand_ext != ext and os.path.exists(stem + cand_ext):
+                        return stem + cand_ext
         return ap
     return p
 

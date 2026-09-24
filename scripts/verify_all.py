@@ -139,7 +139,10 @@ def check_registry(quick):
 
     # geshell list
     r = run(geshell("list"))
-    listed = sum(1 for l in r.stdout.splitlines() if "✓" in l or "✗" in l)
+    # 只数表格行：状态列现在是三态（✓/⚠/✗），而表尾那行汇总里三种符号都有，
+    # 会被误当成一行工具。以「共 N 个」开头的就是汇总行，排除掉。
+    listed = sum(1 for l in r.stdout.splitlines()
+                 if ("✓" in l or "⚠" in l or "✗" in l) and not l.lstrip().startswith("共 "))
     if listed == total:
         rec(OK, "reg", f"geshell list 一致（{listed}）")
     else:

@@ -1277,6 +1277,39 @@ def provision_jars(force=False):
     return sorted(done)
 
 
+def _path_resolves(path):
+    """注册表里这个 path 在本平台能否解析到真实文件。
+
+    镜像 ai/cli_runner._resolve_path 的回落规则（Windows 的 .exe/.bat/.cmd 后缀、
+    bin/→Scripts/、扩展名替换）。provision 用它决定「要不要改写 tools.json 里的
+    path」——已经在共享注册表里写死的路径若能解析，就说明它是平台中立写法，
+    不该被改成本平台口味。
+    """
+    if not path:
+        return False
+    p = str(path)
+    if not ("/" in p or "\\" in p):
+        return shutil.which(p) is not None
+    base = os.path.join(BASE_DIR, p.lstrip("/\\").replace("/", os.sep))
+    if os.path.exists(base):
+        return True
+    for cand in (base + EXE, base + ".exe", base + ".bat", base + ".cmd"):
+        if os.path.exists(cand):
+            return True
+    if os.name == "nt":
+        alt = base.replace("\\bin\\", "\\Scripts\\")
+        if alt != base:
+            for cand in (alt, alt + ".exe", alt + ".py", alt + ".bat", alt + ".cmd"):
+                if os.path.exists(cand):
+                    return True
+    stem, ext = os.path.splitext(base)
+    if ext:
+        for ce in ("", ".exe", ".bat", ".cmd", ".bin"):
+            if ce != ext and os.path.exists(stem + ce):
+                return True
+    return False
+
+
 def update_tools_json(placed_map):
     if not placed_map:
         return
@@ -1284,11 +1317,22 @@ def update_tools_json(placed_map):
         tools = json.load(f)
     for t in tools:
         name = str(t.get("name", ""))
-        if name in placed_map:
-            subdir, binary = placed_map[name]
-            t["path"] = f"/tools/{subdir}/{binary}" if not binary.startswith("_venv") \
-                else f"/tools/{binary}"
-            print(f"[更新] {name} → path={t['path']}")
+        if name not in placed_map:
+            continue
+        # 已在注册表里的路径若在本平台能解析到，就别改。tools.json 是**两端共享**
+        # 的单一数据源，把它改成本平台口味的写法（Windows 上就会出现
+        # `_venv\Scripts\sqlmap.exe` 这类反斜杠 + .exe 的路径）会让 Windows 每次
+        # provision 都留一处本地改动，提交了又破坏 Linux。
+        if _path_resolves(t.get("path")):
+            print(f"[保留] {name} 的 path 已可解析，不改写")
+            continue
+        subdir, binary = placed_map[name]
+        # 顺手把分隔符统一成正斜杠，避免混进 Windows 的反斜杠
+        subdir = str(subdir).replace("\\", "/")
+        binary = str(binary).replace("\\", "/")
+        t["path"] = f"/tools/{subdir}/{binary}" if not binary.startswith("_venv") \
+            else f"/tools/{binary}"
+        print(f"[更新] {name} → path={t['path']}")
     with open(TOOLS_FILE, "w", encoding="utf-8") as f:
         json.dump(tools, f, ensure_ascii=False, indent=2)
 
