@@ -314,6 +314,7 @@ def doctor() -> int:
                 print(f"[警告] {t.get('name')} 依赖缺失: {dep}")
 
     # 5. 路径存在性 + bat 透传
+    missing_path = set()          # 第 6 步据此去重，避免同一原因报两遍
     for t in tools:
         p = str(t.get("path", "") or "")
         if not p:
@@ -324,6 +325,7 @@ def doctor() -> int:
         resolved = p if is_bare else cli_runner._resolve_path(t, p)
         if not is_bare and not os.path.exists(resolved):
             print(f"[警告] {t.get('name')} 路径不存在: {p}")
+            missing_path.add(str(t.get("name")))
         if str(t.get("type", "")).strip() in ("批处理", "batch") and not is_bare \
                 and os.path.exists(resolved) and p.lower().endswith(".bat"):
             try:
@@ -337,6 +339,10 @@ def doctor() -> int:
     # 6. AI 可调用工具命令可执行性
     for t in tools:
         if not is_cli_callable(t):
+            continue
+        # 第 5 步已经就「路径不存在」报过这个工具了。同一件事报两遍（oracle 那种
+        # 会同时出现「路径不存在」和「入口不存在」）只会让警告数虚高、掩盖真问题。
+        if str(t.get("name")) in missing_path:
             continue
         built = cli_runner.build_command(t, ["--help"])
         if built.get("kind") != "cmd" or built.get("err"):
