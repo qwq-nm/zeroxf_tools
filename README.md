@@ -521,3 +521,6 @@ Windows 的 CMD 不支持 UNC 路径作为工作目录。启动脚本已用 `pus
 > ⚠️ **仅限在明确授权的资产和测试范围内使用。** 未授权扫描、爆破、利用或访问他人系统违法。使用者需自行承担合规责任。
 
 CLI 架构参考 [One-JiaSuo/Jiasuo-tools](https://github.com/One-JiaSuo/Jiasuo-tools)。
+
+如果这个项目对你有帮助，欢迎点个 [⭐ Star](https://github.com) 支持一下！
+
