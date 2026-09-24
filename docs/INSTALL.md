@@ -10,7 +10,7 @@
 | --- | --- |
 | Python | 3.8+（Windows 建议 3.10+；GUI 需要 PyQt6，其 wheel 覆盖 3.8–3.13） |
 | 系统 | Windows 10/11、WSL2、主流 Linux 发行版、macOS |
-| 磁盘 | **约 5 GB**（工具二进制 ~3.5 G + 便携 JDK ~1.3 G） |
+| 磁盘 | **约 5 GB**（工具二进制 ~2.6 G + 便携 JDK ~1.3 G） |
 | 网络 | 能访问 GitHub / GitLab / PyPI（部分资产走 Azure Blob、downloads.mongodb.com） |
 
 > 不必一次装全。只跑 CLI 的话不需要 PyQt6；只做信息收集的话可以不装 JDK（省 1.3 G）。
@@ -23,7 +23,7 @@
 git clone https://github.com/qwq-nm/zeroxf_tools.git
 cd zeroxf_tools
 
-python3 scripts/provision_tools.py --jdk    # 便携 JDK（14 个 jar 类工具需要）
+python3 scripts/provision_tools.py --jdk    # 便携 JDK（13 个 jar 类工具需要）
 python3 scripts/provision_tools.py          # 全部工具二进制（含 jar 包，约 4.1 GB）
 python3 scripts/provision_tools.py --gui    # GUI 运行时（用界面才需要）
 ```
@@ -50,8 +50,8 @@ cd zeroxf_tools
 仓库里**只有代码和工具注册表**（`config/tools.json`）。工具二进制、JDK、GUI 运行时都不入库——它们体积大、且分平台，由安装脚本按需拉取。
 
 > ⚠️ 注意 `tools/*` 在 `.gitignore` 里是**默认忽略**的，只有几个「仓库自带源码」目录例外
-> （`oracle-py` / `revshell` / `sstikit` / `springkit` / `tomcatscanpro` / `dedecmscan` /
-> `rediskit` / `ruoyikit` / `avoidkilling` / `docem` / `dirsearch`）。这些是天狐原创脚本，
+> （`revshell` / `sstikit` / `springkit` / `tomcatscanpro` / `dedecmscan` /
+> `rediskit` / `ruoyikit` / `avoidkilling` / `docem` / `dirsearch` / `webshell` / `dbx`）。这些是自写脚本，
 > 没有任何下载源，**必须靠 git 分发**。若你自定义了 `.gitignore`，别把它们一起挡掉——
 > 否则界面里有卡片、一点就报路径不存在。
 
@@ -86,8 +86,8 @@ python3 scripts/provision_tools.py --jars     # 单独安装 / 补齐
 python3 scripts/provision_tools.py --jars --force   # 重新下载并覆盖
 ```
 
-这 14 个工具（`shiro` `struts2` `weblogic` `thinkphp` `nacos` `jenkins` `xxl-job`
-`jeecg` `dbcombo` `iwannagetall` `hyacinth` `godzilla` `behinder` `heapdump`）
+这 13 个工具（`shiro` `struts2` `weblogic` `thinkphp` `nacos` `jenkins` `xxl-job`
+`jeecg` `iwannagetall` `hyacinth` `godzilla` `behinder` `heapdump`）
 的 jar 都是**第三方作者作品，没有公开下载源**，provision 没法逐个从上游拉。
 
 它们合计 **632 MB**，其中 `weblogic`(130 MB)、`iwannagetall`(180 MB)、
@@ -139,11 +139,8 @@ python3 scripts/provision_tools.py --gui
 
 | 工具 | 需要 | 安装 |
 | --- | --- | --- |
-| `oracle`（sqlplus） | `libaio.so.1` | `apt install libaio1t64`，并建立软链：<br>`ln -sf /usr/lib/x86_64-linux-gnu/libaio.so.1t64 /usr/lib/x86_64-linux-gnu/libaio.so.1` |
 | `netexec` | Rust 工具链（其 `aardwolf` 依赖需编译） | `curl https://sh.rustup.rs -sSf \| sh -s -- -y --profile minimal` |
-| `hydra` / `mysql` / `metasploit` | 系统包 | `apt install hydra default-mysql-client`；metasploit 用官方 installer |
-
-> Ubuntu 24.04 上 `libaio1t64` 提供的文件名是 `libaio.so.1t64`，而 sqlplus 找的是 `libaio.so.1`，所以要建那条软链。
+| `hydra` / `metasploit` | 系统包 | `apt install hydra`；metasploit 用官方 installer |
 
 ---
 
@@ -223,7 +220,7 @@ WSLg 的 Wayland/XWayland 双栈问题。工具箱已自动注入 `GDK_BACKEND=x
 ./geshell list        # 列出全部工具与可调用状态
 ```
 
-`doctor` 报出的 `CobaltStrike` / `BurpSuite` / `蚁剑` / `fastjson` / `log4j` 属**预期**——它们是商业软件或无可公开来源，说明见 [README](../README.md#关于不可得的工具)。
+`doctor` 报出的 `CobaltStrike` / `BurpSuite` / `蚁剑` 属**预期**——它们是商业软件或无可公开来源，说明见 [README](../README.md#关于不可得的工具)。
 
 ---
 

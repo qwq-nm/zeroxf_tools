@@ -50,13 +50,11 @@ geshell <工具名> [参数...]
 | jenkins | jenkins | JAVA8 | exploit | Jenkins 漏洞利用 GUI |
 | xxljob | xxl-job | JAVA8 | exploit | XXL-JOB 漏洞利用 |
 | dbx | dbx | Python | active | 数据库工作台 DBX：支持 70+ 种库（MySQL/PG/SQLite/Oracle/SQL Se |
-| mysql | mysql | 命令行 | active | MySQL 客户端/综合利用 |
 | netexec | netexec | 命令行 | active | 内网认证/枚举（原 crackmapexec） |
 | sliver | sliver | 命令行 | post-exploit | Sliver 开源 C2 |
 | dirsearch | dirsearch | Python | passive | Web 目录扫描（枷锁版） |
 | revshell | revshell | Python | post-exploit | 反弹 Shell 命令生成（11 种语言/环境，含监听命令） |
 | jeecg | jeecg | JAVA8 | exploit | Jeecg-Boot 漏洞利用 |
-| dbcombo | dbcombo | JAVA8 | exploit | 数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG） |
 | iwannagetall | iwannagetall | JAVA8 | exploit | OA 综合利用 |
 | hyacinth | hyacinth | JAVA8 | exploit | Java 综合利用 v2.0.2 |
 | webshell | webshell | Python | post-exploit | WebShell 管理 CLI：直连蚁剑/冰蝎/哥斯拉三种协议的 PHP 马，可执行命令、探服务器信 |
@@ -525,17 +523,3 @@ geshell <工具名> [参数...]
 - 参数模式：passthrough
 - 别名：dbx, 数据库, database
 - 示例：`geshell dbx -n prod -c "SELECT * FROM users"`
-
-### mysql（mysql）
-
-- 说明：MySQL 客户端/综合利用
-- 风险：active
-- 参数模式：passthrough
-- 别名：mysql连接
-
-### dbcombo（dbcombo）
-
-- 说明：数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG）
-- 风险：exploit
-- 参数模式：passthrough
-- 别名：数据库综合

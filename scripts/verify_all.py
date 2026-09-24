@@ -114,7 +114,7 @@ def check_repo():
     # 关键：源码类工具在 .gitignore 白名单里，必须真的被追踪
     tracked = set(run(["git", "ls-files"]).stdout.split())
     src_tools = ["tools/webshell/webshell_cli.py", "tools/revshell/revshell_cli.py",
-                 "tools/oracle-py/oracle_cli.py", "tools/sstikit/ssti_cli.py",
+                 "tools/sstikit/ssti_cli.py",
                  "tools/springkit/spring_cli.py", "tools/ruoyikit/ruoyi_cli.py"]
     missing = [t for t in src_tools if t not in tracked]
     if missing:
@@ -248,7 +248,6 @@ def check_dist():
     src = {
         "webshell": "tools/webshell/webshell_cli.py",
         "revshell": "tools/revshell/revshell_cli.py",
-        "oracle-py": "tools/oracle-py/oracle_cli.py",
         "ssti": "tools/sstikit/ssti_cli.py",
         "spring": "tools/springkit/spring_cli.py",
         "ruoyi": "tools/ruoyikit/ruoyi_cli.py",
@@ -271,7 +270,7 @@ def check_dist():
             "weblogic": "weblogic/WeblogicTool.jar", "thinkphp": "thinkphp/ThinkphpGUI.jar",
             "nacos": "nacos/nacos-exploit.jar", "jenkins": "jenkins/JenkinsExploit.jar",
             "xxl-job": "xxljob/xxl-job-attack.jar", "jeecg": "jeecg/jeecgExploitss.jar",
-            "dbcombo": "dbcombo/DBUtil.jar", "iwannagetall": "iwannagetall/IWannaGetAll.jar",
+            "iwannagetall": "iwannagetall/IWannaGetAll.jar",
             "hyacinth": "hyacinth/hyacinth.jar", "godzilla": "godzilla/godzilla.jar",
             "behinder": "behinder/Behinder.jar", "heapdump": "heapdump/JDumpSpider.jar"}
     have = [k for k, v in jars.items() if os.path.exists(os.path.join(TOOLS_DIR, v))]

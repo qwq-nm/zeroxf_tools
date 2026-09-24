@@ -1,9 +1,9 @@
 # zeroxf 工具箱 · AI 版
 
-**一个既给人用、也给 AI 用的渗透测试工具箱**——59 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
+**一个既给人用、也给 AI 用的渗透测试工具箱**——57 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
 
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20WSL%2FLinux-blue)](#安装)
-[![Tools](https://img.shields.io/badge/tools-59%20(%E5%85%B6%E4%B8%AD53%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
+[![Tools](https://img.shields.io/badge/tools-57%20(%E5%85%B6%E4%B8%AD51%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-ready-purple)](#mcp-ai-调用)
 
@@ -37,7 +37,7 @@
 
 ## 亮点
 
-- **59 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **53 个可被 AI 直接调用**
+- **57 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **51 个可被 AI 直接调用**
 - **三套入口，一份配置** —— GUI 里能点的，CLI 和 MCP 里都能调，不会出现"界面有、命令行没有"的割裂
 - **依赖自动装配** —— `provision_tools.py` 一条命令拉齐全部工具二进制、便携 JDK、GUI 运行时，自动适配 Windows / Linux / macOS
 - **零环境依赖的 JDK 方案** —— 内置便携 JDK 8/11/17（8 与 11 为 Liberica full 版，内含 JavaFX），12 个 jar 类工具无需系统装 Java
@@ -50,7 +50,7 @@
 
 ## 集成的工具
 
-**共 59 个**（53 个 AI 可直接调用），按 9 大类组织：
+**共 57 个**（51 个 AI 可直接调用），按 9 大类组织：
 
 | 分类 | 数量 | 代表工具 |
 | --- | ---: | --- |
@@ -62,7 +62,7 @@
 | 爆破 | 2 | `hydra` `hashcat` |
 | 隧道代理 | 3 | `frps` `frpc` `chisel` |
 | 后渗透 | 5 | `metasploit` `sliver` `cobaltstrike` `avoidkilling` `revshell` |
-| 数据库利用 | 3 | **`dbx`**（70+ 种库，AI 可调）`mysql` `dbcombo` |
+| 数据库利用 | 1 | **`dbx`**（70+ 种库，CLI + MCP 双入口）|
 | WebShell 管理 | 4 | **`webshell`**（CLI，AI 可调）`蚁剑` `godzilla` `behinder` |
 | 抓包与代理 | 1 | `BurpSuite` |
 
@@ -118,8 +118,9 @@ geshell dbx -n prod -c "SELECT * FROM users WHERE role='admin'"
 > 要放开得在 DBX 设置 → MCP 里调（只读 / 数据读写 / 完全访问）。**那是安全边界**——
 > 尤其当 AI 在自动跑查询时，别为图省事直接开到完全访问。连接白名单也在同一处。
 
-> **`dbcombo` 保留**：它是 Java 写的数据库**利用**工具（不是客户端），DBX 替代不了。
-> **`mysql` 保留**：那是系统级的命令行客户端（apt/winget 装），性质同 `nmap`。
+> **`dbcombo` 与 `mysql` 已一并移除**：前者是数据库**利用**工具（JavaFX 图形界面，
+> AI 本就调不了），后者是被 DBX 完全覆盖的冗余客户端。数据库这一类现在只有 `dbx`。
+> 工具箱因此不再内置数据库利用能力——DBX 是查询工作台，不做 UDF/xp_cmdshell 那些。
 
 ### WebShell 管理：三种 GUI 工具的协议，收进一个 CLI
 
@@ -161,8 +162,8 @@ geshell webshell -u ... -p pass -t antsword --download /etc/passwd:./passwd.txt
 
 ### jar 类工具为什么走 Release 而不是 git
 
-14 个 Java 利用/管理工具（`shiro` `struts2` `weblogic` `thinkphp` `nacos` `jenkins`
-`xxl-job` `jeecg` `dbcombo` `iwannagetall` `hyacinth` `godzilla` `behinder` `heapdump`）
+13 个 Java 利用/管理工具（`shiro` `struts2` `weblogic` `thinkphp` `nacos` `jenkins`
+`xxl-job` `jeecg` `iwannagetall` `hyacinth` `godzilla` `behinder` `heapdump`）
 的 jar 是第三方作者作品，**没有公开下载源**，脚本无法逐个从上游拉取。
 
 它们合计 **632 MB**，其中 `weblogic`(130 MB)、`iwannagetall`(180 MB)、`behinder`(126 MB)
@@ -273,10 +274,10 @@ python3 scripts/setup_burp.py
 
 | 平台 | 就绪 | 缺失 |
 | --- | --- | --- |
-| **WSL / Linux** | **53/53** | —— |
-| **Windows** | **53/53** | —— |
+| **WSL / Linux** | **51/51** | —— |
+| **Windows** | **51/51** | —— |
 
-**两端完全一致**（都是 53/53）。`geshell doctor` 只会列出 3 条——`CobaltStrike`、
+**两端完全一致**（都是 51/51）。`geshell doctor` 只会列出 3 条——`CobaltStrike`、
 `BurpSuite`、`蚁剑`，都是商业软件或需自备，不会静默失败。
 
 > 上表的就绪判据是**入口文件是否存在**。Windows 侧另有一个它测不出来的坑：
@@ -290,7 +291,7 @@ python3 scripts/setup_burp.py
 
 ## 安装
 
-### 先搞清楚：59 个工具分别从哪来
+### 先搞清楚：57 个工具分别从哪来
 
 工具箱的获取方式**不是一种而是四种**，因为它们性质不同：
 
@@ -329,7 +330,7 @@ cd zeroxf_tools
 python3 scripts/provision_tools.py --all
 ```
 
-**一条命令装完全部**：便携 JDK + 28 个工具二进制 + 14 个 jar 包 + 运行时依赖
+**一条命令装完全部**：便携 JDK + 28 个工具二进制 + 13 个 jar 包 + 运行时依赖
 + GUI 运行时，约 4.9 GB。Windows 上会自动额外补装系统级工具
 （nmap / MySQL 客户端 / Metasploit）。
 
@@ -421,7 +422,7 @@ python3 scripts/verify_all.py --offline  # 不联网
 
 ### MCP（AI 调用）
 
-`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 53 个可调用工具暴露为 `tool_<名称>`：
+`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 51 个可调用工具暴露为 `tool_<名称>`：
 
 在 `~/.claude.json` 的 `mcpServers` 段加入：
 
@@ -448,7 +449,7 @@ python3 scripts/verify_all.py --offline  # 不联网
 | --- | --- | --- |
 | **Skill**（推荐） | 技能的 `name`+`description` 常驻，AI 判断场景相关时自己调用 | 约 30–60 token |
 | `CLAUDE.md` 一行 | 每轮都在上下文里，最稳，但只告知「存在」，不告诉「该用哪个」 | 约 50 token |
-| 注册 MCP | 53 个工具直接进工具列表 | 每个会话 53 份工具定义 |
+| 注册 MCP | 51 个工具直接进工具列表 | 每个会话 51 份工具定义 |
 
 **不做任何配置的后果**：AI 根本不知道工具箱存在。拿到一道题，它看到的工具就是
 它自己的那些，不会想到「先翻翻工具箱里有什么现成的」。
@@ -478,7 +479,7 @@ cp docs/skill/zeroxf-toolbox.md ~/.claude/skills/zeroxf-toolbox/SKILL.md
 
 #### 方式三：注册 MCP
 
-见上一节。适合希望把 53 个工具当**原生工具**调用的场景；代价是每个会话都要
+见上一节。适合希望把 51 个工具当**原生工具**调用的场景；代价是每个会话都要
 加载 57 份工具定义。日常用 Skill + CLI 通常更划算。
 
 ---

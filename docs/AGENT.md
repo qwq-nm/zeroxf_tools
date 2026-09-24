@@ -37,7 +37,7 @@ git clone https://github.com/qwq-nm/zeroxf_tools.git
 cd zeroxf_tools
 ```
 
-**成功判据**：`config/tools.json` 存在，且 `python3 -c "import json;print(len(json.load(open('config/tools.json'))))"` 输出 **59**。
+**成功判据**：`config/tools.json` 存在，且 `python3 -c "import json;print(len(json.load(open('config/tools.json'))))"` 输出 **57**。
 
 > ⚠️ 若 `tools.json` 不存在或数量不对，说明 clone 到的是旧版本，执行 `git pull`。
 
@@ -51,12 +51,12 @@ cd zeroxf_tools
 python3 scripts/provision_tools.py --all      # 一条命令装完，约 4.9 G
 ```
 
-`--all` = 便携 JDK + 全部工具（28 个二进制 + 14 个 jar）+ 运行时依赖 + GUI 运行时，
+`--all` = 便携 JDK + 全部工具（28 个二进制 + 13 个 jar）+ 运行时依赖 + GUI 运行时，
 Windows 上另含系统级工具（nmap / MySQL / Metasploit）。
 需要分开装时用 `--jdk` / `--gui` / `--jars` / `--webshell-deps` 单个开关。
 
 > `--all` 里含从本仓库 **Release 资产**（tag `jar-tools-v1`）下载 584 MB 的
-> `zeroxf-jar-tools-v1.tar.gz` 以还原 14 个 jar 类工具。这些 jar 是第三方作品、
+> `zeroxf-jar-tools-v1.tar.gz` 以还原 13 个 jar 类工具。这些 jar 是第三方作品、
 > 无公开下载源，其中 3 个单个超 GitHub 100 MB 限制，所以只能走 Release。
 > 想跳过就改用 `--tools <名称>` 逐个装，或事后单独跑 `--jars`。
 > 下载失败不影响其余工具——脚本会报 `[失败] jars:` 后继续。
@@ -114,7 +114,7 @@ python3 scripts/verify_all.py
 ./geshell list
 ```
 
-**期望**：列出 59 个工具，表尾汇总为 `✓ 就绪 53   ⚠ 已注册但文件缺失 0   ✗ 未注册 6`。
+**期望**：列出 57 个工具，表尾汇总为 `✓ 就绪 51   ⚠ 已注册但文件缺失 0   ✗ 未注册 6`。
 
 > 状态列是三态：`✓` 就绪可直接调用 / `⚠` 已注册但文件没装（要跑 provision）/
 > `✗` 未注册为 AI 可调用。**只要 `⚠` 不是 0，就说明安装没跑完。**
@@ -141,7 +141,7 @@ printf '%s\n' \
  | python3 ai/mcp_server.py
 ```
 
-**期望**：`initialize` 返回 `serverInfo.name == "tianhu-geshell"`；`tools/list` 返回 **53** 个工具。
+**期望**：`initialize` 返回 `serverInfo.name == "tianhu-geshell"`；`tools/list` 返回 **51** 个工具。
 
 ### 3.6 Burp Suite MCP（可选，若用户要用 Burp）
 
@@ -207,7 +207,7 @@ tools/_venv/bin/python main.py
 | `UnsupportedCompressionMethodError: BCJ2` | hashcat 的 7z 用了 py7zr 不支持的过滤器 | 确认 `.buildtools/7zr.exe`(Win) 或 `7zz`(Linux) 存在；否则手动下载 [7zr.exe](https://www.7-zip.org/a/7zr.exe) 放入 |
 | `HTTP Error 416` | 断点续传越界 | 脚本会自动清除残留重下，重跑即可 |
 | `[失败] jars: HTTP Error 404` | Release 资产 `jar-tools-v1` 不存在（仓库被 fork 后 Release 不跟随，或资产被删） | 从上游 [qwq-nm/zeroxf_tools](https://github.com/qwq-nm/zeroxf_tools/releases) 手动下载 `zeroxf-jar-tools-v1.tar.gz`，解包把 `tools/` 覆盖到仓库根目录 |
-| 14 个 jar 工具（shiro/weblogic/哥斯拉…）报路径不存在 | 没跑 `--jars`，或跑了但 Release 拉取失败 | `python3 scripts/provision_tools.py --jars`，见上一行 |
+| 13 个 jar 工具（shiro/weblogic/哥斯拉…）报路径不存在 | 没跑 `--jars`，或跑了但 Release 拉取失败 | `python3 scripts/provision_tools.py --jars`，见上一行 |
 | `NoClassDefFoundError: javafx/...` | JDK 不是 full 版 | `python3 scripts/provision_tools.py --jdk --force` |
 | Java 工具段错误 / 闪退（WSL） | WSLg 的 Wayland/XWayland 双栈 | 运行前 `export GDK_BACKEND=x11`（工具箱已自动注入） |
 | `netexec` 安装失败 | 其 `aardwolf` 依赖需 Rust 编译，或源码拉取超时 | 装 Rust 后重试，见下方补充说明 |
@@ -228,7 +228,7 @@ tools/_venv/bin/python main.py
 用**结构化**的方式汇报，至少包含：
 
 1. **平台信息** —— 在哪装的（WSL / Windows / 双端）、Python 版本
-2. **工具就绪数** —— 两端现在都是 `53/53`。若你的数量更少，逐条看 `doctor` 报的原因，别照抄旧文档里的「预期缺失」
+2. **工具就绪数** —— 两端现在都是 `51/51`。若你的数量更少，逐条看 `doctor` 报的原因，别照抄旧文档里的「预期缺失」
 3. **仍缺失的项及原因** —— 明确区分「不可得」（商业软件 / 无公开源）与「安装失败」。
    几个**预期内、不要试图修复**的缺失：
    - `CobaltStrike` / `BurpSuite` / `蚁剑`：商业或需自备（Burp 见 §3.6）

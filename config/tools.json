@@ -829,25 +829,6 @@
     "group": ""
   },
   {
-    "name": "mysql",
-    "category": "数据库利用工具",
-    "type": "命令行",
-    "path": "mysql",
-    "description": "MySQL 客户端/综合利用",
-    "risk": "active",
-    "ai_callable": true,
-    "aliases": [
-      "mysql连接"
-    ],
-    "example": "",
-    "params_pre": "",
-    "params": "",
-    "weight": 3.0,
-    "url": "",
-    "tags": [],
-    "group": ""
-  },
-  {
     "name": "netexec",
     "category": "内网渗透工具",
     "type": "命令行",
@@ -936,25 +917,6 @@
     "ai_callable": true,
     "aliases": [
       "jeecg"
-    ],
-    "example": "",
-    "weight": 0.0,
-    "params": "",
-    "params_pre": "",
-    "url": "",
-    "tags": [],
-    "group": ""
-  },
-  {
-    "name": "dbcombo",
-    "category": "数据库利用工具",
-    "type": "JAVA8",
-    "path": "/tools/dbcombo/DBUtil.jar",
-    "description": "数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG）",
-    "risk": "exploit",
-    "ai_callable": true,
-    "aliases": [
-      "数据库综合"
     ],
     "example": "",
     "weight": 0.0,

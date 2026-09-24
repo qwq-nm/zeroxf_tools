@@ -11,11 +11,13 @@
 
 说明：
 - SOURCES 表内是能从官方 release 拉取的开源工具；其余走下方 SPECIAL 分发表里的专用函数
-  （sqlmap/netexec/impacket/mongodb/usql/jndi/zap/exploitdb/oracle/xray）。
+  （sqlmap/netexec/impacket/jndi/zap/exploitdb/xray/dbx 等）。
+  注：usql/mongosh/sqlcmd/oracle 的函数仍保留，但对应条目已从注册表移除
+  （数据库客户端统一到 DBX），全量安装不会再调用它们。
 - --jdk 安装便携 Liberica JDK 8/11/17 到 Java_path/，8 与 11 为 full 版（含 JavaFX），
   供 12 个 jar 类工具使用，无需系统 java。
 - --gui 安装 PyQt6 到 tools/_venv，供 main.py/launcher.py 的图形界面使用。
-- --jars 还原 14 个 jar 类工具（632 MB，随本仓库的 GitHub Release 分发，见 provision_jars）。
+- --jars 还原 13 个 jar 类工具（632 MB，随本仓库的 GitHub Release 分发，见 provision_jars）。
 - CobaltStrike/Burp/蚁剑等商业或 GUI 工具不在表内，保持原样，doctor 会提示。
 - 同一脚本在 Windows 上重跑一次即可拉取 .exe 版本。
 """
@@ -112,7 +114,7 @@ PATH_MAP = {
 # 便携 JDK：解压到 Java_path/，目录名沿用 env_manager 内置约定（Java_8_win / Java_11_win）。
 #
 # 用 BellSoft Liberica 的 "full" 版而非 Temurin：full 版内置 JavaFX，而天狐多数 jar 工具
-# 是 JavaFX 写的（shiro/weblogic/thinkphp/jeecg/dbcombo/xxl-job/jenkins），常规 JDK 不含
+# 是 JavaFX 写的（shiro/weblogic/thinkphp/jeecg/xxl-job/jenkins），常规 JDK 不含
 # JavaFX，运行时报 NoClassDefFoundError: javafx/application/Application。
 # Liberica JDK 8 把 JavaFX 放在 jre/lib/ext，扩展类加载器会自动加载，无需 --module-path。
 JAVA_PATH_DIR = os.path.join(BASE_DIR, "Java_path")
@@ -124,7 +126,6 @@ MONGOSH_VERSION = "2.3.1"
 
 # ---------- 缺失工具的替代品 ----------
 # 原工具无法自动获取（商业授权 / 已停止分发 / 原包缺失），用功能等价的免 sudo 开源工具替代：
-#   mysql / oracle   → usql（单二进制通用 SQL 客户端，还顺带支持 mssql 等）
 #   fastjson / log4j → JNDI-Injection-Exploit（通用 JNDI 注入利用，两者通吃）
 #   xray             → OWASP ZAP（被动代理扫描，xray 已停止公开分发）
 #   hydra            → patator（多协议在线爆破，pip 安装）
@@ -973,7 +974,6 @@ def provision_zap(force=False):
 # winget 随 Windows 10 1809+ 自带，无需额外装包管理器。
 WINGET_PACKAGES = [
     ("nmap", "Insecure.Nmap"),
-    ("mysql", "Oracle.MySQL"),
 ]
 # Metasploit 官方 MSI（Rapid7），支持 /qn 静默安装；winget 源里没有它
 METASPLOIT_MSI = "https://windows.metasploit.com/metasploitframework-latest.msi"
@@ -1188,7 +1188,7 @@ def provision_searchsploit(force=False):
         return None
 
 
-# jar 类工具：14 个 Java 利用/管理工具的 jar，全部来自天狐工具箱 V4.0 原始发行包。
+# jar 类工具：13 个 Java 利用/管理工具的 jar，全部来自天狐工具箱 V4.0 原始发行包。
 # 它们是第三方作者的作品，没有任何公开下载源，provision 无法逐个拉取；
 # 合计 632 MB，其中 weblogic(130MB) / iwannagetall(180MB) / behinder(126MB)
 # 单个就超过 GitHub 单文件 100 MB 的硬限制，因此不能入 git ——
@@ -1207,7 +1207,6 @@ JAR_TOOLS = {
     "jenkins":      "jenkins/JenkinsExploit.jar",
     "xxl-job":      "xxljob/xxl-job-attack.jar",
     "jeecg":        "jeecg/jeecgExploitss.jar",
-    "dbcombo":      "dbcombo/DBUtil.jar",
     "iwannagetall": "iwannagetall/IWannaGetAll.jar",
     "hyacinth":     "hyacinth/hyacinth.jar",
     "godzilla":     "godzilla/godzilla.jar",
@@ -1217,7 +1216,7 @@ JAR_TOOLS = {
 
 
 def provision_jars(force=False):
-    """下载并还原 14 个 jar 类工具。
+    """下载并还原 13 个 jar 类工具。
 
     返回已就位的工具名列表。整体是一个 584 MB 的 tar.gz，下载走 _download
     （支持断点续传），解包用 tarfile 而非系统 tar —— Windows 上不必依赖
@@ -1450,7 +1449,7 @@ def main():
     ap.add_argument("--oracledb", action="store_true",
                     help="装 python-oracledb 到 tools/_venv（Oracle thin 模式，免客户端）")
     ap.add_argument("--jars", action="store_true",
-                    help="还原 14 个 jar 类工具（632 MB，从本仓库 Release 下载）")
+                    help="还原 13 个 jar 类工具（约 620 MB，从本仓库 Release 下载）")
     ap.add_argument("--webshell-deps", action="store_true",
                     help="装 webshell 工具的依赖（requests / pycryptodome）到 tools/_venv")
     ap.add_argument("--all", action="store_true",
