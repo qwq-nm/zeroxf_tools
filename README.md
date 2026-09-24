@@ -403,6 +403,48 @@ python3 scripts/verify_all.py --offline  # 不联网
 
 之后 AI 就能以 `tool_nmap`、`tool_nuclei`、`tool_sqlmap` 等形式直接调用。
 
+### 让 AI 自动用上这个工具箱
+
+工具箱本身只解决了「**能被**调用」；要让它**在该用的时候自动被用上**，
+还需要在 Claude Code 那边给它一个入口。三种机制：
+
+| 机制 | 效果 | 常驻开销 |
+| --- | --- | --- |
+| **Skill**（推荐） | 技能的 `name`+`description` 常驻，AI 判断场景相关时自己调用 | 约 30–60 token |
+| `CLAUDE.md` 一行 | 每轮都在上下文里，最稳，但只告知「存在」，不告诉「该用哪个」 | 约 50 token |
+| 注册 MCP | 57 个工具直接进工具列表 | 每个会话 57 份工具定义 |
+
+**不做任何配置的后果**：AI 根本不知道工具箱存在。拿到一道题，它看到的工具就是
+它自己的那些，不会想到「先翻翻工具箱里有什么现成的」。
+
+#### 方式一：装 Skill（推荐）
+
+```bash
+mkdir -p ~/.claude/skills/zeroxf-toolbox
+cp docs/skill/zeroxf-toolbox.md ~/.claude/skills/zeroxf-toolbox/SKILL.md
+```
+
+装完**重启 Claude Code**。之后它会在相关场景自己调用，也可以 `/zeroxf-toolbox`
+手动强制调用——两条路都通。
+
+> **它到底会不会自动触发？** 会，但**不保证**。机制是：技能的 `name`+`description`
+> 常驻在 AI 的上下文里，AI 判断当前任务相关就自己调用。所以**描述里的触发词是关键**——
+> 写成「工具箱介绍」基本不会被触发，写成「CTF/扫描/爆破/内网/后渗透 等场景先查这里」
+> 才会。仓库里那份的描述已经按这个原则写好了。
+
+#### 方式二：CLAUDE.md 加一行
+
+在 `~/.claude/CLAUDE.md`（全局）或项目 `CLAUDE.md` 里加：
+
+```markdown
+安全测试/CTF 场景优先看 zeroxf 工具箱（<路径>），入口 `./geshell list` 看有哪些工具。
+```
+
+#### 方式三：注册 MCP
+
+见上一节。适合希望把 57 个工具当**原生工具**调用的场景；代价是每个会话都要
+加载 57 份工具定义。日常用 Skill + CLI 通常更划算。
+
 ---
 
 ## 文档
