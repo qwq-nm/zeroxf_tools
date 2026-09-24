@@ -724,6 +724,16 @@ def provision_jndi(force=False):
 
 
 ORACLE_IC_BASE = "https://download.oracle.com/otn_software/linux/instantclient"
+# Windows 版 Instant Client。**直链同样是公开的**——原先这里记着「官方只对
+# 登录用户提供 Windows 包」，实测是错的：Oracle CDN 上版本化直链直接 200。
+# 用版本化的 21.13 而不是不带版本号的最新版：后者 basiclite 有 60MB，
+# 这一版 basiclite 38MB + sqlplus 1MB，小得多且够用。
+ORACLE_IC_BASE_WIN = "https://download.oracle.com/otn_software/nt/instantclient"
+ORACLE_IC_WIN_VER = "2113000"
+ORACLE_IC_WIN_PKGS = [
+    "instantclient-basiclite-windows.x64-21.13.0.0.0dbru.zip",
+    "instantclient-sqlplus-windows.x64-21.13.0.0.0dbru.zip",
+]
 
 # chaitin/xray 的 releases/latest 已被 xpoc 顶替，官方下载站 download.xray.cool 已 404，
 # 但按固定版本号仍能取到旧资产。首次运行会自动生成 module/plugin/xray.yaml。
@@ -801,22 +811,12 @@ set "PATH=%_IC%;%PATH%"
 '''
 
 
-ORACLE_IC_WIN_HINT = """[跳过] oracle：Oracle 不为 Windows 版 Instant Client 提供免登录直链。
-
-  Linux 版可以自动下载，但 Windows 版必须从官网手动获取（需 Oracle 账号）：
-    https://www.oracle.com/database/technologies/instant-client/winx64-64-downloads.html
-
-  下载这两个包并解压到本目录（tools/oracle/）即可自动生效：
-    instantclient-basiclite-windows.x64-*.zip
-    instantclient-sqlplus-windows.x64-*.zip
-  本脚本会检测到 instantclient_* 目录并生成 sqlplus.bat 包装。"""
-
-
 def provision_oracle(force=False):
     """下载 Oracle Instant Client + SQL*Plus 到 tools/oracle/。
 
-    Linux 版的下载地址是公开的，不需要 Oracle 账号——原 tools.json 把它标成
-    "需自备"是过虑了。Windows 版则相反：Oracle 只给登录用户，因此单独提示。
+    **两端的下载地址都是公开的**，不需要 Oracle 账号。原先这里有句「Windows 版
+    只给登录用户」，实测是错的——Oracle CDN 上版本化直链直接可下，所以两端
+    走同一套逻辑，只是包名不同。
     sqlplus 依赖同目录的 IC 共享库；Linux 还需系统 libaio.so.1。
     """
     target_dir = os.path.join(TOOLS_DIR, "oracle")
@@ -825,26 +825,18 @@ def provision_oracle(force=False):
         print("[已有] oracle 已打包，跳过（--force 重新下载）")
         return [("oracle", entry_name)]
     if PLAT == "windows":
-        # Windows 版 Instant Client 拿不到免登录直链（见 ORACLE_IC_WIN_HINT）。
-        # 若用户已手动解压进来，只补一个包装脚本即可；否则明确说明而不是
-        # 误下载 Linux 版（那会导致 sqlplus.bat 调用一个 ELF 文件）。
-        have_ic = os.path.isdir(target_dir) and any(
-            d.startswith("instantclient_") for d in os.listdir(target_dir))
-        if have_ic:
-            wrapper = os.path.join(target_dir, "sqlplus.bat")
-            with open(wrapper, "w", encoding="gbk", newline="\r\n") as f:
-                f.write(ORACLE_WRAPPER_BAT)
-            print("[完成] oracle：检测到手动放入的 Instant Client，已生成 sqlplus.bat")
-            return [("oracle", "sqlplus.bat")]
-        print(ORACLE_IC_WIN_HINT)
-        return None
+        base = f"{ORACLE_IC_BASE_WIN}/{ORACLE_IC_WIN_VER}"
+        names = ORACLE_IC_WIN_PKGS
+    else:
+        base = ORACLE_IC_BASE
+        names = ["instantclient-basiclite-linuxx64.zip",
+                 "instantclient-sqlplus-linuxx64.zip"]
     try:
         os.makedirs(target_dir, exist_ok=True)
-        for name in ("instantclient-basiclite-linuxx64.zip",
-                     "instantclient-sqlplus-linuxx64.zip"):
+        for name in names:
             archive = os.path.join(TOOLS_DIR, f".tmp_{name}")
             print(f"[下载] oracle ← {name}")
-            _download(f"{ORACLE_IC_BASE}/{name}", archive)
+            _download(f"{base}/{name}", archive)
             _extract(archive, target_dir, "zip")
             _drop(archive)
         ic_dir = next((os.path.join(target_dir, d) for d in os.listdir(target_dir)
@@ -852,11 +844,14 @@ def provision_oracle(force=False):
         if not ic_dir:
             print("[失败] oracle: 解压后未找到 instantclient_* 目录")
             return None
-        # 清掉 zip 顶层散落的 LICENSE/README，只留 IC 目录与包装脚本
+        # 清掉 zip 顶层散落的 LICENSE/README，只留 IC 目录与包装脚本。
+        # Windows 的包还多一个 META-INF/（jar 签名元数据），一并清掉。
         for f in os.listdir(target_dir):
             p = os.path.join(target_dir, f)
             if os.path.isfile(p):
                 os.remove(p)
+            elif f == "META-INF" and os.path.isdir(p):
+                shutil.rmtree(p, ignore_errors=True)
         entry = os.path.join(ic_dir, "sqlplus")
         if os.path.exists(entry):
             os.chmod(entry, 0o755)
