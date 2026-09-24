@@ -236,12 +236,19 @@ python3 scripts/setup_burp.py
 | `nmap` `mysql` | `apt install` 即可 | `python scripts/provision_tools.py --win-deps`（winget 自动装）|
 | `hydra` | ✅ 系统包安装 | ⚠️ 本体无 Windows 版，但**爆破能力不缺席**（见下）|
 | `metasploit` | 官方 installer | ✅ 手动装（官方 MSI 的静默安装实测不生效，见下方说明）|
-| `oracle`（sqlplus） | ✅ 自动（Linux 版有免登录直链） | ⚠️ 需 Oracle 账号（官方只对登录用户提供 Windows 包）|
-| **`oracle-py`** | ✅ 自动 | ✅ 自动 —— **Windows 端的 Oracle 替代** |
+| `oracle`（sqlplus） | ✅ 自动 | ✅ 自动 —— **两端的直链都是公开的** |
+| `oracle-py` | ✅ 自动 | ✅ 自动 —— 纯 Python 的 thin 模式，免客户端库 |
 
-> **`oracle-py`**：Oracle 官方不提供 Windows 版 Instant Client 的免登录下载，但他们的
-> Python 驱动 **`python-oracledb` 的 thin 模式是纯 Python 实现**，不需要任何 Oracle
-> 客户端库就能连库。因此 Windows 端也有完整的 Oracle 连接能力。
+> **关于 `oracle` 与 `oracle-py`**：曾长期认为 Windows 版 Instant Client 必须登录
+> Oracle 账号才能下载，所以 Windows 端只能用 `oracle-py` 顶替。**那个判断是错的**——
+> Oracle CDN 上版本化直链是公开的（实测 200），`provision_tools.py --tools oracle`
+> 两端都能装出真正的 sqlplus：
+> ```bash
+> geshell oracle -V      # SQL*Plus: Release 21.0.0.0.0 - Production
+> ```
+>
+> **`oracle-py`** 仍然值得留着：它的 **`python-oracledb` thin 模式是纯 Python 实现**，
+> 不需要任何 Oracle 客户端库就能连库，适合「不想装 IC / 只想跑条 SQL」的场景。
 > 装它：`python scripts/provision_tools.py --oracledb`；用法：
 > ```bash
 > geshell oracle-py scott/tiger@10.0.0.5:1521/orcl -e "select * from users"
@@ -271,11 +278,10 @@ python3 scripts/setup_burp.py
 | 平台 | 就绪 | 缺失 |
 | --- | --- | --- |
 | **WSL / Linux** | **59/59** | —— |
-| **Windows** | **57/59** | `hydra` `oracle` |
+| **Windows** | **59/59** | —— |
 
-差异只有两条，都是 Windows 平台限制：`hydra`（官方无 Windows 构建）、
-`oracle`（需 Oracle 账号，Windows 端用 `oracle-py` 替代）。
-`geshell doctor` 会把缺的逐条列出并说明原因。
+**两端完全一致**（都是 59/59）。`geshell doctor` 只会列出 3 条——`CobaltStrike`、
+`BurpSuite`、`蚁剑`，都是商业软件或需自备，不会静默失败。
 
 > 上表的就绪判据是**入口文件是否存在**。Windows 侧另有一个它测不出来的坑：
 > `webshell` 的冰蝎模块会被杀软隔离（见上方说明），届时只有哥斯拉、蚁剑两条线可用。

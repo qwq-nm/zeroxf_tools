@@ -37,7 +37,9 @@ EXPECTED_MISSING = {
     # 所以**不该再当作预期内缺失**：真缺了就是故障。
     # hydra 原先在这里（Windows 无官方构建）。现在该条目指向 tools/brute/ 的
     # 调度器——Windows 上自动落到 netexec，两端都有爆破能力，故不再算预期缺失。
-    "oracle": "仅 Windows 端缺失：官方只对登录用户提供 Windows 包（用 oracle-py 替代）",
+    # oracle 原先在这里（曾以为 Windows 版 Instant Client 要登录 Oracle 账号）。
+    # 实测 Oracle CDN 的版本化直链是公开的，provision 两端都能装出真 sqlplus，
+    # 故不再算预期缺失。
     "cobaltstrike4.9": "商业软件，需自备（替代：sliver）",
     "BurpSuite": "商业软件，需自备（AI 走 MCP 接入）",
     "蚁剑": "未随工具箱分发（上游只发源码、无二进制；协议由 webshell 覆盖）",
