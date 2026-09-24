@@ -72,6 +72,29 @@ def call_name(tool: dict) -> str:
 
 # ---------- list ----------
 
+def _tool_state(tool: dict) -> str:
+    """工具的真实状态。
+
+    "ok"      注册为 AI 可调用，且入口确实存在（或裸命令在 PATH 里）
+    "missing" 注册为 AI 可调用，但入口文件不在——新 clone 下来大量属于这种，
+              必须跑 provision 才有
+    "off"     没注册为 AI 可调用
+
+    加这个是因为原先 list 只显示 ✓/✗，而 ✓ 只看注册表标志、不看文件，
+    于是在全新 clone 上会显示「57 个 AI 可用」而实际只有 13 个有文件——
+    照着它去调用会满屏「路径不存在」。
+    """
+    if not is_cli_callable(tool):
+        return "off"
+    p = str(tool.get("path", "") or "")
+    if not p:
+        return "missing"
+    if not ("/" in p or "\\" in p):          # 裸命令名，交给 PATH
+        return "ok" if shutil.which(p) else "missing"
+    resolved = cli_runner._resolve_path(tool, p)
+    return "ok" if resolved and os.path.exists(resolved) else "missing"
+
+
 def list_tools() -> int:
     tools = get_all_tools()
     if not tools:
@@ -86,20 +109,19 @@ def list_tools() -> int:
     for cat in cat_order:
         grouped.setdefault(cat, [])
 
-    headers = ["工具名", "类型", "AI可用", "风险", "说明"]
-    rows = []
-    for cat in cat_order + [c for c in grouped if c not in cat_order]:
-        items = grouped.get(cat) or []
-        if not items:
-            continue
-        for t in items:
-            rows.append([
-                str(t.get("name", "")),
-                str(t.get("type", "")),
-                "✓" if is_cli_callable(t) else "✗",
-                str(t.get("risk", "active") or "active"),
-                str(t.get("description", ""))[:40],
-            ])
+    headers = ["工具名", "类型", "状态", "风险", "说明"]
+
+    def _row(t):
+        return [
+            str(t.get("name", "")),
+            str(t.get("type", "")),
+            {"ok": "✓", "missing": "⚠", "off": "✗"}[_tool_state(t)],
+            str(t.get("risk", "active") or "active"),
+            str(t.get("description", ""))[:40],
+        ]
+
+    rows = [_row(t) for cat in cat_order + [c for c in grouped if c not in cat_order]
+            for t in (grouped.get(cat) or [])]
     widths = [max(len(str(r[i])) for r in rows + [headers]) for i in range(5)]
 
     def _fmt(r):
@@ -116,13 +138,22 @@ def list_tools() -> int:
             print(f"\n[{cat}]")
             last_cat = cat
         for t in items:
-            print(_fmt([
-                str(t.get("name", "")),
-                str(t.get("type", "")),
-                "✓" if is_cli_callable(t) else "✗",
-                str(t.get("risk", "active") or "active"),
-                str(t.get("description", ""))[:40],
-            ]))
+            print(_fmt(_row(t)))
+
+    # 汇总 + 图例。之前这里只有 ✓/✗ 两态，而 ✓ 反映的是注册表里的 ai_callable
+    # 标志、**不看文件在不在**——新 clone 下来会显示「57 个 AI 可用」，
+    # 实际只有 13 个有文件。现在把「注册了但没装」单列成 ⚠。
+    stats = {"ok": 0, "missing": 0, "off": 0}
+    for cat in cat_order + [c for c in grouped if c not in cat_order]:
+        for t in (grouped.get(cat) or []):
+            stats[_tool_state(t)] += 1
+    print(f"\n共 {len(tools)} 个：✓ 就绪 {stats['ok']}   "
+          f"⚠ 已注册但文件缺失 {stats['missing']}   ✗ 未注册为 AI 可调用 {stats['off']}")
+    if stats["missing"]:
+        print("    ⚠ 的补装：python3 scripts/provision_tools.py"
+              "（或 --tools <名称> 只装指定的）；详情看 `./geshell doctor`")
+    elif stats["ok"]:
+        print("    全部就绪。`./geshell info <名称>` 看单个工具的用法")
     return 0
 
 
