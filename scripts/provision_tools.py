@@ -636,9 +636,17 @@ def _provision_pip(package, entry):
     except subprocess.CalledProcessError:
         print(f"[失败] {package}: pip 安装失败（包名可能不同）")
         return None
-    exe = os.path.join(bindir, entry + EXE)
-    if not os.path.exists(exe):
-        print(f"[失败] {package}: pip 安装后未找到入口 {entry}")
+    # 入口名不能一味地拼 EXE：entry 本身可能已带后缀（impacket 的
+    # `secretsdump.py` 就是），Windows 上拼成 `secretsdump.py.exe` 永远找不到，
+    # 于是 pip 明明装成功却报「未找到入口」。按候选列表逐个试。
+    cands = []
+    for base in (entry, entry + EXE):
+        cands += [base, base + ".exe", base + ".bat", base + ".cmd"]
+    exe = next((os.path.join(bindir, c) for c in cands
+                if os.path.exists(os.path.join(bindir, c))), None)
+    if not exe:
+        print(f"[失败] {package}: pip 安装后未找到入口 {entry}"
+              f"（在 {bindir} 下找过 {', '.join(sorted(set(cands)))}）")
         return None
     rel = os.path.relpath(exe, TOOLS_DIR)
     return [("_venv", rel)]
