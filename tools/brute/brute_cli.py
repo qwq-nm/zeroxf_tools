@@ -175,6 +175,16 @@ def main():
               file=sys.stderr)
         return 2
 
+    # 先校验字典文件真的存在。这一步不是多余的：两个后端都会把 `-P/-p` 的值
+    # 「是文件就当字典、不是就当字面口令」，路径写错时它们**不报错**，而是
+    # 老老实实拿这个文件名去当密码试——静默做错事，比报错难查得多。
+    for label, path in (("--users", args.users), ("--passwords", args.passwords)):
+        if path and not os.path.isfile(path):
+            print(f"[错误] {label} 指向的文件不存在: {path}", file=sys.stderr)
+            print(f"       提示：若你本来就想用这个字符串当口令，请改用 "
+                  f"{'-u' if label == '--users' else '-p'}。", file=sys.stderr)
+            return 2
+
     try:
         cmd = (build_hydra if backend == "hydra" else build_nxc)(
             SERVICES[svc][backend], args)

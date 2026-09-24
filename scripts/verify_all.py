@@ -35,7 +35,8 @@ EXPECTED_MISSING = {
     # fastjson / log4j 原先在这里——它们的 jar 无公开源，是两条空壳注册项。
     # 现在两条都指向自研的 javadeser CLI（协议自己实现，不依赖那两份 jar），
     # 所以**不该再当作预期内缺失**：真缺了就是故障。
-    "hydra": "仅 Windows 端缺失：官方无 Windows 构建",
+    # hydra 原先在这里（Windows 无官方构建）。现在该条目指向 tools/brute/ 的
+    # 调度器——Windows 上自动落到 netexec，两端都有爆破能力，故不再算预期缺失。
     "oracle": "仅 Windows 端缺失：官方只对登录用户提供 Windows 包（用 oracle-py 替代）",
     "cobaltstrike4.9": "商业软件，需自备（替代：sliver）",
     "BurpSuite": "商业软件，需自备（AI 走 MCP 接入）",

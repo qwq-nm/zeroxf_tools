@@ -234,7 +234,7 @@ python3 scripts/setup_burp.py
 | 便携 JDK | ✅ 8 / 11 / 17 | ✅ 8 / 11 |
 | GUI 运行时（PyQt6） | ✅ 自动 | ✅ 自动 |
 | `nmap` `mysql` | `apt install` 即可 | `python scripts/provision_tools.py --win-deps`（winget 自动装）|
-| **`hydra`** | ✅ `apt install hydra` | ❌ **装不了 —— Windows 无官方版本** |
+| `hydra` | ✅ 系统包安装 | ⚠️ 本体无 Windows 版，但**爆破能力不缺席**（见下）|
 | `metasploit` | 官方 installer | ✅ 手动装（官方 MSI 的静默安装实测不生效，见下方说明）|
 | `oracle`（sqlplus） | ✅ 自动（Linux 版有免登录直链） | ⚠️ 需 Oracle 账号（官方只对登录用户提供 Windows 包）|
 | **`oracle-py`** | ✅ 自动 | ✅ 自动 —— **Windows 端的 Oracle 替代** |
@@ -247,13 +247,18 @@ python3 scripts/setup_burp.py
 > geshell oracle-py scott/tiger@10.0.0.5:1521/orcl -e "select * from users"
 > ```
 
-> **`hydra` 的特别说明**：它**只有类 Unix 版本**，官方从未发布 Windows 构建。
-> winget 源里搜到的 `HydraLauncher.Hydra` 是**游戏启动器**，与渗透工具无关。
-> 因此本工具箱**只在 Linux/WSL 侧配置 hydra**，Windows 端不提供，`doctor` 会如实报缺失。
-> Windows 上需要爆破能力时，可用 **nmap 的 NSE brute 脚本**覆盖：
+> **`hydra` 的特别说明**：它**只有类 Unix 版本**，官方从未发布 Windows 构建
+> （winget 源里那个 `HydraLauncher.Hydra` 是**游戏启动器**，与渗透无关）。
+>
+> 但**爆破能力两端都有**：`hydra` 这个工具条目实际指向 `tools/brute/` 的调度器，
+> 有 hydra 就用 hydra（Linux），没有就自动落到 **NetExec(nxc)**（Windows 装得上）。
+> 对外是一套参数、覆盖 15 种协议：
 > ```bash
-> nmap -p22 --script ssh-brute --script-args userdb=u.txt,passdb=p.txt TARGET
+> geshell hydra --service ssh --target 10.0.0.5 -u root --passwords pass.txt
+> geshell hydra --list          # 看当前后端与支持的服务
 > ```
+> 这不是把 nxc 伪装成 hydra —— `--show` 会打印实际执行的命令、`--backend` 可强制指定。
+> 两端都对着**真实 SSH 服务**验证过，都能找到正确口令。
 
 > **`metasploit` 与 `mysql` 的 Windows 安装**：两者都要**刷新 PATH 才生效**。
 > winget 装的 MySQL 不会自己建 shim，Metasploit 的 MSI 静默安装实测多次失败
