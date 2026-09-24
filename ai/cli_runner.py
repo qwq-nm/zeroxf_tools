@@ -187,7 +187,12 @@ def build_command(tool: Dict[str, Any], user_args: List[str]) -> Dict[str, Any]:
             exe = shutil.which(script)
             if exe:
                 script = exe
-        cmd = [_resolve_python(t)] + pre + [script] + post + args
+        # params_pre 放在**脚本之后**，与「命令行」「批处理」两个分支的语义
+        # 保持一致：它是这个工具的默认参数。原先放在解释器与脚本之间，于是
+        # `python --mode xxx script.py` 把参数喂给了 python 而不是脚本——
+        # params_pre 对 Python 类工具等于失效。（Java 分支的 pre 确实是 JVM
+        # 参数，那一处语义不同是有意的，不动。）
+        cmd = [_resolve_python(t)] + [script] + pre + post + args
         return {"kind": "cmd", "cmd": cmd,
                 "cwd": cwd or os.path.dirname(os.path.abspath(script)),
                 "env": _inject_env(t)}

