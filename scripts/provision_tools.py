@@ -1277,6 +1277,99 @@ def provision_jars(force=False):
     return sorted(done)
 
 
+# ---------- DBX（数据库工作台 + MCP server）----------
+# DBX 是一款 20MB 量级的跨平台数据库工作台，支持 70+ 种库（MySQL/PG/SQLite/
+# Oracle/SQL Server/Redis/MongoDB/DuckDB/达梦…），并自带一个 Rust 写的 MCP server
+# （22 个工具：列连接、看表结构、执行查询、Redis 命令…）。
+#
+# 分发方式：MCP server 在 npm 上是 `@dbx-app/mcp-server`（Node 包装器）+
+# 各平台的 `@dbx-app/mcp-<平台>`（真正的二进制）。**平台包里的二进制是自足的**
+# ——实测只依赖系统 libc，不需要 Node、也不需要桌面应用就能跑原生模式的库
+# （SQLite/MySQL/PG/Redis/MongoDB）。因此这里直接取平台包，绕开 Node。
+DBX_VERSION = "0.4.95"          # 兜底版本；优先问 npm 要最新
+DBX_NPM_BASE = "https://registry.npmjs.org/@dbx-app"
+DBX_PKGS = {
+    ("linux", "x86_64"): "mcp-linux-x64-gnu",
+    ("linux", "aarch64"): "mcp-linux-arm64-gnu",
+    ("windows", "x86_64"): "mcp-win32-x64",
+    ("windows", "arm64"): "mcp-win32-arm64",
+    ("darwin", "x86_64"): "mcp-darwin-x64",
+    ("darwin", "arm64"): "mcp-darwin-arm64",
+}
+
+
+def _dbx_pkg_name():
+    import platform as _platform
+    m = _platform.machine().lower()
+    arch = "aarch64" if m in ("aarch64", "arm64") else "x86_64"
+    return DBX_PKGS.get((PLAT, arch))
+
+
+def _npm_latest(pkg):
+    """问 npm 要 @dbx-app/<pkg> 的最新版本号；失败返回 None（由调用方兜底）。"""
+    try:
+        with urllib.request.urlopen(
+                f"{DBX_NPM_BASE}/{pkg}", timeout=30) as r:
+            return (json.load(r).get("dist-tags") or {}).get("latest")
+    except Exception:
+        return None
+
+
+def provision_dbx(force=False):
+    """下载 DBX 的 MCP 平台二进制到 tools/dbx/。
+
+    只取平台包里的那个可执行文件，不装 Node、不装桌面应用。装出来的东西是
+    `dbx-mcp`（Windows 上 `dbx-mcp.exe`），通过 stdio 说 MCP 协议。
+    """
+    target_dir = os.path.join(TOOLS_DIR, "dbx")
+    exe_name = "dbx-mcp" + EXE
+    target = os.path.join(target_dir, exe_name)
+    if not force and os.path.exists(target):
+        print("[已有] dbx 已打包，跳过（--force 重新下载）")
+        return [("dbx", exe_name)]
+
+    pkg = _dbx_pkg_name()
+    if not pkg:
+        print(f"[跳过] dbx: 当前平台（{PLAT}/{PLAT}）没有对应的 npm 平台包")
+        return None
+
+    ver = _npm_latest(pkg) or DBX_VERSION
+    url = f"{DBX_NPM_BASE}/{pkg}/-/{pkg}-{ver}.tgz"
+    print(f"[下载] dbx ← {pkg}@{ver}")
+    archive = os.path.join(TOOLS_DIR, f".tmp_dbx_{pkg}.tgz")
+    tmp = os.path.join(TOOLS_DIR, ".tmp_dbx")
+    try:
+        _download(url, archive)
+        shutil.rmtree(tmp, ignore_errors=True)
+        os.makedirs(tmp, exist_ok=True)
+        _extract(archive, tmp, "targz")
+        # 包里结构固定：package/bin/dbx-mcp[.exe]
+        src = None
+        for root, _dirs, files in os.walk(tmp):
+            for f in files:
+                if f.startswith("dbx-mcp"):
+                    src = os.path.join(root, f)
+                    break
+            if src:
+                break
+        if not src:
+            print("[失败] dbx: 平台包里没找到 dbx-mcp 可执行文件")
+            return None
+        os.makedirs(target_dir, exist_ok=True)
+        shutil.copy2(src, target)
+        if PLAT != "windows":
+            os.chmod(target, 0o755)
+        _drop(archive)
+        shutil.rmtree(tmp, ignore_errors=True)
+        print(f"[完成] dbx → tools/dbx/{exe_name}（{os.path.getsize(target) // 1048576} MB）")
+        return [("dbx", exe_name)]
+    except Exception as e:
+        print(f"[失败] dbx: {type(e).__name__}: {e}")
+        _drop(archive)
+        shutil.rmtree(tmp, ignore_errors=True)
+        return None
+
+
 def _path_resolves(path):
     """注册表里这个 path 在本平台能否解析到真实文件。
 
@@ -1433,6 +1526,7 @@ def main():
         "exploitdb": lambda: provision_searchsploit(force=args.force),
         "oracle": lambda: provision_oracle(force=args.force),
         "xray": lambda: provision_xray(force=args.force),
+        "dbx": lambda: provision_dbx(force=args.force),
     }
 
     names = args.tools

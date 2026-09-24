@@ -805,6 +805,30 @@
     "group": ""
   },
   {
+    "name": "dbx",
+    "category": "数据库利用工具",
+    "type": "Python",
+    "path": "/tools/dbx/dbx_cli.py",
+    "description": "数据库工作台 DBX：支持 70+ 种库（MySQL/PG/SQLite/Oracle/SQL Server/Redis/MongoDB…），并自带 MCP server（22 个工具，AI 可直接查库）",
+    "risk": "active",
+    "ai_callable": true,
+    "aliases": [
+      "dbx",
+      "数据库",
+      "database"
+    ],
+    "example": "dbx -n prod -c \"SELECT * FROM users\"",
+    "url": "https://github.com/t8y2/dbx",
+    "tags": [
+      "数据库",
+      "MCP"
+    ],
+    "weight": 3.0,
+    "params_pre": "",
+    "params": "",
+    "group": ""
+  },
+  {
     "name": "mysql",
     "category": "数据库利用工具",
     "type": "命令行",
@@ -819,64 +843,6 @@
     "params_pre": "",
     "params": "",
     "weight": 3.0,
-    "url": "",
-    "tags": [],
-    "group": ""
-  },
-  {
-    "name": "mssql",
-    "category": "数据库利用工具",
-    "type": "命令行",
-    "path": "/tools/sqlcmd/sqlcmd",
-    "description": "MSSQL 客户端",
-    "risk": "active",
-    "ai_callable": true,
-    "aliases": [
-      "sqlserver",
-      "mssql"
-    ],
-    "example": "",
-    "params_pre": "",
-    "params": "",
-    "weight": 3.0,
-    "url": "",
-    "tags": [],
-    "group": ""
-  },
-  {
-    "name": "mongodb",
-    "category": "数据库利用工具",
-    "type": "命令行",
-    "path": "/tools/mongodb/mongosh",
-    "description": "MongoDB 未授权访问",
-    "risk": "active",
-    "ai_callable": true,
-    "aliases": [
-      "mongodb未授权"
-    ],
-    "example": "",
-    "params_pre": "",
-    "params": "",
-    "weight": 4.0,
-    "url": "",
-    "tags": [],
-    "group": ""
-  },
-  {
-    "name": "oracle",
-    "category": "数据库利用工具",
-    "type": "命令行",
-    "path": "/tools/oracle/sqlplus.sh",
-    "description": "Oracle 数据库客户端",
-    "risk": "active",
-    "ai_callable": true,
-    "aliases": [
-      "oracle连接"
-    ],
-    "example": "",
-    "params_pre": "",
-    "params": "",
-    "weight": 4.0,
     "url": "",
     "tags": [],
     "group": ""
@@ -1096,26 +1062,6 @@
     "params": ""
   },
   {
-    "name": "usql",
-    "category": "数据库利用工具",
-    "type": "命令行",
-    "path": "/tools/usql/usql",
-    "description": "通用 SQL 客户端：MySQL/PG/Oracle/MSSQL（替代 mysql/oracle 客户端）",
-    "risk": "active",
-    "ai_callable": true,
-    "aliases": [
-      "usql",
-      "sql客户端"
-    ],
-    "weight": 4.0,
-    "params": "",
-    "params_pre": "",
-    "example": "usql mysql://user:pass@10.0.0.5:3306/db",
-    "url": "",
-    "tags": [],
-    "group": ""
-  },
-  {
     "name": "jndi",
     "category": "框架漏洞利用工具",
     "type": "JAVA8",
@@ -1191,26 +1137,6 @@
     "params": "",
     "params_pre": "",
     "example": "searchsploit apache 2.4",
-    "url": "",
-    "tags": [],
-    "group": ""
-  },
-  {
-    "name": "oracle-py",
-    "category": "数据库利用工具",
-    "type": "Python",
-    "path": "/tools/oracle-py/oracle_cli.py",
-    "description": "Oracle 客户端（thin 模式免 Instant Client，Windows 端可用）",
-    "risk": "active",
-    "ai_callable": true,
-    "aliases": [
-      "oracle-py",
-      "oracledb"
-    ],
-    "weight": 2.0,
-    "params": "",
-    "params_pre": "",
-    "example": "oracle-py scott/tiger@10.0.0.5:1521/orcl -e \"select * from users\"",
     "url": "",
     "tags": [],
     "group": ""

@@ -1,9 +1,9 @@
 # zeroxf 工具箱 · AI 版
 
-**一个既给人用、也给 AI 用的渗透测试工具箱**——63 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
+**一个既给人用、也给 AI 用的渗透测试工具箱**——59 个工具，统一的图形界面、命令行与 MCP 接口，三套入口共用同一份工具注册表。
 
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20WSL%2FLinux-blue)](#安装)
-[![Tools](https://img.shields.io/badge/tools-63%20(%E5%85%B6%E4%B8%AD57%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
+[![Tools](https://img.shields.io/badge/tools-59%20(%E5%85%B6%E4%B8%AD53%E4%B8%AAAI%E5%8F%AF%E8%B0%83)-brightgreen)](#集成的工具)
 [![License](https://img.shields.io/badge/license-GPL--3.0-orange)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-ready-purple)](#mcp-ai-调用)
 
@@ -37,7 +37,7 @@
 
 ## 亮点
 
-- **63 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **57 个可被 AI 直接调用**
+- **59 个工具开箱可用**，横跨信息收集到后渗透的完整链路；其中 **53 个可被 AI 直接调用**
 - **三套入口，一份配置** —— GUI 里能点的，CLI 和 MCP 里都能调，不会出现"界面有、命令行没有"的割裂
 - **依赖自动装配** —— `provision_tools.py` 一条命令拉齐全部工具二进制、便携 JDK、GUI 运行时，自动适配 Windows / Linux / macOS
 - **零环境依赖的 JDK 方案** —— 内置便携 JDK 8/11/17（8 与 11 为 Liberica full 版，内含 JavaFX），12 个 jar 类工具无需系统装 Java
@@ -50,19 +50,19 @@
 
 ## 集成的工具
 
-**共 63 个**（57 个 AI 可直接调用），按 9 大类组织：
+**共 59 个**（53 个 AI 可直接调用），按 9 大类组织：
 
 | 分类 | 数量 | 代表工具 |
 | --- | ---: | --- |
 | 信息收集 | 12 | `nmap` `httpx` `nuclei` `ffuf` `subfinder` `naabu` `katana` `dnsx` `uncover` `gobuster` `urlfinder` `dirsearch` |
 | 漏洞扫描与利用 | 8 | `nuclei` `sqlmap` `xray` `dalfox` `zap` `exploitdb` `ssti` `docem` |
-| 框架漏洞利用 | 9 | `shiro` `struts2` `weblogic` `fastjson`→`jndi` `log4j`→`jndi` `thinkphp` `spring` `tomcat` `dedecmscan` `redis` `nacos` |
+| 框架漏洞利用 | 9 | `shiro` `struts2` `weblogic` `jndi` `thinkphp` `spring` `tomcat` `dedecmscan` `redis` `nacos` |
 | 重点系统漏洞 | 8 | `heapdump` `ruoyi` `nacos` `jenkins` `xxl-job` `jeecg` `iwannagetall` `hyacinth` |
 | 内网渗透 | 4 | `fscan` `yasso` `netexec` `impacket` |
 | 爆破 | 2 | `hydra` `hashcat` |
 | 隧道代理 | 3 | `frps` `frpc` `chisel` |
 | 后渗透 | 5 | `metasploit` `sliver` `cobaltstrike` `avoidkilling` `revshell` |
-| 数据库利用 | 6 | `mysql` `mssql` `mongodb` `oracle` `usql` `dbcombo` |
+| 数据库利用 | 3 | **`dbx`**（70+ 种库，AI 可调）`mysql` `dbcombo` |
 | WebShell 管理 | 4 | **`webshell`**（CLI，AI 可调）`蚁剑` `godzilla` `behinder` |
 | 抓包与代理 | 1 | `BurpSuite` |
 
@@ -84,6 +84,42 @@
 > 长期是两条空壳；而它们对应的**利用场景**（JNDI 注入）由 `jndi` 覆盖——
 > 那条是实打实的工具（JNDI-Injection-Exploit），起 LDAP/RMI 服务并投递 payload。
 > 与其留两个装不上的条目，不如只留能用的那个。
+
+### 数据库：统一到一个 DBX
+
+原先数据库这块是「一家一个客户端」——`usql`、`mongosh`、`sqlcmd`、`sqlplus`、
+`oracle-py` 五个，各有各的封装、各有各的坑。现在收成一个
+**[DBX](https://github.com/t8y2/dbx)**：约 20MB 的跨平台数据库工作台，
+支持 **70+ 种库**（MySQL/PG/SQLite/Oracle/SQL Server/Redis/MongoDB/DuckDB/达梦…）。
+
+**它自带 MCP server**，这才是对本项目最有价值的部分——AI 不用再去 shell 里拼
+连接串，而是直接以工具形式查库：
+
+```bash
+python3 scripts/provision_tools.py --tools dbx   # 装（34 MB 单二进制）
+python3 scripts/setup_dbx.py                     # 接进 MCP 客户端 + 实连验证
+```
+
+装出来的就是**一个静态自足的二进制**：不需要 Node、不需要 DBX 桌面应用，
+原生模式的库（SQLite/MySQL/PG/Redis/MongoDB）直接连。
+
+同一个能力也包了个顺手的 CLI（`geshell dbx`），两种入口共用同一份连接配置：
+
+```bash
+geshell dbx --add prod --type mysql --host 10.0.0.5 --user root --password p@ss -d app
+geshell dbx --list                        # 已配置的连接
+geshell dbx -n prod --tables              # 列库中的表
+geshell dbx -n prod --describe users      # 看表结构
+geshell dbx -n prod -c "SELECT * FROM users WHERE role='admin'"
+```
+
+> ⚠️ **默认只读**。写操作会被 DBX 拦下：
+> `Error [SQL_BLOCKED]: High-risk SQL is disabled in DBX MCP settings.`
+> 要放开得在 DBX 设置 → MCP 里调（只读 / 数据读写 / 完全访问）。**那是安全边界**——
+> 尤其当 AI 在自动跑查询时，别为图省事直接开到完全访问。连接白名单也在同一处。
+
+> **`dbcombo` 保留**：它是 Java 写的数据库**利用**工具（不是客户端），DBX 替代不了。
+> **`mysql` 保留**：那是系统级的命令行客户端（apt/winget 装），性质同 `nmap`。
 
 ### WebShell 管理：三种 GUI 工具的协议，收进一个 CLI
 
@@ -206,23 +242,13 @@ python3 scripts/setup_burp.py
 | `nmap` `mysql` | `apt install` 即可 | `python scripts/provision_tools.py --win-deps`（winget 自动装）|
 | `hydra` | ✅ 系统包安装 | ⚠️ 本体无 Windows 版，但**爆破能力不缺席**（见下）|
 | `metasploit` | 官方 installer | ✅ 手动装（官方 MSI 的静默安装实测不生效，见下方说明）|
-| `oracle`（sqlplus） | ✅ 自动 | ✅ 自动 —— **两端的直链都是公开的** |
-| `oracle-py` | ✅ 自动 | ✅ 自动 —— 纯 Python 的 thin 模式，免客户端库 |
+| `dbx` | ✅ 自动 | ✅ 自动 —— 一个二进制搞定 70+ 种库（见下）|
+| `oracle`（sqlplus） | ⚠️ 已从注册表移除，改用 `dbx` | 同左 |
 
-> **关于 `oracle` 与 `oracle-py`**：曾长期认为 Windows 版 Instant Client 必须登录
-> Oracle 账号才能下载，所以 Windows 端只能用 `oracle-py` 顶替。**那个判断是错的**——
-> Oracle CDN 上版本化直链是公开的（实测 200），`provision_tools.py --tools oracle`
-> 两端都能装出真正的 sqlplus：
-> ```bash
-> geshell oracle -V      # SQL*Plus: Release 21.0.0.0.0 - Production
-> ```
->
-> **`oracle-py`** 仍然值得留着：它的 **`python-oracledb` thin 模式是纯 Python 实现**，
-> 不需要任何 Oracle 客户端库就能连库，适合「不想装 IC / 只想跑条 SQL」的场景。
-> 装它：`python scripts/provision_tools.py --oracledb`；用法：
-> ```bash
-> geshell oracle-py scott/tiger@10.0.0.5:1521/orcl -e "select * from users"
-> ```
+> **关于 `oracle` / `oracle-py`**：两条都已在「数据库客户端统一到 DBX」时移除
+> （见下方 DBX 一节）。那两条的来龙去脉留在 git 历史里：`oracle-py` 曾作为
+> Windows 端的 sqlplus 平替，后来发现 Instant Client 的 Windows 直链其实是
+> 公开的、能装出真 sqlplus。再后来整个数据库客户端层被 DBX 取代。
 
 > **`hydra` 的特别说明**：它**只有类 Unix 版本**，官方从未发布 Windows 构建
 > （winget 源里那个 `HydraLauncher.Hydra` 是**游戏启动器**，与渗透无关）。
@@ -247,10 +273,10 @@ python3 scripts/setup_burp.py
 
 | 平台 | 就绪 | 缺失 |
 | --- | --- | --- |
-| **WSL / Linux** | **57/57** | —— |
-| **Windows** | **57/57** | —— |
+| **WSL / Linux** | **53/53** | —— |
+| **Windows** | **53/53** | —— |
 
-**两端完全一致**（都是 57/57）。`geshell doctor` 只会列出 3 条——`CobaltStrike`、
+**两端完全一致**（都是 53/53）。`geshell doctor` 只会列出 3 条——`CobaltStrike`、
 `BurpSuite`、`蚁剑`，都是商业软件或需自备，不会静默失败。
 
 > 上表的就绪判据是**入口文件是否存在**。Windows 侧另有一个它测不出来的坑：
@@ -264,7 +290,7 @@ python3 scripts/setup_burp.py
 
 ## 安装
 
-### 先搞清楚：63 个工具分别从哪来
+### 先搞清楚：59 个工具分别从哪来
 
 工具箱的获取方式**不是一种而是四种**，因为它们性质不同：
 
@@ -280,7 +306,7 @@ python3 scripts/setup_burp.py
 
 - **a. 随 git 分发（11）** —— 天狐原创的 Python 脚本与手写 CLI，没有任何下载源，
   只能入库：`ssti` `spring` `tomcat` `dedecmscan` `redis` `ruoyi` `avoidkilling`
-  `docem` `dirsearch` `revshell` `oracle-py`
+  `docem` `dirsearch` `revshell`
   > ⚠️ 这几个目录在 `.gitignore` 里是 `tools/*` 的**例外**。改 gitignore 时别把它们
   > 一起挡掉——否则 clone 下来界面有卡片、一点就报路径不存在。
 - **b. provision 自动下载（32）** —— 有官方 release 的开源工具（`nuclei` `httpx`
@@ -325,7 +351,7 @@ Windows 下把 `python3` 换成 `python`。脚本会自动识别平台，拉取�
 
 ```bash
 python3 scripts/provision_tools.py --tools nuclei httpx ffuf     # 只装指定工具
-python3 scripts/provision_tools.py --tools zap usql oracle xray  # 专用工具
+python3 scripts/provision_tools.py --tools zap dbx xray   # 专用工具（按需）
 python3 scripts/provision_tools.py --help                        # 查看全部参数
 ```
 
@@ -395,7 +421,7 @@ python3 scripts/verify_all.py --offline  # 不联网
 
 ### MCP（AI 调用）
 
-`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 57 个可调用工具暴露为 `tool_<名称>`：
+`ai/mcp_server.py` 是一个 stdio JSON-RPC MCP server，把 53 个可调用工具暴露为 `tool_<名称>`：
 
 在 `~/.claude.json` 的 `mcpServers` 段加入：
 
@@ -422,7 +448,7 @@ python3 scripts/verify_all.py --offline  # 不联网
 | --- | --- | --- |
 | **Skill**（推荐） | 技能的 `name`+`description` 常驻，AI 判断场景相关时自己调用 | 约 30–60 token |
 | `CLAUDE.md` 一行 | 每轮都在上下文里，最稳，但只告知「存在」，不告诉「该用哪个」 | 约 50 token |
-| 注册 MCP | 57 个工具直接进工具列表 | 每个会话 57 份工具定义 |
+| 注册 MCP | 53 个工具直接进工具列表 | 每个会话 53 份工具定义 |
 
 **不做任何配置的后果**：AI 根本不知道工具箱存在。拿到一道题，它看到的工具就是
 它自己的那些，不会想到「先翻翻工具箱里有什么现成的」。
@@ -452,7 +478,7 @@ cp docs/skill/zeroxf-toolbox.md ~/.claude/skills/zeroxf-toolbox/SKILL.md
 
 #### 方式三：注册 MCP
 
-见上一节。适合希望把 57 个工具当**原生工具**调用的场景；代价是每个会话都要
+见上一节。适合希望把 53 个工具当**原生工具**调用的场景；代价是每个会话都要
 加载 57 份工具定义。日常用 Skill + CLI 通常更划算。
 
 ---

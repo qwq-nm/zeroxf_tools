@@ -49,10 +49,8 @@ geshell <工具名> [参数...]
 | nacos | nacos | JAVA11 | exploit | Nacos 漏洞利用 v3.0.5 |
 | jenkins | jenkins | JAVA8 | exploit | Jenkins 漏洞利用 GUI |
 | xxljob | xxl-job | JAVA8 | exploit | XXL-JOB 漏洞利用 |
+| dbx | dbx | Python | active | 数据库工作台 DBX：支持 70+ 种库（MySQL/PG/SQLite/Oracle/SQL Se |
 | mysql | mysql | 命令行 | active | MySQL 客户端/综合利用 |
-| mssql | mssql | 命令行 | active | MSSQL 客户端 |
-| mongodb | mongodb | 命令行 | active | MongoDB 未授权访问 |
-| oracle | oracle | 命令行 | active | Oracle 数据库客户端 |
 | netexec | netexec | 命令行 | active | 内网认证/枚举（原 crackmapexec） |
 | sliver | sliver | 命令行 | post-exploit | Sliver 开源 C2 |
 | dirsearch | dirsearch | Python | passive | Web 目录扫描（枷锁版） |
@@ -62,12 +60,10 @@ geshell <工具名> [参数...]
 | iwannagetall | iwannagetall | JAVA8 | exploit | OA 综合利用 |
 | hyacinth | hyacinth | JAVA8 | exploit | Java 综合利用 v2.0.2 |
 | webshell | webshell | Python | post-exploit | WebShell 管理 CLI：直连蚁剑/冰蝎/哥斯拉三种协议的 PHP 马，可执行命令、探服务器信 |
-| usql | usql | 命令行 | active | 通用 SQL 客户端：MySQL/PG/Oracle/MSSQL（替代 mysql/oracle 客 |
 | jndi | jndi | JAVA8 | exploit | JNDI 注入利用服务端（JNDI-Injection-Exploit）：起 LDAP/RMI 服务 |
 | zap | zap | 命令行 | passive | OWASP ZAP 被动代理/自动化扫描（替代已停止公开分发的 xray） |
 | impacket | impacket | 命令行 | active | impacket 协议攻击脚本集：secretsdump/psexec/smbclient/GetN |
 | exploitdb | exploitdb | 命令行 | passive | ExploitDB 本地漏洞库检索（searchsploit；配合 sliver/nuclei/im |
-| oraclepy | oracle-py | Python | active | Oracle 客户端（thin 模式免 Instant Client，Windows 端可用） |
 
 ## 信息收集工具
 
@@ -522,6 +518,14 @@ geshell <工具名> [参数...]
 
 ## 数据库利用工具
 
+### dbx（dbx）
+
+- 说明：数据库工作台 DBX：支持 70+ 种库（MySQL/PG/SQLite/Oracle/SQL Server/Redis/MongoDB…），并自带 MCP server（22 个工具，AI 可直接查库）
+- 风险：active
+- 参数模式：passthrough
+- 别名：dbx, 数据库, database
+- 示例：`geshell dbx -n prod -c "SELECT * FROM users"`
+
 ### mysql（mysql）
 
 - 说明：MySQL 客户端/综合利用
@@ -529,46 +533,9 @@ geshell <工具名> [参数...]
 - 参数模式：passthrough
 - 别名：mysql连接
 
-### mssql（mssql）
-
-- 说明：MSSQL 客户端
-- 风险：active
-- 参数模式：passthrough
-- 别名：sqlserver, mssql
-
-### mongodb（mongodb）
-
-- 说明：MongoDB 未授权访问
-- 风险：active
-- 参数模式：passthrough
-- 别名：mongodb未授权
-
-### oracle（oracle）
-
-- 说明：Oracle 数据库客户端
-- 风险：active
-- 参数模式：passthrough
-- 别名：oracle连接
-
 ### dbcombo（dbcombo）
 
 - 说明：数据库综合利用 v2.1.1（Oracle/MySQL/MSSQL/PG）
 - 风险：exploit
 - 参数模式：passthrough
 - 别名：数据库综合
-
-### usql（usql）
-
-- 说明：通用 SQL 客户端：MySQL/PG/Oracle/MSSQL（替代 mysql/oracle 客户端）
-- 风险：active
-- 参数模式：passthrough
-- 别名：usql, sql客户端
-- 示例：`geshell usql mysql://user:pass@10.0.0.5:3306/db`
-
-### oracle-py（oraclepy）
-
-- 说明：Oracle 客户端（thin 模式免 Instant Client，Windows 端可用）
-- 风险：active
-- 参数模式：passthrough
-- 别名：oracle-py, oracledb
-- 示例：`geshell oracle-py scott/tiger@10.0.0.5:1521/orcl -e "select * from users"`

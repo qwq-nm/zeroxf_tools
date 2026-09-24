@@ -12,6 +12,10 @@ tools/*
 !tools/revshell/
 !tools/webshell/
 !tools/brute/
+# 注意：这里只能放行**源码**。provision 下来的二进制也落在同一个目录里，
+# 整目录放行会把 30MB+ 的 dbx-mcp 一起提交进去（犯过一次）。
+# 所以写成「放行目录 + 挡掉二进制」，靠目录内的 .gitignore 逐文件放行。
+!tools/dbx/
 !tools/sstikit/
 !tools/springkit/
 !tools/tomcatscanpro/

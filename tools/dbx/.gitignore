@@ -1,0 +1,4 @@
+# 只放行源码。dbx-mcp / dbx-mcp.exe 是 provision 下来的平台二进制（30MB+），
+# 按本仓库的约定不入库——由 `provision_tools.py --tools dbx` 按需下载。
+dbx-mcp
+dbx-mcp.exe
