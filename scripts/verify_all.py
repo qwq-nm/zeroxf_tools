@@ -65,6 +65,19 @@ def py():
     return VENV_PY if os.path.exists(VENV_PY) else sys.executable
 
 
+def geshell(*args):
+    """构造调用 geshell 的 argv。
+
+    两端的入口**不是同一个文件**：POSIX 是 `geshell`（bash 脚本），
+    Windows 是 `geshell.cmd`。在 Windows 上直接执行 `geshell` 会报
+    `WinError 193 不是有效的 Win32 应用程序`；而 .cmd 需要经 cmd.exe 启动。
+    """
+    if os.name == "nt":
+        gs = os.path.join(BASE, "geshell.cmd")
+        return [os.environ.get("COMSPEC", "cmd.exe"), "/c", gs, *args]
+    return [os.path.join(BASE, "geshell"), *args]
+
+
 def load_tools():
     with open(TOOLS_FILE, encoding="utf-8") as f:
         return json.load(f)
@@ -114,8 +127,7 @@ def check_registry(quick):
     rec(OK, "reg", f"tools.json: {total} 个工具，其中 {callable_n} 个 AI 可调用")
 
     # geshell list
-    r = run([sys.executable, "geshell", "list"] if not os.path.exists(
-        os.path.join(BASE, "geshell")) else [os.path.join(BASE, "geshell"), "list"])
+    r = run(geshell("list"))
     listed = sum(1 for l in r.stdout.splitlines() if "✓" in l or "✗" in l)
     if listed == total:
         rec(OK, "reg", f"geshell list 一致（{listed}）")
@@ -350,9 +362,9 @@ def check_release(offline):
 # --------------------------------------------------------------------------
 def check_selftests(quick):
     section("6. 自检与回归")
-    gs = os.path.join(BASE, "geshell")
+    gs = os.path.join(BASE, "geshell.cmd" if os.name == "nt" else "geshell")
     if os.path.exists(gs):
-        r = run([gs, "selftest"], timeout=180)
+        r = run(geshell("selftest"), timeout=180)
         # unittest 把结果写到 stderr，不是 stdout —— 两边都要看
         out = r.stdout + r.stderr
         if r.returncode == 0 and "OK" in out:
@@ -360,7 +372,7 @@ def check_selftests(quick):
             rec(OK, "test", f"geshell selftest 通过（{tail[0] if tail else ''}）")
         else:
             rec(FAIL, "test", f"geshell selftest 失败:\n{out[-400:]}")
-        r = run([gs, "doctor"], timeout=180)
+        r = run(geshell("doctor"), timeout=180)
         warns = [l for l in r.stdout.splitlines() if "警告" in l]
         rec(OK if len(warns) <= 7 else WARN, "test",
             f"geshell doctor 报 {len(warns)} 条警告（预期 ≤7）")
