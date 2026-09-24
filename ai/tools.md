@@ -28,7 +28,7 @@ geshell <工具名> [参数...]
 | ruoyi | ruoyi | Python | exploit | 若依统一入口：扫描器 + 综合利用 |
 | fscan | fscan | 命令行 | active | 内网综合扫描（端口/服务/漏洞/MS17010） |
 | yasso | yasso | 命令行 | active | 内网扫描 + 密码爆破 |
-| hydra | hydra | 命令行 | brute | 多协议在线密码爆破 |
+| hydra | hydra | Python | bruteforce | 密码爆破（ssh/ftp/rdp/smb/mssql/ldap/winrm 等 15 种协议）：有  |
 | hashcat | hashcat | 命令行 | brute | GPU 离线密码哈希爆破 |
 | frps | frps | 命令行 | tunnel | frp 服务端（VPS 接收内网连接） |
 | frpc | frpc | 命令行 | tunnel | frp 客户端（内网机器映射服务） |
@@ -417,11 +417,11 @@ geshell <工具名> [参数...]
 
 ### hydra（hydra）
 
-- 说明：多协议在线密码爆破
-- 风险：brute
+- 说明：密码爆破（ssh/ftp/rdp/smb/mssql/ldap/winrm 等 15 种协议）：有 hydra 用 hydra，Windows 无 hydra 时自动落到 netexec(nxc)
+- 风险：bruteforce
 - 参数模式：passthrough
-- 别名：爆破
-- 示例：`geshell hydra -l root -P pass.txt ssh://10.0.0.5`
+- 别名：hydra, 爆破, brute
+- 示例：`geshell hydra --service ssh --target 10.0.0.5 -u root --passwords pass.txt`
 
 ### hashcat（hashcat）
 

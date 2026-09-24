@@ -346,20 +346,25 @@
   {
     "name": "hydra",
     "category": "爆破工具",
-    "type": "命令行",
-    "path": "hydra",
-    "description": "多协议在线密码爆破",
-    "risk": "brute",
+    "type": "Python",
+    "path": "/tools/brute/brute_cli.py",
+    "description": "密码爆破（ssh/ftp/rdp/smb/mssql/ldap/winrm 等 15 种协议）：有 hydra 用 hydra，Windows 无 hydra 时自动落到 netexec(nxc)",
+    "risk": "bruteforce",
     "ai_callable": true,
     "aliases": [
-      "爆破"
+      "hydra",
+      "爆破",
+      "brute"
     ],
-    "example": "hydra -l root -P pass.txt ssh://10.0.0.5",
+    "example": "hydra --service ssh --target 10.0.0.5 -u root --passwords pass.txt",
     "weight": 0.0,
     "params": "",
     "params_pre": "",
     "url": "",
-    "tags": [],
+    "tags": [
+      "爆破",
+      "凭据"
+    ],
     "group": ""
   },
   {

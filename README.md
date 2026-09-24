@@ -265,11 +265,12 @@ python3 scripts/setup_burp.py
 
 | 平台 | 就绪 | 缺失 |
 | --- | --- | --- |
-| **WSL / Linux** | **57/59** | `fastjson` `log4j` |
-| **Windows** | **55/59** | `fastjson` `log4j` `hydra` `oracle` |
+| **WSL / Linux** | **59/59** | —— |
+| **Windows** | **57/59** | `hydra` `oracle` |
 
-差异只有两条：`hydra`（Windows 无官方版本）、`oracle`（需 Oracle 账号，
-Windows 端用 `oracle-py` 替代）。`geshell doctor` 会把缺的逐条列出并说明原因。
+差异只有两条，都是 Windows 平台限制：`hydra`（官方无 Windows 构建）、
+`oracle`（需 Oracle 账号，Windows 端用 `oracle-py` 替代）。
+`geshell doctor` 会把缺的逐条列出并说明原因。
 
 > 上表的就绪判据是**入口文件是否存在**。Windows 侧另有一个它测不出来的坑：
 > `webshell` 的冰蝎模块会被杀软隔离（见上方说明），届时只有哥斯拉、蚁剑两条线可用。

@@ -12,6 +12,7 @@ tools/*
 !tools/revshell/
 !tools/webshell/
 !tools/javadeser/
+!tools/brute/
 !tools/sstikit/
 !tools/springkit/
 !tools/tomcatscanpro/
