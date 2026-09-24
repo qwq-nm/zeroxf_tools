@@ -340,6 +340,26 @@ python3 scripts/provision_tools.py --help                        # 查看全部�
 ./geshell selftest                    # 回归测试
 ```
 
+### 全量验证
+
+装完或改动之后，一条命令确认工具箱是否完整可用：
+
+```bash
+python3 scripts/verify_all.py          # 全部检查
+python3 scripts/verify_all.py --quick  # 跳过耗时项
+python3 scripts/verify_all.py --offline  # 不联网
+```
+
+六组检查：仓库状态（含 `.gitignore` 白名单是否真的生效）、注册表一致性
+（`tools.json` / `geshell` / MCP / `ai/tools.md` 四个入口必须数得出同一个数）、
+就绪度、分发包完整性（源码工具 / jar / JDK / venv 依赖）、Release 资产可达性、
+自检与回归。跑完给出「通过 / 警告 / 失败」的汇总。
+
+它会**区分「预期内缺失」与「真异常」**——`fastjson`/`log4j`/`hydra` 这类
+授权或平台限制导致的缺失记警告并说明原因，出现别的缺失才是失败。
+它也不会把「本机连不上 github.com」（链路干扰，TCP 通但 TLS 超时）误判成
+「资产没了」，两者处置完全不同。
+
 命令名匹配**忽略大小写、空格、横线和下划线**，并支持中文拼音：
 
 ```bash
