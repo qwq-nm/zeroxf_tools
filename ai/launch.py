@@ -248,18 +248,14 @@ def run_tool(tool: dict, user_args: list) -> int:
 
 
 def _bump_weight(tool: dict) -> None:
-    """启动成功 → weight+1 并落盘（复刻天狐 GUI 闭环）。"""
+    """启动成功 → 使用计数 +1。
+
+    注意落点：写进 `config/weights.json`（已 gitignore），**不是** tools.json。
+    tools.json 是被 git 跟踪的共享配置，往里面写每台机器各自的运行时计数，
+    会让工作区每启动一次工具就变脏一次（这个坑困扰了双端同步很久）。
+    """
     try:
-        tools = config.load_tools()
-        for t in tools:
-            if (str(t.get("name", "")) == str(tool.get("name", ""))
-                    and str(t.get("category", "")) == str(tool.get("category", ""))):
-                try:
-                    t["weight"] = float(t.get("weight", 0) or 0) + 1
-                except (TypeError, ValueError):
-                    t["weight"] = 1.0
-                break
-        config.save_tools(tools)
+        config.bump_weight(tool)
     except Exception:
         pass
 

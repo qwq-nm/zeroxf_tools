@@ -18,7 +18,7 @@ from PyQt6 .QtGui import QIcon
 from config import (
 SETTINGS ,THEME ,load_settings ,save_settings ,load_theme ,
 load_tools ,load_categories ,save_tools ,save_categories ,DEFAULT_CATEGORIES ,
-export_all_data ,import_all_data
+export_all_data ,import_all_data ,bump_weight
 )
 from utils import (
 ensure_single_instance ,check_environment ,validate_java_path ,run_tool ,
@@ -915,13 +915,15 @@ class MainWindow (QMainWindow ):
                 cat =str (tool_data .get ("category","")).strip ()
                 for t in self .tools :
                     if str (t .get ("name","")).strip ()==name and str (t .get ("category","")).strip ()==cat :
+                        # 计数写进 weights.json（gitignore），**不写 tools.json** ——
+                        # 后者被 git 跟踪，写进去会让工作区每启动一次工具就脏一次
+                        bump_weight (t )
                         try :
                             t ["weight"]=float (t .get ("weight",0 )or 0 )+1.0
                         except Exception :
                             t ["weight"]=1.0
-                        save_tools (self .tools )
                         self .update_tool_grid ()
-                        break 
+                        break
             except Exception :
                 pass 
 

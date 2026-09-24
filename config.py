@@ -358,6 +358,41 @@ DEFAULT_SETTINGS ={
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SETTINGS_FILE = os.path.join(BASE_DIR, "config", "settings.json")
 TOOLS_FILE = os.path.join(BASE_DIR, "config", "tools.json")
+# 使用计数（weight）单独存放，**不写回 tools.json**。
+# tools.json 是被 git 跟踪的共享配置，而 weight 是每台机器各自的运行时状态
+# （每启动一次工具 +1）。写回它会让工作区每启动一次就变脏一次，两台机器也会
+# 互相冲掉对方的计数。存放在这里、并加进 .gitignore。
+WEIGHTS_FILE = os.path.join(BASE_DIR, "config", "weights.json")
+
+
+def _weight_key (tool ):
+    """按「分类/名称」做键——天狐允许同名工具出现在不同分类下。"""
+    return f"{tool .get ('category','')}/{tool .get ('name','')}"
+
+
+def load_weights ():
+    """读使用计数（增量）。读不到就返回空 dict，不报错。"""
+    try :
+        with open (WEIGHTS_FILE ,'r',encoding ='utf-8')as f :
+            data =json .load (f )
+        return data if isinstance (data ,dict )else {}
+    except Exception :
+        return {}
+
+
+def bump_weight (tool ):
+    """某工具启动成功 → 使用计数 +1，写进旁挂文件。"""
+    weights =load_weights ()
+    key =_weight_key (tool )
+    try :
+        weights [key ]=float (weights .get (key ,0 )or 0 )+1.0
+    except (TypeError ,ValueError ):
+        weights [key ]=1.0
+    try :
+        os .makedirs (os .path .dirname (WEIGHTS_FILE ),exist_ok =True )
+        _atomic_write_json (WEIGHTS_FILE ,weights )
+    except Exception :
+        pass
 CATEGORIES_FILE = os.path.join(BASE_DIR, "config", "categories.json")
 HOTKEYS_FILE = os.path.join(BASE_DIR, "config", "hotkeys.json")
 
@@ -987,7 +1022,19 @@ def load_tools ():
                         abs_path =os .path .join (base_dir ,rel_part )
                         tool ['path']=abs_path 
                 out .append (tool )
-            return out 
+            # 叠加运行时使用计数：tools.json 里的 weight 是出厂基线，
+            # 实际排序用「基线 + 本机累计次数」。
+            bumps =load_weights ()
+            if bumps :
+                for t in out :
+                    inc =bumps .get (_weight_key (t ))
+                    if inc is None :
+                        continue
+                    try :
+                        t ['weight']=float (t .get ('weight',0 )or 0 )+float (inc )
+                    except (TypeError ,ValueError ):
+                        pass
+            return out
     except Exception as e :
         print (f"加载工具数据失败: {e}")
     return []

@@ -35,6 +35,8 @@ app.log
 config/.instance.lock
 config/shortcuts.ini
 config/settings.json
+# 工具使用计数：每启动一次 +1，是本机运行时状态，不入库
+config/weights.json
 
 # config/tools.json 故意不忽略：它是工具箱的核心工具清单（63 条），
 # 内容全是相对路径（nmap、/tools/xxx），不含任何本机信息。
